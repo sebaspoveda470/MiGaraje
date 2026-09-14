@@ -1,0 +1,94 @@
+{
+  "entities": {
+    "users": {
+      "title": "Usuarios",
+      "description": "Perfiles de usuarios y propietarios",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "role": { "type": "string" },
+        "avatar": { "type": "string" },
+        "joinedDate": { "type": "string" }
+      },
+      "required": ["id", "fullName", "email"]
+    },
+    "partnerStores": {
+      "title": "Tiendas Aliadas de Repuestos",
+      "description": "Tiendas, distribuidoras y autopartes inscritas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "commercialName": { "type": "string" },
+        "taxId": { "type": "string" },
+        "ownerName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "city": { "type": "string" },
+        "address": { "type": "string" },
+        "specialties": { "type": "array", "items": { "type": "string" } },
+        "rating": { "type": "number" },
+        "verified": { "type": "boolean" },
+        "commissionRate": { "type": "number" },
+        "bankAccount": { "type": "string" },
+        "status": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "commercialName", "email", "phone", "city"]
+    },
+    "orders": {
+      "title": "Órdenes de Compra & Intermediación",
+      "description": "Pedidos y pagos intermediados con garantía MiGaraje",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "buyerId": { "type": "string" },
+        "buyerName": { "type": "string" },
+        "buyerEmail": { "type": "string" },
+        "buyerPhone": { "type": "string" },
+        "shippingAddress": { "type": "string" },
+        "city": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "shippingCost": { "type": "number" },
+        "intermediationFee": { "type": "number" },
+        "total": { "type": "number" },
+        "currency": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "orderStatus": { "type": "string" },
+        "trackingNumber": { "type": "string" },
+        "warrantyProtected": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "orderNumber", "buyerName", "total", "paymentMethod"]
+    },
+    "customParts": {
+      "title": "Catálogo de Repuestos Publicados por Tiendas",
+      "description": "Repuestos agregados por almacenes aliados",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "partNumber": { "type": "string" },
+        "category": { "type": "string" },
+        "brand": { "type": "string" },
+        "price": { "type": "number" },
+        "storeId": { "type": "string" },
+        "storeName": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "inStock": { "type": "boolean" },
+        "warrantyMonths": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "price", "category", "storeName"]
+    }
+  }
+}

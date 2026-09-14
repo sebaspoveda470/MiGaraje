@@ -1,0 +1,6 @@
+{
+  "name": "MiGaraje",
+  "description": "Plataforma integral automotriz: gestión de vehículos, marketplace de repuestos con garantía, autos verificados, clásicos con placas de antiguo, cuidado estético y mecánico, diagnóstico con IA y comunidades por marca.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
