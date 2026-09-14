@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
   Search, 
   Star, 
   Droplet, 
@@ -8,25 +7,33 @@ import {
   Layers, 
   Check, 
   BookOpen, 
-  Plus, 
   X, 
-  ShieldCheck
+  ShieldCheck,
+  Store,
+  PlusCircle,
+  PackageCheck,
+  ChevronRight,
+  Info
 } from 'lucide-react';
 import { CareProduct, CareCategory, CartItem } from '../types';
+import { RegisterProductModal } from './RegisterProductModal';
 
 interface CuidadoEsteticoMotorProps {
   careProducts: CareProduct[];
   onAddToCart: (item: CartItem) => void;
+  onRegisterProduct?: (newProduct: CareProduct) => void;
 }
 
 export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
   careProducts,
   onAddToCart,
+  onRegisterProduct,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<CareCategory | 'todos'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<CareProduct | null>(null);
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
+  const [showRegisterProductModal, setShowRegisterProductModal] = useState<boolean>(false);
   const [activeGuideType, setActiveGuideType] = useState<'exterior' | 'motor' | 'interior'>('exterior');
 
   const filteredProducts = careProducts.filter((p) => {
@@ -46,58 +53,69 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
-      {/* Hero Banner with Frosted Glass */}
-      <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="absolute -top-16 -right-16 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Top Editorial Banner: Clean White Card with Architectural Detail */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl relative z-10">
-          <div className="flex items-center gap-2">
-            <span className="bg-white/10 text-white border border-white/20 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md">
-              <Sparkles className="w-4 h-4 text-purple-400" /> Detailing Premium & Tratamientos de Motor
-            </span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold tracking-wider uppercase">
+            <span className="w-2 h-2 rounded-full bg-blue-600" />
+            <span>Detailing Profesional & Tratamientos de Motor</span>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-            Conserva el Brillo, Protege la Pintura y Alarga la Vida Útil del Motor
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight leading-tight">
+            ESTÉTICA Y MOTOR.
+            <br />
+            <span className="text-slate-800">CUIDADO EN GRADO DE COLECCIÓN.</span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Productos profesionales de nivel show-car y aditivos alemanes de alta tecnología para mantener tu vehículo en estado de colección.
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl font-normal">
+            Fórmulas cerámicas SiO2, descontaminantes y aditivos alemanes de ultra-fricción para proteger la pintura, interiores y mecánica de tu auto.
           </p>
         </div>
 
-        <button
-          onClick={() => setShowGuideModal(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-2xl shadow-lg shadow-blue-600/30 border border-blue-500/30 transition-all shrink-0 cursor-pointer relative z-10"
-        >
-          <BookOpen className="w-4 h-4" />
-          <span>Ver Protocolo de Detailing Maestro</span>
-        </button>
+        {/* Action buttons: Register product or view protocol */}
+        <div className="flex flex-wrap items-center gap-3 shrink-0 relative z-10 w-full sm:w-auto">
+          <button
+            onClick={() => setShowRegisterProductModal(true)}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-md transition-all cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4 text-blue-400" />
+            <span>Inscribir Producto para Venta</span>
+          </button>
+
+          <button
+            onClick={() => setShowGuideModal(true)}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:scale-98 text-slate-800 font-bold text-xs sm:text-sm px-5 py-3.5 rounded-xl border border-slate-300 shadow-xs transition-all cursor-pointer"
+          >
+            <BookOpen className="w-4 h-4 text-slate-600" />
+            <span>Protocolo de Detailing</span>
+          </button>
+        </div>
       </div>
 
-      {/* Filter and Categories with Frosted Glass */}
-      <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl p-5 shadow-xl space-y-4">
+      {/* Filter and Categories: Clean White Surface */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
         
         {/* Search */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Buscar ceras, selladores, limpiador de inyectores, acondicionador de cuero..."
+            placeholder="Buscar ceras, selladores cerámicos, aditivos de motor, limpiador de inyectores o cueros..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 backdrop-blur-md focus:outline-none focus:border-blue-400/40"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-600 focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
           />
         </div>
 
-        {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        {/* Category Filter Buttons */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
           
           <button
             onClick={() => setSelectedCategory('todos')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === 'todos'
-                ? 'bg-blue-600 text-white font-bold backdrop-blur-md border border-blue-400/30 shadow-lg shadow-blue-600/25'
-                : 'bg-white/5 text-slate-300 hover:text-white border border-white/5 backdrop-blur-sm'
+                ? 'bg-slate-950 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
             }`}
           >
             Todos los Productos ({careProducts.length})
@@ -105,108 +123,106 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
 
           <button
             onClick={() => setSelectedCategory('exterior')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === 'exterior'
-                ? 'bg-blue-600 text-white font-bold backdrop-blur-md border border-blue-400/30 shadow-lg shadow-blue-600/25'
-                : 'bg-white/5 text-slate-300 hover:text-white border border-white/5 backdrop-blur-sm'
+                ? 'bg-slate-950 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
             }`}
           >
-            <Droplet className="w-3.5 h-3.5 text-cyan-400" />
+            <Droplet className="w-3.5 h-3.5 text-sky-500" />
             <span>Estética Exterior (Ceras & SiO2)</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory('motor_aditivos')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === 'motor_aditivos'
-                ? 'bg-blue-600 text-white font-bold backdrop-blur-md border border-blue-400/30 shadow-lg shadow-blue-600/25'
-                : 'bg-white/5 text-slate-300 hover:text-white border border-white/5 backdrop-blur-sm'
+                ? 'bg-slate-950 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
             }`}
           >
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
-            <span>Tratamientos & Aditivos de Motor</span>
+            <Flame className="w-3.5 h-3.5 text-amber-500" />
+            <span>Tratamientos de Motor & Inyectores</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory('interior')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === 'interior'
-                ? 'bg-blue-600 text-white font-bold backdrop-blur-md border border-blue-400/30 shadow-lg shadow-blue-600/25'
-                : 'bg-white/5 text-slate-300 hover:text-white border border-white/5 backdrop-blur-sm'
+                ? 'bg-slate-950 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
             }`}
           >
-            <Layers className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Cuidado Interior & Cueros</span>
+            <Layers className="w-3.5 h-3.5 text-blue-600" />
+            <span>Interiores & Cuero</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory('herramientas')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === 'herramientas'
-                ? 'bg-blue-600 text-white font-bold backdrop-blur-md border border-blue-400/30 shadow-lg shadow-blue-600/25'
-                : 'bg-white/5 text-slate-300 hover:text-white border border-white/5 backdrop-blur-sm'
+                ? 'bg-slate-950 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span>Herramientas & Cañones de Espuma</span>
+            <Check className="w-3.5 h-3.5 text-purple-600" />
+            <span>Microfibras & Aplicadores</span>
           </button>
-
         </div>
-
       </div>
 
-      {/* Product Grid with Frosted Glass */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Product Grid: Clean White Cards with High-Contrast Typography */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="bg-white/[0.04] hover:bg-white/[0.07] backdrop-blur-xl border border-white/10 hover:border-blue-400/30 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all flex flex-col justify-between group"
+            className="group bg-white border border-slate-200 hover:border-slate-400 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
           >
-            {/* Product Image */}
+            {/* Top Media Thumbnail */}
             <div 
               onClick={() => setSelectedProduct(product)}
-              className="h-48 bg-white/5 relative overflow-hidden cursor-pointer"
+              className="relative aspect-4/3 bg-slate-100 overflow-hidden cursor-pointer"
             >
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
               />
-              <div className="absolute top-3 left-3 bg-slate-950/75 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-white/10 text-[10px] font-bold text-blue-300">
+              <div className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-bold text-white uppercase tracking-wider">
                 {product.brand}
               </div>
-              <div className="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-white font-black text-sm px-3 py-1 rounded-xl border border-white/15">
+              <div className="absolute bottom-3 right-3 bg-white text-slate-950 font-black text-sm px-3 py-1 rounded-lg shadow-sm border border-slate-200">
                 ${product.price.toFixed(2)} USD
               </div>
             </div>
 
-            {/* Product Body */}
+            {/* Product Card Body */}
             <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
-                  <span className="text-blue-300 font-semibold">{product.subcategory}</span>
-                  <span className="flex items-center gap-1 text-amber-300 font-semibold">
-                    <Star className="w-3 h-3 fill-amber-400" /> {product.rating} ({product.reviewsCount})
+                <div className="flex items-center justify-between text-[11px] text-slate-600">
+                  <span className="font-semibold text-slate-700">{product.subcategory}</span>
+                  <span className="flex items-center gap-1 text-amber-600 font-bold">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {product.rating} ({product.reviewsCount})
                   </span>
                 </div>
 
                 <h3 
                   onClick={() => setSelectedProduct(product)}
-                  className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors line-clamp-2 cursor-pointer"
+                  className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 cursor-pointer leading-snug"
                 >
                   {product.name}
                 </h3>
 
-                <p className="text-xs text-slate-300 line-clamp-2">{product.description}</p>
-                <div className="text-[11px] text-slate-400 font-mono">Presentación: {product.volume}</div>
+                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{product.description}</p>
+                <div className="text-[11px] text-slate-600 font-mono">Presentación: {product.volume}</div>
               </div>
 
               {/* Benefits list */}
-              <div className="pt-2 border-t border-white/10 space-y-1.5">
-                <div className="text-[11px] text-slate-300 space-y-1">
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="text-[11px] text-slate-600 space-y-1">
                   {product.benefits.slice(0, 2).map((b, i) => (
-                    <div key={i} className="flex items-center gap-1.5 text-slate-300 truncate">
-                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <div key={i} className="flex items-center gap-1.5 truncate">
+                      <Check className="w-3 h-3 text-blue-600 shrink-0" />
                       <span className="truncate">{b}</span>
                     </div>
                   ))}
@@ -215,7 +231,7 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
                 <div className="flex items-center justify-between pt-2">
                   <button
                     onClick={() => setSelectedProduct(product)}
-                    className="text-xs text-slate-300 hover:text-white font-semibold cursor-pointer"
+                    className="text-xs text-slate-600 hover:text-slate-950 font-semibold cursor-pointer"
                   >
                     Guía de aplicación →
                   </button>
@@ -230,10 +246,9 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
                       quantity: 1,
                       image: product.image,
                     })}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-lg shadow-blue-600/25 border border-blue-500/30 transition-all flex items-center gap-1 cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Añadir</span>
+                    <span>Comprar</span>
                   </button>
                 </div>
               </div>
@@ -243,70 +258,74 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
         ))}
       </div>
 
-      {/* Product Detail / Application Modal with Frosted Glass */}
+      {filteredProducts.length === 0 && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center max-w-lg mx-auto">
+          <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mx-auto mb-3">
+            <Search className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-slate-900">No encontramos productos con ese término</h3>
+          <p className="text-xs text-slate-600 mt-1">Prueba con otra palabra o borra los filtros de categoría.</p>
+        </div>
+      )}
+
+      {/* Product Detail Modal */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-slate-950/85 backdrop-blur-2xl border border-white/15 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden my-8">
-            
-            <div className="relative h-60 bg-slate-900">
-              <img
-                src={selectedProduct.image}
-                alt={selectedProduct.name}
-                className="w-full h-full object-cover"
-              />
-              <button
-                onClick={() => setSelectedProduct(null)}
-                className="absolute top-4 right-4 bg-slate-950/70 hover:bg-slate-950 text-white p-2 rounded-full backdrop-blur-md border border-white/10 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <div className="absolute bottom-4 left-4 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15 text-xs text-white font-bold">
-                {selectedProduct.brand} • {selectedProduct.subcategory}
-              </div>
-            </div>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden relative my-8">
+            <button
+              onClick={() => setSelectedProduct(null)}
+              className="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white text-slate-600 hover:text-slate-950 p-1.5 rounded-full shadow-sm border border-slate-200 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-            <div className="p-6 space-y-4 text-xs text-slate-300">
-              <div>
-                <h2 className="text-xl font-bold text-white">{selectedProduct.name}</h2>
-                <p className="text-xs text-slate-300 mt-1">{selectedProduct.description}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <div className="aspect-4/3 md:aspect-auto bg-slate-100 overflow-hidden relative">
+                <img
+                  src={selectedProduct.image}
+                  alt={selectedProduct.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-3 left-3 bg-slate-950 text-white font-bold text-xs px-3 py-1 rounded-lg">
+                  {selectedProduct.brand}
+                </div>
               </div>
 
-              {/* Application Guide */}
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md space-y-2">
-                <h4 className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4" /> Modo de Aplicación Recomendado:
-                </h4>
-                <ol className="space-y-1.5 list-decimal list-inside text-slate-200 text-[11px]">
-                  {selectedProduct.applicationGuide.map((step, idx) => (
-                    <li key={idx} className="leading-relaxed">{step}</li>
-                  ))}
-                </ol>
-              </div>
-
-              {/* Ideal for vehicles */}
-              <div>
-                <span className="font-bold text-white block mb-1">Ideal para:</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedProduct.idealFor.map((item, idx) => (
-                    <span key={idx} className="bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/10 text-slate-200">
-                      {item}
+              <div className="p-6 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      {selectedProduct.subcategory}
                     </span>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Action buttons */}
-              <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                <div className="text-xl font-black text-white">
-                  ${selectedProduct.price.toFixed(2)} USD
+                  <h3 className="text-lg font-black text-slate-950 leading-tight">
+                    {selectedProduct.name}
+                  </h3>
+
+                  <div className="text-xl font-black text-slate-950">
+                    ${selectedProduct.price.toFixed(2)} USD
+                  </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {selectedProduct.description}
+                  </p>
+
+                  <div className="pt-2">
+                    <h4 className="text-xs font-bold text-slate-900 mb-1">Guía Oficial de Aplicación:</h4>
+                    <ol className="list-decimal list-inside text-xs text-slate-600 space-y-1">
+                      {selectedProduct.applicationGuide.map((step, idx) => (
+                        <li key={idx}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setSelectedProduct(null)}
-                    className="px-4 py-2 text-slate-300 hover:text-white cursor-pointer"
-                  >
-                    Cerrar
-                  </button>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <div className="text-xs text-slate-600">
+                    Presentación: <span className="font-semibold text-slate-900">{selectedProduct.volume}</span>
+                  </div>
+
                   <button
                     onClick={() => {
                       onAddToCart({
@@ -320,74 +339,84 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
                       });
                       setSelectedProduct(null);
                     }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 border border-blue-500/30 cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer"
                   >
                     Añadir al Carrito
                   </button>
                 </div>
               </div>
-
             </div>
-
           </div>
         </div>
       )}
 
-      {/* Detailing Step-by-Step Guide Modal with Frosted Glass */}
+      {/* Detailing Step-by-Step Guide Modal */}
       {showGuideModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-slate-950/85 backdrop-blur-2xl border border-white/15 rounded-3xl max-w-2xl w-full shadow-2xl p-6 relative my-8 text-xs text-slate-300 space-y-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full shadow-2xl p-6 sm:p-8 relative my-8 text-xs text-slate-600 space-y-5">
             <button
               onClick={() => setShowGuideModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
+              className="absolute top-4 right-4 text-slate-600 hover:text-slate-900 cursor-pointer p-1"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-white/10 text-white border border-white/15 backdrop-blur-md">
-                <BookOpen className="w-6 h-6 text-blue-400" />
+              <div className="p-3 rounded-xl bg-slate-100 text-slate-900 border border-slate-200">
+                <BookOpen className="w-6 h-6 text-slate-800" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Manual Maestro de Detailing & Cuidado del Motor</h3>
-                <p className="text-xs text-slate-400">Técnicas profesionales paso a paso para resultados de exhibición</p>
+                <h3 className="text-lg font-black text-slate-950">Manual Maestro de Detailing & Cuidado del Motor</h3>
+                <p className="text-xs text-slate-600">Protocolos y secuencias probadas para resultados de exhibición</p>
               </div>
             </div>
 
             {/* Guide tabs */}
-            <div className="flex gap-2 border-b border-white/10 pb-2">
+            <div className="flex gap-2 border-b border-slate-200 pb-2">
               <button
                 onClick={() => setActiveGuideType('exterior')}
-                className={`px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${activeGuideType === 'exterior' ? 'bg-blue-600/30 text-white backdrop-blur-md border border-blue-400/40' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                  activeGuideType === 'exterior'
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+                }`}
               >
-                1. Tratamiento Cerámico Exterior
+                1. Sellado Cerámico Exterior
               </button>
               <button
                 onClick={() => setActiveGuideType('motor')}
-                className={`px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${activeGuideType === 'motor' ? 'bg-blue-600/30 text-white backdrop-blur-md border border-blue-400/40' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                  activeGuideType === 'motor'
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+                }`}
               >
-                2. Descarbonización de Motor & Inyectores
+                2. Protección y Limpieza de Motor
               </button>
               <button
                 onClick={() => setActiveGuideType('interior')}
-                className={`px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${activeGuideType === 'interior' ? 'bg-blue-600/30 text-white backdrop-blur-md border border-blue-400/40' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                  activeGuideType === 'interior'
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+                }`}
               >
-                3. Restauración de Cueros
+                3. Restauración de Cuero
               </button>
             </div>
 
             {activeGuideType === 'exterior' && (
               <div className="space-y-3">
-                <h4 className="font-bold text-white">Protocolo de 4 Fases para Pintura Espejo:</h4>
+                <h4 className="font-bold text-slate-950">Protocolo de 3 Fases para Acabado Espejo:</h4>
                 <div className="space-y-2">
-                  <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <strong className="text-blue-300">Paso 1: Pre-Lavado Snow Foam</strong> - Rocía espuma densa con hidrolavadora para levantar polvo sin tocar la pintura.
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <strong className="text-slate-950">Paso 1: Pre-Lavado Snow Foam</strong> - Rocía espuma densa con hidrolavadora para levantar polvo sin tocar la pintura.
                   </div>
-                  <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <strong className="text-blue-300">Paso 2: Descontaminado Férrico</strong> - Aplica Sonax Fall-Out Cleaner en rines y pintura. Deja que vire a color púrpura y enjuaga.
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <strong className="text-slate-950">Paso 2: Descontaminado Férrico</strong> - Aplica Sonax Fall-Out Cleaner en rines y pintura. Deja que vire a color púrpura y enjuaga con abundante agua.
                   </div>
-                  <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <strong className="text-blue-300">Paso 3: Sellado Cerámico SiO2</strong> - Aplica Meguiar's Ceramic Liquid panel por panel, cura 3 min y retira con microfibra.
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <strong className="text-slate-950">Paso 3: Sellado Cerámico SiO2</strong> - Aplica Meguiar's Ceramic Liquid panel por panel, cura 3 min y retira con microfibra de 600 GSM.
                   </div>
                 </div>
               </div>
@@ -395,13 +424,13 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
 
             {activeGuideType === 'motor' && (
               <div className="space-y-3">
-                <h4 className="font-bold text-white">Protección Antifricción y Sistema de Combustible:</h4>
+                <h4 className="font-bold text-slate-950">Protección Antifricción y Sistema de Inyección:</h4>
                 <div className="space-y-2">
-                  <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <strong className="text-blue-300">Aditivo Cerámico Cera Tec:</strong> Agrega al cárter con motor tibio. Las partículas de microcerámica recubren camisas y pistones reduciendo el rozamiento.
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <strong className="text-slate-950">Aditivo Cerámico Cera Tec:</strong> Agrega al cárter con motor tibio. Las micropartículas cerámicas recubren camisas y pistones reduciendo el rozamiento y consumo de aceite.
                   </div>
-                  <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <strong className="text-blue-300">Limpiador de Inyectores Ultra:</strong> Vierte antes de repostar tanque lleno cada 10.000 km para disolver barnices en toberas.
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <strong className="text-slate-950">Limpiador de Inyectores Ultra:</strong> Vierte antes de repostar tanque lleno cada 10.000 km para disolver barnices en toberas.
                   </div>
                 </div>
               </div>
@@ -409,9 +438,9 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
 
             {activeGuideType === 'interior' && (
               <div className="space-y-3">
-                <h4 className="font-bold text-white">Preservación de Tapicerías de Cuero y Plásticos:</h4>
-                <div className="p-3.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                  Usa cepillo de crin suave con Chemical Guys Leather Cleaner para abrir los poros sin rayar. Luego aplica acondicionador con filtro UV para evitar resequedad por el sol.
+                <h4 className="font-bold text-slate-950">Preservación de Tapicerías de Cuero y Plásticos:</h4>
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  Usa cepillo de cerdas suaves de crin con Chemical Guys Leather Cleaner para abrir los microporos sin rayar. Luego aplica crema acondicionadora con filtro UV para evitar resequedad y cuarteaduras.
                 </div>
               </div>
             )}
@@ -419,7 +448,7 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setShowGuideModal(false)}
-                className="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-2.5 rounded-xl backdrop-blur-md border border-white/15 cursor-pointer"
+                className="bg-slate-950 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl cursor-pointer"
               >
                 Entendido
               </button>
@@ -428,6 +457,17 @@ export const CuidadoEsteticoMotor: React.FC<CuidadoEsteticoMotorProps> = ({
           </div>
         </div>
       )}
+
+      {/* Register Product Modal for Stores or Individuals */}
+      <RegisterProductModal
+        isOpen={showRegisterProductModal}
+        onClose={() => setShowRegisterProductModal(false)}
+        onProductRegistered={(newProduct) => {
+          if (onRegisterProduct) {
+            onRegisterProduct(newProduct);
+          }
+        }}
+      />
 
     </div>
   );

@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { 
-  Award, 
   Crown, 
   Sparkles, 
-  FileText, 
   Hammer, 
-  Check, 
   ShieldCheck, 
-  RefreshCw
+  Search, 
+  Plus, 
+  Award, 
+  RefreshCw, 
+  ChevronRight, 
+  Info,
+  Calendar,
+  DollarSign
 } from 'lucide-react';
 import { VehicleListing, RestorationAnalysis } from '../types';
 import { getClientRestorationAnalysis } from '../services/geminiClientService';
@@ -21,54 +25,51 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
   carListings,
   onOpenIntermediationModal,
 }) => {
-  const [subTab, setSubTab] = useState<'certificados' | 'proyectos' | 'evaluador_ia' | 'guia_placas'>('certificados');
-
-  // AI Restoration Evaluator State
-  const [evalBrand, setEvalBrand] = useState('Ford');
-  const [evalModel, setEvalModel] = useState('Mustang Fastback 1967');
-  const [evalYear, setEvalYear] = useState<number>(1967);
-  const [evalBodyCondition, setEvalBodyCondition] = useState('Óxido superficial moderado, líneas rectas');
-  const [evalEngineCondition, setEvalEngineCondition] = useState('Motor original gira pero requiere reconstrucción completa');
-  const [evalInteriorCondition, setEvalInteriorCondition] = useState('Tapicería deteriorada, tablero 80% completo');
-  const [evalOriginalParts] = useState('75% piezas originales presentes');
-  const [evalHasClassicPlates, setEvalHasClassicPlates] = useState<boolean>(false);
-  const [evalLoading, setEvalLoading] = useState<boolean>(false);
+  const [subTab, setSubTab] = useState<'certificados' | 'proyectos' | 'evaluador_ia' | 'talleres'>('certificados');
+  
+  // Evaluador de Viabilidad State
+  const [evalBrand, setEvalBrand] = useState('Toyota');
+  const [evalModel, setEvalModel] = useState('Land Cruiser FJ40');
+  const [evalYear, setEvalYear] = useState(1978);
+  const [evalState, setEvalState] = useState('Regular - Requiere latonería, tapicería y puesta a punto de motor');
+  const [evalHasClassicPlates, setEvalHasClassicPlates] = useState(true);
+  const [evalLoading, setEvalLoading] = useState(false);
   const [evalResult, setEvalResult] = useState<RestorationAnalysis | null>(null);
 
-  // Filter cars
-  const classicCertifiedCars = carListings.filter((c) => c.isClassicPlate || c.condition === 'clasico_antiguo');
-  const restorationProjectCars = carListings.filter((c) => c.condition === 'para_restaurar' || c.restorationPotential);
+  // Filter classic cars
+  const classicCertifiedCars = carListings.filter((v) => v.isClassicPlate || v.condition === 'clasico_antiguo' || v.year <= 1990);
+  const restorationProjectCars = carListings.filter((v) => v.condition === 'para_restaurar' || v.restorationPotential !== undefined);
 
-  const handleRunRestorationEvaluation = async (e: React.FormEvent) => {
+  const handleEvaluateViability = async (e: React.FormEvent) => {
     e.preventDefault();
     setEvalLoading(true);
 
     try {
-      const res = await fetch('/api/gemini/restoration-advisor', {
+      const res = await fetch('/api/gemini/evaluate-restoration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           brand: evalBrand,
           model: evalModel,
           year: evalYear,
-          bodyCondition: evalBodyCondition,
-          engineCondition: evalEngineCondition,
-          interiorCondition: evalInteriorCondition,
-          hasOriginalParts: evalOriginalParts,
-          hasClassicPlates: evalHasClassicPlates,
+          currentStateDescription: evalState,
+          aimsForClassicPlate: evalHasClassicPlates,
         }),
       });
 
-      const data = await res.json();
-      if (data.success && data.data) {
-        setEvalResult(data.data);
+      if (res.ok) {
+        const data = await res.json();
+        setEvalResult(data);
       } else {
-        const fallback = getClientRestorationAnalysis({ brand: evalBrand, model: evalModel, year: evalYear });
-        setEvalResult(fallback);
+        throw new Error('API Error');
       }
-    } catch (err: any) {
-      console.warn('Backend unavailable, using client restoration perito:', err);
-      const fallback = getClientRestorationAnalysis({ brand: evalBrand, model: evalModel, year: evalYear });
+    } catch {
+      // Fallback
+      const fallback = getClientRestorationAnalysis({
+        brand: evalBrand,
+        model: evalModel,
+        year: evalYear,
+      });
       setEvalResult(fallback);
     } finally {
       setEvalLoading(false);
@@ -78,35 +79,34 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
-      {/* Hero Banner Clásicos & Restauración with Frosted Glass */}
-      <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/15 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute -top-16 -right-16 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="max-w-3xl space-y-3 relative z-10">
+      {/* Hero Banner Clásicos & Restauración: Clean Editorial Header */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden">
+        <div className="max-w-3xl space-y-4">
           <div className="flex items-center gap-2">
-            <span className="bg-amber-500 text-slate-950 font-black text-xs uppercase px-3 py-1 rounded-full shadow flex items-center gap-1.5 border border-amber-400">
-              <Crown className="w-4 h-4" /> División Clásicos, Antiguos & Restauración
+            <span className="bg-amber-100 text-amber-900 font-bold text-xs uppercase px-3 py-1 rounded-full flex items-center gap-1.5 border border-amber-300">
+              <Crown className="w-4 h-4 text-amber-700" /> División Clásicos, Antiguos & Restauración
             </span>
           </div>
 
-          <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
             Patrimonio Sobre Ruedas: Joyas con Placas de Antiguo & Proyectos Únicos
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Un espacio exclusivo para coleccionistas y restauradores. Compra vehículos históricos certificados, descubre proyectos con alto potencial de plusvalía y evalúa la viabilidad con nuestro perito IA.
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+            Un espacio exclusivo para coleccionistas y restauradores en Colombia. Compra vehículos históricos certificados con placas de antiguo, descubre proyectos con alto potencial de plusvalía y evalúa la viabilidad con nuestro perito IA.
           </p>
         </div>
       </div>
 
-      {/* Sub Navigation Tabs with Frosted Glass */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/10 scrollbar-thin">
+      {/* Sub Navigation Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 scrollbar-thin">
         
         <button
           onClick={() => setSubTab('certificados')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             subTab === 'certificados'
-              ? 'bg-blue-600/30 text-white backdrop-blur-md border border-blue-400/40 shadow-lg shadow-blue-600/20'
-              : 'text-slate-300 hover:text-white bg-white/5 border border-white/5 backdrop-blur-sm'
+              ? 'bg-slate-950 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 border border-slate-200'
           }`}
         >
           <Crown className="w-4 h-4 text-amber-400" />
@@ -115,95 +115,105 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
 
         <button
           onClick={() => setSubTab('proyectos')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             subTab === 'proyectos'
-              ? 'bg-blue-600/30 text-white backdrop-blur-md border border-blue-400/40 shadow-lg shadow-blue-600/20'
-              : 'text-slate-300 hover:text-white bg-white/5 border border-white/5 backdrop-blur-sm'
+              ? 'bg-slate-950 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 border border-slate-200'
           }`}
         >
-          <Hammer className="w-4 h-4 text-orange-400" />
+          <Hammer className="w-4 h-4 text-orange-500" />
           <span>Proyectos para Restaurar ({restorationProjectCars.length})</span>
         </button>
 
         <button
           onClick={() => setSubTab('evaluador_ia')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             subTab === 'evaluador_ia'
-              ? 'bg-blue-600/30 text-white backdrop-blur-md border border-blue-400/40 shadow-lg shadow-blue-600/20'
-              : 'text-slate-300 hover:text-white bg-white/5 border border-white/5 backdrop-blur-sm'
+              ? 'bg-slate-950 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 border border-slate-200'
           }`}
         >
-          <Sparkles className="w-4 h-4 text-blue-400" />
+          <Sparkles className="w-4 h-4 text-blue-500" />
           <span>Evaluador IA de Viabilidad de Restauración</span>
         </button>
 
         <button
-          onClick={() => setSubTab('guia_placas')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-            subTab === 'guia_placas'
-              ? 'bg-blue-600/30 text-white backdrop-blur-md border border-blue-400/40 shadow-lg shadow-blue-600/20'
-              : 'text-slate-300 hover:text-white bg-white/5 border border-white/5 backdrop-blur-sm'
+          onClick={() => setSubTab('talleres')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+            subTab === 'talleres'
+              ? 'bg-slate-950 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 border border-slate-200'
           }`}
         >
-          <FileText className="w-4 h-4 text-emerald-400" />
-          <span>Guía & Trámites Placa de Antiguo</span>
+          <Award className="w-4 h-4 text-blue-500" />
+          <span>Talleres Especialistas & Certificadores</span>
         </button>
-
       </div>
 
       {/* SubTab 1: Clásicos Certificados con Placa de Antiguo */}
       {subTab === 'certificados' && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 p-4 rounded-2xl flex items-center justify-between text-xs text-slate-300">
+          <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 shadow-xs">
             <span className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Vehículos con dictamen pericial aprobado por clubes federados (mínimo 85% a 95% de originalidad).</span>
+              <Crown className="w-4 h-4 text-amber-500" />
+              <span>Vehículos con más de 35 años y certificación oficial de originalidad (mínimo 85% partes originales según regulación de Colombia).</span>
             </span>
-            <span className="text-amber-300 font-bold hidden sm:inline">Exentos de Pico y Placa</span>
+            <span className="text-[11px] bg-slate-100 text-slate-800 font-bold px-2.5 py-1 rounded-lg border border-slate-200 shrink-0">
+              Exentos de Pico y Placa
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {classicCertifiedCars.map((car) => (
               <div
                 key={car.id}
-                className="bg-white/[0.04] hover:bg-white/[0.07] backdrop-blur-xl border border-white/10 hover:border-amber-400/40 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all flex flex-col group"
+                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between group"
               >
-                <div className="h-56 bg-white/5 relative overflow-hidden">
+                <div className="relative aspect-16/10 bg-slate-100 overflow-hidden">
                   <img
                     src={car.images[0]}
                     alt={car.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
                   />
-                  <div className="absolute top-3 left-3 bg-amber-500 text-slate-950 font-black text-xs px-3 py-1 rounded-lg shadow-md flex items-center gap-1.5">
-                    <Crown className="w-3.5 h-3.5" /> Placa de Antiguo Vigente
+                  <div className="absolute top-3 left-3 bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-2.5 py-0.5 rounded shadow-xs flex items-center gap-1">
+                    <Crown className="w-3 h-3" /> Placa de Antiguo
                   </div>
-                  <div className="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-white font-black text-base px-3.5 py-1 rounded-xl border border-white/15">
-                    ${car.price.toLocaleString()} USD
+                  <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-xs text-slate-900 text-xs font-black px-2.5 py-1 rounded shadow-xs">
+                    ${car.price.toLocaleString()} {car.currency}
                   </div>
                 </div>
 
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-                  <div>
-                    <span className="text-[11px] text-amber-300 font-bold">{car.brand} • Año {car.year}</span>
-                    <h3 className="text-base font-bold text-white mt-0.5">{car.title}</h3>
-                    <p className="text-xs text-slate-300 line-clamp-2 mt-1">{car.description}</p>
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-slate-500">
+                      <span className="font-bold text-slate-800">{car.brand} {car.model}</span>
+                      <span>Año {car.year}</span>
+                    </div>
+
+                    <h3 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors">
+                      {car.title}
+                    </h3>
+
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      {car.description}
+                    </p>
                   </div>
 
-                  <div className="pt-2 border-t border-white/10 space-y-2">
-                    <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300">
-                      <span className="bg-white/5 p-2 rounded-xl border border-white/10 truncate backdrop-blur-sm">
+                  <div className="pt-3 border-t border-slate-100 space-y-3">
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+                      <span className="bg-slate-50 p-2 rounded-xl border border-slate-200 truncate">
                         Motor: {car.specs.engine}
                       </span>
-                      <span className="bg-white/5 p-2 rounded-xl border border-white/10 truncate backdrop-blur-sm">
+                      <span className="bg-slate-50 p-2 rounded-xl border border-slate-200 truncate">
                         Caja: {car.specs.transmission}
                       </span>
                     </div>
 
                     <button
                       onClick={() => onOpenIntermediationModal(car)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg shadow-blue-600/25 border border-blue-500/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <ShieldCheck className="w-4 h-4" />
+                      <ShieldCheck className="w-4 h-4 text-blue-400" />
                       <span>Ver Ficha & Solicitar Intermediación</span>
                     </button>
                   </div>
@@ -217,10 +227,10 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
       {/* SubTab 2: Proyectos con Potencial de Restauración */}
       {subTab === 'proyectos' && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 p-4 rounded-2xl flex items-center justify-between text-xs text-slate-300">
+          <div className="bg-white border border-slate-200 p-4 rounded-2xl flex items-center justify-between text-xs text-slate-600 shadow-xs">
             <span className="flex items-center gap-2">
-              <Hammer className="w-4 h-4 text-amber-400" />
-              <span>Autos con alta demanda de coleccionistas listos para ser revividos. Incluyen diagnóstico de piezas faltantes y dificultad.</span>
+              <Hammer className="w-4 h-4 text-orange-500" />
+              <span>Autos con alta demanda de coleccionistas listos para ser revividos. Incluyen diagnóstico y estimación de inversión.</span>
             </span>
           </div>
 
@@ -228,70 +238,64 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
             {restorationProjectCars.map((car) => (
               <div
                 key={car.id}
-                className="bg-white/[0.04] hover:bg-white/[0.07] backdrop-blur-xl border border-white/10 hover:border-white/20 rounded-3xl overflow-hidden shadow-xl p-6 flex flex-col justify-between space-y-4"
+                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 p-5 flex flex-col justify-between space-y-4"
               >
                 <div className="flex flex-col sm:flex-row gap-4">
                   <img
                     src={car.images[0]}
                     alt={car.title}
-                    className="w-full sm:w-44 h-36 rounded-2xl object-cover bg-white/5 shrink-0 border border-white/10"
+                    className="w-full sm:w-44 h-36 rounded-xl object-cover bg-slate-100 shrink-0 border border-slate-200"
                   />
                   <div className="space-y-1.5 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-amber-400">{car.brand} {car.year}</span>
-                      <span className="text-base font-black text-white">${car.price.toLocaleString()} USD</span>
+                      <span className="text-xs font-bold text-amber-700">{car.brand} {car.year}</span>
+                      <span className="text-base font-black text-slate-950">${car.price.toLocaleString()} {car.currency}</span>
                     </div>
-                    <h3 className="text-base font-bold text-white">{car.title}</h3>
-                    <p className="text-xs text-slate-300 line-clamp-2">{car.description}</p>
+                    <h3 className="text-base font-bold text-slate-950">{car.title}</h3>
+                    <p className="text-xs text-slate-600 line-clamp-2">{car.description}</p>
                   </div>
                 </div>
 
                 {/* Restoration Potential Data */}
                 {car.restorationPotential && (
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5 text-xs text-slate-300 backdrop-blur-md">
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs text-slate-700">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-slate-400">Nivel de Dificultad:</span>
-                      <span className="font-bold text-amber-300 bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/10">
+                      <span className="font-semibold text-slate-500">Nivel de Dificultad:</span>
+                      <span className="font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-lg border border-amber-200">
                         {car.restorationPotential.difficulty}
                       </span>
                     </div>
 
                     <div>
                       <div className="flex justify-between text-[11px] mb-1">
-                        <span>Completitud de piezas originales:</span>
-                        <strong className="text-emerald-400">{car.restorationPotential.completeness}%</strong>
+                        <span className="text-slate-500">Índice de Completitud:</span>
+                        <span className="font-bold text-slate-900">{car.restorationPotential.completeness}%</span>
                       </div>
-                      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-emerald-500 rounded-full"
+                          className="bg-blue-600 h-full rounded-full"
                           style={{ width: `${car.restorationPotential.completeness}%` }}
                         ></div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
-                      <div>
-                        <span className="text-slate-400 block font-semibold">Carrocería:</span>
-                        <span>{car.restorationPotential.bodyworkStatus}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-semibold">Motor / Mecánica:</span>
-                        <span>{car.restorationPotential.engineStatus}</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-1 text-[11px] text-amber-300 font-medium">
-                      Presupuesto estimado de terminación: <strong>{car.restorationPotential.estimatedCost}</strong>
+                    <div className="text-[11px] text-slate-600">
+                      <span className="font-semibold text-slate-900">Estado de Carrocería: </span>
+                      <span>{car.restorationPotential.bodyworkStatus}</span>
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-center justify-end gap-3 pt-2">
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <div className="text-xs text-slate-500">
+                    Inversión estimada: <strong className="text-slate-900 font-bold">{car.restorationPotential?.estimatedCost || 'A cotizar'}</strong>
+                  </div>
+
                   <button
                     onClick={() => onOpenIntermediationModal(car)}
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 border border-blue-500/30 transition-all cursor-pointer"
+                    className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors cursor-pointer shadow-xs"
                   >
-                    Contactar & Ver Expediente Técnico
+                    Ver Proyecto
                   </button>
                 </div>
               </div>
@@ -302,79 +306,66 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
 
       {/* SubTab 3: Evaluador IA de Viabilidad de Restauración */}
       {subTab === 'evaluador_ia' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-200">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in duration-200">
           
           {/* Form Column */}
-          <div className="lg:col-span-5 bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="p-2 rounded-xl bg-white/10 text-blue-400 border border-white/15 backdrop-blur-md">
-                <Sparkles className="w-5 h-5" />
+          <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-slate-100 text-slate-900">
+                <Sparkles className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Simulador de Restauración con IA</h3>
-                <p className="text-xs text-slate-400">Ingresa los datos del auto para evaluar costo vs. valor de mercado</p>
+                <h3 className="text-base font-black text-slate-950">Peritaje IA de Restauración</h3>
+                <p className="text-xs text-slate-500">Calcula horas de taller, costo de repuestos y valor futuro</p>
               </div>
             </div>
 
-            <form onSubmit={handleRunRestorationEvaluation} className="space-y-3.5 text-xs text-slate-300">
+            <form onSubmit={handleEvaluateViability} className="space-y-4 text-xs text-slate-700">
+              <div>
+                <label className="block font-semibold text-slate-900 mb-1">Marca del Vehículo</label>
+                <input
+                  type="text"
+                  required
+                  value={evalBrand}
+                  onChange={(e) => setEvalBrand(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold mb-1 text-slate-200">Marca</label>
+                  <label className="block font-semibold text-slate-900 mb-1">Modelo / Serie</label>
                   <input
                     type="text"
-                    value={evalBrand}
-                    onChange={(e) => setEvalBrand(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white backdrop-blur-md focus:outline-none focus:border-blue-400/40"
+                    required
+                    value={evalModel}
+                    onChange={(e) => setEvalModel(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-slate-200">Año</label>
+                  <label className="block font-semibold text-slate-900 mb-1">Año</label>
                   <input
                     type="number"
+                    required
+                    min={1920}
+                    max={1995}
                     value={evalYear}
                     onChange={(e) => setEvalYear(Number(e.target.value))}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white backdrop-blur-md focus:outline-none focus:border-blue-400/40"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold mb-1 text-slate-200">Modelo Exacto & Carrocería</label>
-                <input
-                  type="text"
-                  value={evalModel}
-                  onChange={(e) => setEvalModel(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white backdrop-blur-md focus:outline-none focus:border-blue-400/40"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-1 text-slate-200">Estado de Chapería y Óxido</label>
-                <input
-                  type="text"
-                  value={evalBodyCondition}
-                  onChange={(e) => setEvalBodyCondition(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white backdrop-blur-md focus:outline-none focus:border-blue-400/40"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-1 text-slate-200">Estado Mecánico del Motor</label>
-                <input
-                  type="text"
-                  value={evalEngineCondition}
-                  onChange={(e) => setEvalEngineCondition(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white backdrop-blur-md focus:outline-none focus:border-blue-400/40"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-1 text-slate-200">Estado de Interior / Tapicería</label>
-                <input
-                  type="text"
-                  value={evalInteriorCondition}
-                  onChange={(e) => setEvalInteriorCondition(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white backdrop-blur-md focus:outline-none focus:border-blue-400/40"
+                <label className="block font-semibold text-slate-900 mb-1">Estado Actual del Proyecto</label>
+                <textarea
+                  rows={3}
+                  required
+                  value={evalState}
+                  onChange={(e) => setEvalState(e.target.value)}
+                  placeholder="Describe qué piezas tiene, qué le falta, estado de chasis, óxido o funcionamiento de motor..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                 />
               </div>
 
@@ -384,9 +375,9 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
                   id="classicPlateGoal"
                   checked={evalHasClassicPlates}
                   onChange={(e) => setEvalHasClassicPlates(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-white/20 cursor-pointer accent-blue-600"
+                  className="w-4 h-4 text-slate-900 rounded border-slate-300 cursor-pointer accent-slate-900"
                 />
-                <label htmlFor="classicPlateGoal" className="font-semibold text-slate-200 cursor-pointer">
+                <label htmlFor="classicPlateGoal" className="font-semibold text-slate-700 cursor-pointer">
                   El objetivo es certificarlo con Placa de Antiguo (85%+ original)
                 </label>
               </div>
@@ -394,7 +385,7 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
               <button
                 type="submit"
                 disabled={evalLoading}
-                className="w-full mt-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/30 border border-blue-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full mt-3 bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <RefreshCw className={`w-4 h-4 ${evalLoading ? 'animate-spin' : ''}`} />
                 <span>{evalLoading ? 'Calculando Presupuesto & Viabilidad...' : 'Generar Dictamen de Restauración'}</span>
@@ -405,79 +396,83 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
           {/* Results Column */}
           <div className="lg:col-span-7 space-y-4">
             {evalLoading ? (
-              <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl p-12 text-center space-y-3">
-                <RefreshCw className="w-10 h-10 text-white animate-spin mx-auto" />
-                <h4 className="text-base font-bold text-white">Analizando bases históricas de repuestos y cotizaciones de talleres...</h4>
-                <p className="text-xs text-slate-400">Calculando viabilidad de inversión, horas hombre y valor de subasta.</p>
+              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3 shadow-xs">
+                <RefreshCw className="w-10 h-10 text-slate-900 animate-spin mx-auto" />
+                <h4 className="text-base font-bold text-slate-900">Analizando bases históricas de repuestos y cotizaciones de talleres...</h4>
+                <p className="text-xs text-slate-500">Calculando viabilidad de inversión, horas hombre y valor de mercado.</p>
               </div>
             ) : evalResult ? (
-              <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5 animate-in fade-in">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-5 animate-in fade-in">
                 
                 {/* Viability & Value metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center backdrop-blur-md">
-                    <span className="text-[11px] text-slate-400 block font-semibold">Viabilidad</span>
-                    <span className="text-2xl font-black text-emerald-400">{evalResult.restorationViabilityScore} / 100</span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Dificultad: {evalResult.difficultyLevel}</span>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+                    <span className="text-[11px] text-slate-500 block font-semibold">Viabilidad</span>
+                    <span className="text-2xl font-black text-blue-700">{evalResult.restorationViabilityScore} / 100</span>
+                    <span className="text-[10px] text-slate-500 block mt-0.5">Dificultad: {evalResult.difficultyLevel}</span>
                   </div>
 
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center backdrop-blur-md">
-                    <span className="text-[11px] text-slate-400 block font-semibold">Presupuesto Estimado</span>
-                    <span className="text-base font-black text-amber-400">{evalResult.estimatedBudgetRangeUSD}</span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Mano de obra + piezas</span>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+                    <span className="text-[11px] text-slate-500 block font-semibold">Presupuesto Estimado</span>
+                    <span className="text-base font-black text-amber-700">{evalResult.estimatedBudgetRangeUSD}</span>
+                    <span className="text-[10px] text-slate-500 block mt-0.5">Mano de obra + piezas</span>
                   </div>
 
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center backdrop-blur-md">
-                    <span className="text-[11px] text-slate-400 block font-semibold">Valor Restaurado</span>
-                    <span className="text-base font-black text-blue-400">{evalResult.estimatedValueAfterRestorationUSD}</span>
-                    <span className="text-[10px] text-emerald-400 block mt-0.5 font-bold">Retorno Positivo</span>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+                    <span className="text-[11px] text-slate-500 block font-semibold">Valor Restaurado</span>
+                    <span className="text-base font-black text-blue-700">{evalResult.estimatedValueAfterRestorationUSD}</span>
+                    <span className="text-[10px] text-blue-700 block mt-0.5 font-bold">Plusvalía Proyectada</span>
                   </div>
                 </div>
 
                 {/* Classic Plate Eligibility */}
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                  <span className="text-xs font-bold text-amber-300 block mb-1">
+                <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200">
+                  <span className="text-xs font-bold text-amber-900 block mb-1">
                     👑 Elegibilidad para Placa de Antiguo:
                   </span>
-                  <p className="text-xs text-slate-300">{evalResult.potentialClassicPlateEligibility}</p>
+                  <p className="text-xs text-slate-700">{evalResult.potentialClassicPlateEligibility}</p>
                 </div>
 
                 {/* Phases */}
                 <div>
-                  <h4 className="text-xs font-bold text-white mb-2">Fases Recomendadas de Trabajo:</h4>
+                  <h4 className="text-xs font-bold text-slate-900 mb-2">Fases Recomendadas de Trabajo:</h4>
                   <div className="space-y-2">
                     {evalResult.recommendedPhases.map((p, idx) => (
-                      <div key={idx} className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs backdrop-blur-sm">
-                        <div className="flex items-center justify-between font-bold text-white">
-                          <span>{idx + 1}. {p.phase}</span>
-                          {p.difficulty && <span className="text-[10px] text-amber-400 font-normal">{p.difficulty}</span>}
+                      <div key={idx} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                        <div className="flex justify-between font-bold text-slate-900 mb-1">
+                          <span>{p.phase}</span>
+                          <span className="text-slate-600 font-normal">{p.difficulty}</span>
                         </div>
-                        <p className="text-slate-300 mt-1 text-[11px]">{p.keyTasks}</p>
+                        <p className="text-slate-600 leading-relaxed">{p.keyTasks}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Expert Tips */}
-                <div>
-                  <h4 className="text-xs font-bold text-white mb-1.5">Consejos Clave del Restaurador:</h4>
-                  <ul className="space-y-1 text-xs text-slate-300">
-                    {evalResult.expertTips.map((tip, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {/* Tips */}
+                {evalResult.expertTips && (
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Info className="w-4 h-4 text-blue-600" />
+                      <span>Consejos de Especialistas:</span>
+                    </span>
+                    <div className="space-y-1">
+                      {evalResult.expertTips.map((tip, idx) => (
+                        <p key={idx} className="text-[11px] text-slate-600">
+                          • {tip}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               </div>
             ) : (
-              <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl p-10 text-center space-y-3">
-                <Crown className="w-12 h-12 text-white/50 mx-auto" />
-                <h4 className="text-base font-bold text-white">Simula tu proyecto de restauración</h4>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  Completa los datos del vehículo y obtén un dictamen técnico con rango presupuestal, fases sugeridas y probabilidad de certificar placa de antiguo.
+              <div className="bg-white border border-slate-200 rounded-3xl p-10 text-center space-y-3 shadow-xs">
+                <Crown className="w-10 h-10 text-amber-500 mx-auto" />
+                <h4 className="text-base font-bold text-slate-900">Evalúa cualquier clásico antes de comprarlo</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Completa los datos del vehículo en el formulario de la izquierda para obtener un dictamen pericial con cotizaciones de piezas y viabilidad para placa de antiguo.
                 </p>
               </div>
             )}
@@ -486,76 +481,61 @@ export const ClasicosRestauracion: React.FC<ClasicosRestauracionProps> = ({
         </div>
       )}
 
-      {/* SubTab 4: Guía Oficial de Trámite de Placa de Antiguo */}
-      {subTab === 'guia_placas' && (
-        <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 text-xs text-slate-300 shadow-2xl animate-in fade-in duration-200">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-white/10 text-white border border-white/15 backdrop-blur-md">
-              <FileText className="w-6 h-6 text-blue-400" />
-            </div>
+      {/* SubTab 4: Talleres Especialistas & Certificadores */}
+      {subTab === 'talleres' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
             <div>
-              <h2 className="text-lg font-bold text-white">Manual y Requisitos para Certificación de Placas de Antiguo</h2>
-              <p className="text-xs text-slate-400">Procedimiento avalado por la Federación de Clubes y Autoridades de Tránsito</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-              <h3 className="text-sm font-bold text-amber-300 flex items-center gap-1.5">
-                <Crown className="w-4 h-4" /> 1. Requisitos Fundamentales
+              <h3 className="text-sm font-bold text-slate-950 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                <span>Red de Talleres de Restauración y Peritos Autorizados en Colombia</span>
               </h3>
-              <ul className="space-y-2 text-slate-300">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Antigüedad mínima:</strong> El vehículo debe haber cumplido al menos 30 a 35 años desde su fecha de fabricación original.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Originalidad certificada:</strong> Debe conservar un mínimo del 85% al 90% de sus especificaciones de fábrica de la época.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Mecánica fidedigna:</strong> Motor, transmisión y suspensión correspondientes a la serie o catálogo del año del vehículo.</span>
-                </li>
-              </ul>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Especialistas en latonería artesanal inglesa/alemana, reconstrucción de motores clásicos y tramitología de placas de antiguo.
+              </p>
             </div>
-
-            <div className="space-y-3 p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-              <h3 className="text-sm font-bold text-amber-300 flex items-center gap-1.5">
-                <Award className="w-4 h-4" /> 2. Beneficios de la Placa de Antiguo
-              </h3>
-              <ul className="space-y-2 text-slate-300">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Exención de restricciones de movilidad:</strong> Libre circulación sin pico y placa en las principales ciudades.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Revisión técnico-mecánica especial:</strong> Examen ajustado a los estándares de emisiones y tecnología de su época.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Plusvalía e inversión:</strong> Incremento inmediato de la cotización internacional y cotización en pólizas de colección.</span>
-                </li>
-              </ul>
-            </div>
-
           </div>
 
-          <div className="p-5 rounded-2xl bg-white/5 border border-white/15 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white">¿Tienes un vehículo listo para peritaje de antiguo?</h4>
-              <p className="text-xs text-slate-300">Nuestros peritos aliados de la Asociación de Clásicos realizan la pre-evaluación digital.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900">Restauraciones Época Vintage</span>
+                <span className="text-[10px] bg-blue-50 text-blue-800 font-bold px-2 py-0.5 rounded border border-blue-200">Bogotá</span>
+              </div>
+              <p className="text-xs text-slate-600">
+                Especialistas en pintura poliéster y reconstrucción de chasís para Mercedes-Benz W114, BMW E30 y Toyota FJ.
+              </p>
+              <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-100">
+                Más de 40 autos con placa de antiguo certificados.
+              </div>
             </div>
-            <button
-              onClick={() => setSubTab('evaluador_ia')}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 border border-blue-500/30 shrink-0 cursor-pointer"
-            >
-              Iniciar Pre-Evaluación IA
-            </button>
-          </div>
 
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-950">Medellín Classic Coachworks</span>
+                <span className="text-[10px] bg-blue-50 text-blue-800 font-bold px-2 py-0.5 rounded border border-blue-200">Medellín</span>
+              </div>
+              <p className="text-xs text-slate-600">
+                Tapicería en cuero legítimo de época, cromado electrolítico y puesta a punto de carburadores dobles Weber/Solex.
+              </p>
+              <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-100">
+                Garantía escrita de 24 meses en restauración integral.
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-950">Autoclásica Eje Cafetero</span>
+                <span className="text-[10px] bg-blue-50 text-blue-800 font-bold px-2 py-0.5 rounded border border-blue-200">Pereira</span>
+              </div>
+              <p className="text-xs text-slate-600">
+                Restauración de 4x4 icónicos (Willys MB, Land Rover Serie II/III, Nissan Patrol G60).
+              </p>
+              <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-100">
+                Banco de pruebas de tracción y cajas transfer originales.
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

@@ -11,6 +11,7 @@ export function getClientChatResponse(
     model?: string;
     year?: number;
     mileage?: number;
+    engine?: string;
   } | null
 ): string {
   const q = message.toLowerCase();
@@ -49,6 +50,9 @@ export function getClientVehicleInsights(vehicle: {
   mileage?: number;
   engine?: string;
   type?: string;
+  transmission?: string;
+  fuelType?: string;
+  issues?: string[];
 }): VehicleInsight {
   const brand = vehicle.brand || 'Vehículo';
   const model = vehicle.model || 'Estándar';

@@ -47,7 +47,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shippingFee = subtotal > 100 ? 0 : 8.50;
-  const intermediationFee = Number((subtotal * 0.03).toFixed(2)); // Tarifa de seguro/garantía
+  const intermediationFee = Number((subtotal * 0.03).toFixed(2));
   const total = subtotal + shippingFee;
 
   const handleFinishOrder = async (e: React.FormEvent) => {
@@ -69,14 +69,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         total,
         currency: 'USD',
         paymentMethod,
-        paymentStatus: paymentMethod === 'contraentrega_custodia' ? 'en_custodia' : 'aprobado',
-        storeNames: uniqueStores
+        paymentStatus: 'en_custodia',
+        storeNames: uniqueStores,
       });
 
       setCompletedOrder(order);
       setCheckoutStep('success');
-    } catch (err) {
-      console.error('Error procesando orden:', err);
+    } catch {
+      alert('Hubo un error procesando tu pedido. Intenta nuevamente.');
     } finally {
       setIsProcessing(false);
     }
@@ -92,23 +92,23 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex justify-end animate-in fade-in duration-200 overflow-hidden">
-      <div className="bg-slate-950 border-l border-white/15 w-full sm:max-w-md h-[100dvh] max-h-[100dvh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-right duration-200">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex justify-end animate-in fade-in duration-200 overflow-hidden">
+      <div className="bg-white border-l border-slate-200 w-full sm:max-w-md h-[100dvh] max-h-[100dvh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-right duration-200">
         
         {/* Drawer Header - Fixed */}
-        <div className="shrink-0 p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-slate-950 text-white">
+        <div className="shrink-0 p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-white text-slate-950">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-white text-slate-950 flex items-center justify-center font-black shadow-xs shrink-0">
-              <ShoppingBag className="w-5 h-5 text-blue-600" />
+            <div className="w-9 h-9 rounded-xl bg-slate-950 text-white flex items-center justify-center font-black shadow-xs shrink-0">
+              <ShoppingBag className="w-4 h-4 text-blue-400" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-black text-white truncate">Carrito & Repuestos</h3>
-              <p className="text-[10px] text-slate-300 font-medium truncate">Intermediación 100% Garantizada</p>
+              <h3 className="text-sm sm:text-base font-black text-slate-950 truncate">Carrito de Compras</h3>
+              <p className="text-[10px] text-slate-500 font-medium truncate">Intermediación 100% Garantizada</p>
             </div>
           </div>
           <button
             onClick={handleCloseAndReset}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer shrink-0 ml-2"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-950 transition-all cursor-pointer shrink-0 ml-2"
             aria-label="Cerrar carrito"
           >
             <X className="w-4 h-4" />
@@ -116,18 +116,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         </div>
 
         {/* Content Body - Scrollable */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4 overscroll-contain">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4 overscroll-contain bg-slate-50/50">
           
           {checkoutStep === 'cart' && (
             <>
               {items.length === 0 ? (
-                <div className="py-12 sm:py-16 text-center space-y-3">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 text-slate-400 flex items-center justify-center mx-auto border border-white/10">
-                    <ShoppingBag className="w-8 h-8" />
+                <div className="py-12 sm:py-16 text-center space-y-3 bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                    <ShoppingBag className="w-7 h-7" />
                   </div>
-                  <h4 className="text-sm font-bold text-white">Tu carrito está vacío</h4>
-                  <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                    Explora nuestra red de tiendas de repuestos y productos de cuidado para armar tu pedido con intermediación garantizada.
+                  <h4 className="text-sm font-bold text-slate-950">Tu carrito está vacío</h4>
+                  <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                    Explora nuestra red de repuestos, lubricantes y productos de estética para tu vehículo.
                   </p>
                 </div>
               ) : (
@@ -135,19 +135,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="p-3 sm:p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 backdrop-blur-md"
+                      className="p-3.5 rounded-2xl bg-white border border-slate-200 flex items-center gap-3 shadow-xs"
                     >
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-14 h-14 rounded-xl object-cover bg-white/5 shrink-0 border border-white/10"
+                        className="w-14 h-14 rounded-xl object-cover bg-slate-100 shrink-0 border border-slate-200"
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="text-[9px] uppercase font-bold text-slate-200 bg-white/10 px-1.5 py-0.5 rounded border border-white/10">
+                        <span className="text-[9px] uppercase font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                           {item.brand}
                         </span>
-                        <h4 className="text-xs font-bold text-white truncate mt-0.5">{item.name}</h4>
-                        <div className="text-xs font-black text-white mt-1">
+                        <h4 className="text-xs font-bold text-slate-950 truncate mt-0.5">{item.name}</h4>
+                        <div className="text-xs font-black text-slate-900 mt-1">
                           ${(item.price * item.quantity).toFixed(2)} USD
                         </div>
                       </div>
@@ -156,24 +156,22 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
                         <button
                           onClick={() => onRemoveItem(item.id)}
-                          className="text-slate-400 hover:text-red-400 p-1 cursor-pointer"
+                          className="text-slate-400 hover:text-red-600 p-1 cursor-pointer transition-colors"
                           title="Eliminar"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                        <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 rounded-lg p-0.5">
+                        <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1 border border-slate-200">
                           <button
                             onClick={() => onUpdateQuantity(item.id, -1)}
-                            className="p-1 text-slate-300 hover:text-white cursor-pointer"
-                            aria-label="Disminuir cantidad"
+                            className="w-5 h-5 flex items-center justify-center bg-white text-slate-700 rounded hover:bg-slate-200 cursor-pointer shadow-xs"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="text-xs font-black text-white px-1">{item.quantity}</span>
+                          <span className="text-xs font-bold px-1 text-slate-900">{item.quantity}</span>
                           <button
                             onClick={() => onUpdateQuantity(item.id, 1)}
-                            className="p-1 text-slate-300 hover:text-white cursor-pointer"
-                            aria-label="Aumentar cantidad"
+                            className="w-5 h-5 flex items-center justify-center bg-white text-slate-700 rounded hover:bg-slate-200 cursor-pointer shadow-xs"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -181,226 +179,178 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </div>
                     </div>
                   ))}
-
-                  {/* Intermediation Trust Banner */}
-                  <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs backdrop-blur-sm">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <p className="text-slate-300 text-[11px] leading-relaxed">
-                      <strong className="text-white">Pago Protegido:</strong> El dinero se transfiere a la tienda únicamente cuando recibes la pieza y confirmas compatibilidad.
-                    </p>
-                  </div>
                 </div>
               )}
             </>
           )}
 
           {checkoutStep === 'shipping' && (
-            <form onSubmit={handleFinishOrder} id="checkoutForm" className="space-y-4 text-xs text-slate-300">
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">1</span>
-                  <span>Datos del Comprador & Envío</span>
+            <form onSubmit={handleFinishOrder} className="space-y-4 text-xs text-slate-700">
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
+                <h4 className="font-bold text-slate-950 flex items-center gap-1.5">
+                  <PackageCheck className="w-4 h-4 text-slate-900" />
+                  <span>Datos de Envío & Facturación</span>
                 </h4>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-slate-400 mb-1 font-medium">Nombre Completo *</label>
-                    <input
-                      type="text"
-                      required
-                      value={buyerName}
-                      onChange={(e) => setBuyerName(e.target.value)}
-                      className="w-full bg-white/5 border border-white/15 rounded-xl p-2 text-white backdrop-blur-md focus:outline-none focus:border-white text-xs"
-                      placeholder="Tu nombre"
-                    />
-                  </div>
 
+                <div>
+                  <label className="block font-semibold text-slate-900 mb-1">Nombre Completo</label>
+                  <input
+                    type="text"
+                    required
+                    value={buyerName}
+                    onChange={(e) => setBuyerName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-slate-400 mb-1 font-medium">Teléfono / WhatsApp *</label>
+                    <label className="block font-semibold text-slate-900 mb-1">WhatsApp / Tel</label>
                     <input
                       type="tel"
                       required
                       value={buyerPhone}
                       onChange={(e) => setBuyerPhone(e.target.value)}
-                      className="w-full bg-white/5 border border-white/15 rounded-xl p-2 text-white backdrop-blur-md focus:outline-none focus:border-white text-xs"
-                      placeholder="+57 310 123 4567"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-900 mb-1">Ciudad</label>
+                    <input
+                      type="text"
+                      required
+                      value={receiverCity}
+                      onChange={(e) => setReceiverCity(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 mb-1 font-medium">Correo Electrónico *</label>
-                  <input
-                    type="email"
-                    required
-                    value={buyerEmail}
-                    onChange={(e) => setBuyerEmail(e.target.value)}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl p-2 text-white backdrop-blur-md focus:outline-none focus:border-white text-xs"
-                    placeholder="correo@ejemplo.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 mb-1 font-medium">Dirección exacta de entrega *</label>
+                  <label className="block font-semibold text-slate-900 mb-1">Dirección de Entrega</label>
                   <input
                     type="text"
                     required
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl p-2 text-white backdrop-blur-md focus:outline-none focus:border-white text-xs"
-                    placeholder="Ej. Calle 100 # 15-20, Apto 402"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 mb-1 font-medium">Ciudad de Entrega *</label>
-                  <input
-                    type="text"
-                    required
-                    value={receiverCity}
-                    onChange={(e) => setReceiverCity(e.target.value)}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl p-2 text-white backdrop-blur-md focus:outline-none focus:border-white text-xs"
-                    placeholder="Ej. Bogotá, D.C."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-white/10">
-                <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">2</span>
-                  <span>Pasarela de Pago & Intermediación Segura</span>
+              {/* Payment Methods */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
+                <h4 className="font-bold text-slate-950 flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-slate-900" />
+                  <span>Método de Pago con Custodia Escrow</span>
                 </h4>
-                <div className="space-y-1.5">
-                  {[
-                    { id: 'contraentrega_custodia', label: '🛡️ Pago en Custodia MiGaraje (Recomendado)', desc: 'Fondos retenidos en la plataforma hasta recibir conforme' },
-                    { id: 'tarjeta', label: '💳 Tarjeta de Crédito / Débito (Stripe / Wompi)', desc: 'Procesamiento encriptado con Visa, Mastercard o Amex' },
-                    { id: 'pse_transferencia', label: '🏦 Transferencia Bancaria PSE / Nequi / Bancolombia', desc: 'Débito inmediato desde tu cuenta bancaria' },
-                  ].map((m) => (
-                    <label
-                      key={m.id}
-                      className={`flex items-start gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-colors backdrop-blur-sm ${
-                        paymentMethod === m.id
-                          ? 'bg-blue-600/20 border-blue-400/60 text-white'
-                          : 'bg-white/5 border-white/10 text-slate-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="payMethod"
-                        value={m.id}
-                        checked={paymentMethod === m.id}
-                        onChange={() => setPaymentMethod(m.id as any)}
-                        className="mt-0.5 accent-blue-600"
-                      />
-                      <div>
-                        <div className="font-bold text-xs text-white">{m.label}</div>
-                        <div className="text-[10px] text-slate-400">{m.desc}</div>
-                      </div>
-                    </label>
-                  ))}
+
+                <div className="space-y-2">
+                  <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer ${paymentMethod === 'contraentrega_custodia' ? 'border-slate-950 bg-slate-50' : 'border-slate-200'}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={paymentMethod === 'contraentrega_custodia'}
+                      onChange={() => setPaymentMethod('contraentrega_custodia')}
+                      className="accent-slate-950"
+                    />
+                    <div>
+                      <span className="font-bold text-slate-900 block">Pago Contra Entrega con Custodia</span>
+                      <span className="text-[10px] text-slate-500">Paga al recibir tras verificar la pieza</span>
+                    </div>
+                  </label>
+
+                  <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer ${paymentMethod === 'pse_transferencia' ? 'border-slate-950 bg-slate-50' : 'border-slate-200'}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={paymentMethod === 'pse_transferencia'}
+                      onChange={() => setPaymentMethod('pse_transferencia')}
+                      className="accent-slate-950"
+                    />
+                    <div>
+                      <span className="font-bold text-slate-900 block">PSE / Transferencia Bancaria</span>
+                      <span className="text-[10px] text-slate-500">Bancolombia, Davivienda, Nequi</span>
+                    </div>
+                  </label>
                 </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCheckoutStep('cart')}
+                  className="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                >
+                  Volver
+                </button>
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="flex-2 bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isProcessing ? 'Confirmando Pedido...' : 'Confirmar Pedido'}
+                </button>
               </div>
             </form>
           )}
 
           {checkoutStep === 'success' && completedOrder && (
-            <div className="py-6 sm:py-8 text-center space-y-4 animate-in fade-in">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-lg">
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 text-center space-y-4 shadow-xs animate-in fade-in">
+              <div className="w-16 h-16 bg-blue-50 text-blue-700 rounded-2xl flex items-center justify-center mx-auto border border-blue-200">
                 <Check className="w-8 h-8" />
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-white">¡Orden de Compra Confirmada!</h3>
-                <p className="text-xs text-emerald-400 font-mono mt-0.5">N° {completedOrder.orderNumber}</p>
-              </div>
-
-              <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
-                Guardado en la base de datos en la nube. Hemos notificado a las tiendas asociadas: <strong className="text-white">{completedOrder.storeNames.join(', ')}</strong>.
+              <h4 className="text-lg font-black text-slate-950">¡Pedido #{completedOrder.orderNumber} Exitoso!</h4>
+              <p className="text-xs text-slate-600 leading-relaxed max-w-xs mx-auto">
+                Hemos notificado a los almacenes aliados. Tu dinero se encuentra protegido bajo garantía de compatibilidad.
               </p>
-
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-left space-y-2 backdrop-blur-md">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Guía de Rastreo:</span>
-                  <span className="font-mono font-bold text-blue-400">{completedOrder.trackingNumber}</span>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-left space-y-1">
+                <div className="flex justify-between font-semibold text-slate-900">
+                  <span>Destino:</span>
+                  <span>{completedOrder.city}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Total Transacción:</span>
-                  <span className="font-bold text-white">${completedOrder.total.toFixed(2)} USD</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Entrega en:</span>
-                  <span className="text-slate-200">{completedOrder.city}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Estado de Pago:</span>
-                  <span className="text-emerald-400 font-bold capitalize">{completedOrder.paymentStatus.replace('_', ' ')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Garantía MiGaraje:</span>
-                  <span className="text-emerald-400 font-bold">100% Protegido</span>
+                <div className="flex justify-between font-semibold text-slate-900">
+                  <span>Total a Pagar:</span>
+                  <span>${completedOrder.total.toFixed(2)} USD</span>
                 </div>
               </div>
+              <button
+                onClick={handleCloseAndReset}
+                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3 rounded-xl shadow-xs cursor-pointer"
+              >
+                Cerrar y Continuar
+              </button>
             </div>
           )}
 
         </div>
 
-        {/* Drawer Footer with Totals - Fixed Shrink-0 */}
-        {items.length > 0 && checkoutStep !== 'success' && (
-          <div className="shrink-0 p-4 sm:p-5 border-t border-white/10 bg-slate-950/95 backdrop-blur-md space-y-3 pb-8 sm:pb-5">
-            <div className="space-y-1 text-xs text-slate-300">
-              <div className="flex justify-between">
-                <span>Subtotal ({items.length} productos):</span>
-                <span className="text-white font-semibold">${subtotal.toFixed(2)} USD</span>
+        {/* Drawer Footer Summary (only when in cart step and items exist) */}
+        {checkoutStep === 'cart' && items.length > 0 && (
+          <div className="shrink-0 p-4 sm:p-5 border-t border-slate-200 bg-white space-y-3">
+            <div className="space-y-1.5 text-xs">
+              <div className="flex justify-between text-slate-500">
+                <span>Subtotal ({items.length} ítems):</span>
+                <span className="font-bold text-slate-900">${subtotal.toFixed(2)} USD</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between text-slate-500">
                 <span>Envío asegurado:</span>
-                <span className="text-white">
-                  {shippingFee === 0 ? <strong className="text-emerald-400 font-bold">Gratis ($0.00)</strong> : `$${shippingFee.toFixed(2)} USD`}
+                <span className="font-bold text-slate-900">
+                  {shippingFee === 0 ? <span className="text-blue-600 font-bold">Gratis</span> : `$${shippingFee.toFixed(2)} USD`}
                 </span>
               </div>
-              <div className="flex justify-between text-sm font-black text-white pt-2 border-t border-white/10">
-                <span>Total a Pagar:</span>
-                <span className="text-white font-black">${total.toFixed(2)} USD</span>
+              <div className="flex justify-between text-sm font-black text-slate-950 pt-2 border-t border-slate-100">
+                <span>Total Estimado:</span>
+                <span className="text-base">${total.toFixed(2)} USD</span>
               </div>
             </div>
 
-            {checkoutStep === 'cart' ? (
-              <button
-                onClick={() => setCheckoutStep('shipping')}
-                className="w-full bg-white hover:bg-slate-100 active:scale-98 text-slate-950 font-black py-3 rounded-2xl shadow-lg text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <span>Proceder al Pago Seguro</span>
-                <ArrowRight className="w-4 h-4 text-blue-600" />
-              </button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCheckoutStep('cart')}
-                  className="px-4 py-3 rounded-xl bg-white/10 text-slate-200 text-xs font-bold hover:bg-white/15 cursor-pointer"
-                >
-                  Atrás
-                </button>
-                <button
-                  type="submit"
-                  form="checkoutForm"
-                  disabled={isProcessing}
-                  className="flex-1 bg-white hover:bg-slate-100 disabled:opacity-50 active:scale-98 text-slate-950 font-black py-3 rounded-xl shadow-lg text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>{isProcessing ? 'Procesando Pago & Custodia...' : `Confirmar & Pagar ($${total.toFixed(2)})`}</span>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {checkoutStep === 'success' && (
-          <div className="shrink-0 p-4 sm:p-5 border-t border-white/10 bg-slate-950/95 backdrop-blur-md pb-8 sm:pb-5">
             <button
-              onClick={handleCloseAndReset}
-              className="w-full bg-white hover:bg-slate-100 active:scale-98 text-slate-950 font-black py-3 rounded-2xl text-xs transition-all cursor-pointer shadow-md"
+              onClick={() => setCheckoutStep('shipping')}
+              className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              Cerrar y Seguir Navegando
+              <span>Proceder al Despacho</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}

@@ -2,18 +2,13 @@ import React from 'react';
 import { 
   ShieldCheck, 
   Wrench, 
-  Car, 
-  Bot, 
   Store, 
-  CheckCircle2, 
   ArrowRight, 
-  Star,
-  Search,
   Sparkles,
-  ShoppingBag,
-  Award
+  Award,
+  ChevronRight,
+  Sparkle
 } from 'lucide-react';
-import { Logo } from './Logo';
 
 interface WebHeroProps {
   onExploreCatalog: () => void;
@@ -33,106 +28,103 @@ export const WebHero: React.FC<WebHeroProps> = ({
   totalPartsCount = 1200
 }) => {
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-b from-slate-900/90 via-slate-950 to-blue-950/40 p-6 sm:p-10 md:p-12 shadow-2xl backdrop-blur-2xl">
-      {/* Background Neon Ambient Glows */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center text-center space-y-6">
+    <section className="relative overflow-hidden rounded-3xl bg-white border border-slate-200/90 shadow-xl shadow-slate-900/5 mb-8">
+      
+      {/* Top Architectural Banner Inspired by Editorial Luxury Automotive Showcase */}
+      <div className="relative min-h-[480px] lg:min-h-[520px] flex flex-col justify-between p-6 sm:p-10 lg:p-14 overflow-hidden bg-slate-50">
         
-        {/* Trust pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-semibold text-slate-200 backdrop-blur-md shadow-sm">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>El portal web automotriz con compra segura y tiendas verificadas</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse hidden sm:inline" />
+        {/* Subtle geometric grid backdrop */}
+        <div 
+          className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+          style={{ backgroundImage: 'radial-gradient(#0f172a 1px, transparent 1px)', backgroundSize: '24px 24px' }}
+        />
+
+        {/* Hero Background Studio Vehicle Image */}
+        <div className="absolute right-[-8%] bottom-[-2%] lg:right-[0%] lg:bottom-[0%] w-[90%] sm:w-[70%] lg:w-[58%] max-w-4xl pointer-events-none select-none z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1600&q=85" 
+            alt="Vehículo de alto rendimiento en estudio"
+            className="w-full h-auto object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.18)]"
+          />
         </div>
 
-        {/* Hero Central Branding Graphic */}
-        <div className="py-2">
-          <Logo size="2xl" showTagline={true} showBadge={false} />
+        {/* Top Eyebrow Tag */}
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white text-[11px] font-bold tracking-wider uppercase mb-6">
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            <span>Plataforma Oficial MiGaraje • Colombia</span>
+          </div>
+          
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.08] max-w-xl">
+            PRECISIÓN.
+            <br />
+            GARANTÍA.
+            <br />
+            <span className="text-slate-800">TU GARAJE.</span>
+          </h1>
+
+          <p className="mt-4 text-xs sm:text-sm text-slate-600 max-w-md leading-relaxed font-normal">
+            El ecosistema automotriz que conecta propietarios, almacenes certificados y peritaje técnico con garantía de entrega asegurada.
+          </p>
         </div>
 
-        {/* Headline */}
-        <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-3xl leading-tight">
-          Compra repuestos originales, cotiza con tiendas aliadas y cuida tu vehículo con{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-blue-200">
-            Inteligencia Artificial
-          </span>
-        </h1>
-
-        {/* Value Proposition Description */}
-        <p className="text-sm sm:text-base text-slate-300 max-w-2xl font-normal leading-relaxed">
-          Acceso libre para propietarios, talleres y entusiastas. Encuentra autopartes con compatibilidad asegurada, garantía con retención de fondos y diagnóstico preventivo.
-        </p>
-
-        {/* Quick Action CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2 w-full sm:w-auto">
+        {/* CTA Button Group - High Contrast Minimalist */}
+        <div className="relative z-10 pt-8 flex flex-wrap items-center gap-3">
           <button
             onClick={onExploreCatalog}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:scale-98 text-white font-black text-xs sm:text-sm px-6 py-3.5 rounded-2xl shadow-xl shadow-blue-600/30 border border-blue-400/40 transition-all cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl shadow-lg transition-all cursor-pointer group"
           >
-            <Wrench className="w-4 h-4" />
-            <span>Explorar Catálogo de Repuestos</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Explorar Catálogo</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
 
           <button
             onClick={onExploreStores}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-2xl border border-white/20 backdrop-blur-md transition-all cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm px-5 py-3.5 rounded-xl border border-slate-300 shadow-xs transition-all cursor-pointer"
           >
-            <Store className="w-4 h-4 text-emerald-400" />
-            <span>Directorio de Tiendas Aliadas</span>
+            <Store className="w-4 h-4 text-slate-700" />
+            <span>Almacenes Aliados</span>
           </button>
 
           <button
-            onClick={onAskAi}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600/30 to-blue-600/30 hover:from-purple-600/50 hover:to-blue-600/50 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-2xl border border-purple-400/30 backdrop-blur-md transition-all cursor-pointer"
+            onClick={onRegisterCar}
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer"
           >
-            <Bot className="w-4 h-4 text-sky-400" />
-            <span>Consultar Mecánico IA</span>
+            <span>Registrar mi Auto</span>
           </button>
         </div>
 
-        {/* Live Metrics / Features Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-white/10 w-full text-left">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-blue-400 mb-1">
-              <Store className="w-4 h-4" />
-              <span className="text-xs font-bold text-white">Almacenes Aliados</span>
-            </div>
-            <div className="text-lg font-black text-white">+{totalStoresCount} Tiendas</div>
-            <div className="text-[11px] text-slate-400">Verificadas con NIT & garantía</div>
-          </div>
+      </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-emerald-400 mb-1">
-              <ShieldCheck className="w-4 h-4" />
-              <span className="text-xs font-bold text-white">Pago en Custodia</span>
-            </div>
-            <div className="text-lg font-black text-white">100% Protegido</div>
-            <div className="text-[11px] text-slate-400">Liberación tras recibir conforme</div>
-          </div>
+      {/* Metric Benchmarks Strip - Clean White High-Density Grid (Like Zenith spec strip) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 border-t border-slate-200 bg-white divide-x divide-slate-100">
+        
+        <div className="p-5 sm:p-6 text-left">
+          <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">+{totalStoresCount}</div>
+          <div className="text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Almacenes Verificados</div>
+          <div className="text-[11px] text-slate-600 mt-0.5">Bogotá, Medellín, Cali & nacional</div>
+        </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-amber-400 mb-1">
-              <Award className="w-4 h-4" />
-              <span className="text-xs font-bold text-white">Autos Clásicos</span>
-            </div>
-            <div className="text-lg font-black text-white">Placas Antiguo</div>
-            <div className="text-[11px] text-slate-400">Restauración y peritaje</div>
-          </div>
+        <div className="p-5 sm:p-6 text-left">
+          <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">+{totalPartsCount}</div>
+          <div className="text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Repuestos & Partes</div>
+          <div className="text-[11px] text-slate-600 mt-0.5">OEM y marcas líderes europeas y asiáticas</div>
+        </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-sky-400 mb-1">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-xs font-bold text-white">Asesor IA 24/7</span>
-            </div>
-            <div className="text-lg font-black text-white">Gemini 2.5</div>
-            <div className="text-[11px] text-slate-400">Diagnóstico de fallas y códigos</div>
-          </div>
+        <div className="p-5 sm:p-6 text-left">
+          <div className="text-2xl sm:text-3xl font-black text-blue-600 tracking-tight">100%</div>
+          <div className="text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Garantía Protegida</div>
+          <div className="text-[11px] text-slate-600 mt-0.5">Retención de fondos hasta verificar tu pieza</div>
+        </div>
+
+        <div className="p-5 sm:p-6 text-left">
+          <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">IA 24/7</div>
+          <div className="text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Peritaje Digital</div>
+          <div className="text-[11px] text-slate-600 mt-0.5">Compatibilidad de chasís & mantenimiento</div>
         </div>
 
       </div>
+
     </section>
   );
 };

@@ -83,8 +83,29 @@ export function App() {
   // Store Market Catalog Data
   const [spareParts] = useState<SparePart[]>(initialSpareParts);
   const [carListings, setCarListings] = useState<VehicleListing[]>(initialCarListings);
-  const [careProducts] = useState<CareProduct[]>(initialCareProducts);
+  const [careProducts, setCareProducts] = useState<CareProduct[]>(() => {
+    try {
+      const saved = localStorage.getItem('migaraje_care_products');
+      return saved ? JSON.parse(saved) : initialCareProducts;
+    } catch {
+      return initialCareProducts;
+    }
+  });
   const [communities] = useState<BrandCommunity[]>(initialCommunities);
+
+  // Sync custom published care products to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('migaraje_care_products', JSON.stringify(careProducts));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [careProducts]);
+
+  const handleRegisterCareProduct = (newProduct: CareProduct) => {
+    setCareProducts((prev) => [newProduct, ...prev]);
+    showToast(`Producto "${newProduct.name}" publicado exitosamente para la venta`);
+  };
 
   // Cart & Intermediation State
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
@@ -274,22 +295,17 @@ export function App() {
   const totalCartPrice = cartItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative overflow-x-hidden selection:bg-blue-500/30 selection:text-white">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans relative overflow-x-hidden selection:bg-slate-900 selection:text-white">
       
-      {/* Frosted Glass Background Ambient Glowing Orbs in Deep Blue & Cyan */}
-      <div className="fixed top-[-100px] left-[-100px] w-[550px] h-[550px] bg-blue-600/20 rounded-full blur-[130px] pointer-events-none z-0"></div>
-      <div className="fixed top-[35%] right-[-100px] w-[500px] h-[500px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none z-0"></div>
-      <div className="fixed bottom-[-100px] left-[15%] w-[650px] h-[650px] bg-indigo-600/15 rounded-full blur-[160px] pointer-events-none z-0"></div>
-
       {/* Toast Banner */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-slate-900/90 backdrop-blur-2xl border border-blue-500/30 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-200">
+        <div className="fixed top-20 right-6 z-50 bg-slate-950 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-200 border border-slate-800">
           <Sparkles className="w-4 h-4 text-blue-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* App Header with Frosted Glass Styling */}
+      {/* App Header */}
       <div className="relative z-30">
         <Header
           activeTab={activeTab}
@@ -391,8 +407,8 @@ export function App() {
         {activeTab === 'cuidado' && (
           <CuidadoEsteticoMotor
             careProducts={careProducts}
-            activeVehicle={activeVehicle}
             onAddToCart={handleAddToCart}
+            onRegisterProduct={handleRegisterCareProduct}
           />
         )}
 
@@ -409,15 +425,15 @@ export function App() {
       </main>
 
       {/* Persistent Mobile Bottom Sticky Cart & Action Bar */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-2xl border-t border-white/15 px-4 py-2.5 flex items-center justify-between shadow-2xl shadow-black">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 flex items-center justify-between shadow-lg">
         <button
           onClick={() => setIsCartOpen(true)}
-          className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 border border-blue-500/30 transition-all flex-1 mr-2 cursor-pointer"
+          className="flex items-center gap-3 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all flex-1 mr-2 cursor-pointer"
         >
           <div className="relative">
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-5 h-5 text-white" />
             {totalCartCount > 0 && (
-              <span className="absolute -top-2 -right-2.5 bg-amber-400 text-slate-950 font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center shadow">
+              <span className="absolute -top-2 -right-2.5 bg-blue-600 text-white font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center shadow">
                 {totalCartCount}
               </span>
             )}
@@ -426,21 +442,21 @@ export function App() {
             <div className="text-xs font-black leading-tight flex items-center justify-between">
               <span>{totalCartCount > 0 ? `Carrito (${totalCartCount})` : 'Ver Carrito'}</span>
               {totalCartCount > 0 && (
-                <span className="text-blue-100 font-mono text-xs">${totalCartPrice.toFixed(2)}</span>
+                <span className="text-blue-300 font-mono text-xs">${totalCartPrice.toFixed(2)}</span>
               )}
             </div>
-            <div className="text-[10px] text-blue-200 font-normal">Intermediación & Garantía</div>
+            <div className="text-[10px] text-slate-300 font-normal">Intermediación & Garantía</div>
           </div>
-          <ChevronRight className="w-4 h-4 text-blue-200" />
+          <ChevronRight className="w-4 h-4 text-slate-300" />
         </button>
 
         {/* Mobile AI Quick Trigger */}
         <button
           onClick={() => setIsAiChatOpen(true)}
-          className="p-3 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl border border-white/15 text-white shrink-0 shadow-lg cursor-pointer"
+          className="p-3 bg-slate-100 hover:bg-slate-200 active:scale-98 rounded-xl border border-slate-300 text-slate-900 shrink-0 shadow-xs cursor-pointer"
           title="Consultar Mecánico IA"
         >
-          <Bot className="w-5 h-5 text-blue-400" />
+          <Bot className="w-5 h-5 text-slate-950" />
         </button>
       </div>
 
@@ -448,15 +464,15 @@ export function App() {
       {!isAiChatOpen && (
         <button
           onClick={() => setIsAiChatOpen(true)}
-          className="hidden sm:flex fixed bottom-6 right-6 z-40 bg-white/10 hover:bg-white/20 text-white backdrop-blur-xl border border-white/20 font-bold p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl shadow-black/50 items-center gap-3 transition-all hover:scale-105 cursor-pointer group"
+          className="hidden sm:flex fixed bottom-6 right-6 z-40 bg-white text-slate-900 hover:bg-slate-50 border border-slate-300 font-bold p-3.5 sm:px-5 sm:py-3.5 rounded-2xl shadow-xl items-center gap-3 transition-all hover:scale-102 cursor-pointer group"
           title="Consultar Mecánico IA"
         >
-          <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-600/30">
-            <Bot className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-slate-950 text-white flex items-center justify-center font-bold shadow-xs">
+            <Bot className="w-5 h-5 text-blue-400" />
           </div>
           <div className="hidden sm:block text-left text-xs">
-            <div className="font-extrabold text-white leading-tight">Asistente Mecánico IA</div>
-            <div className="text-[10px] text-slate-300 font-medium">Diagnóstico & Consultas</div>
+            <div className="font-black text-slate-950 leading-tight">Mecánico IA 24/7</div>
+            <div className="text-[10px] text-slate-600 font-medium">Diagnóstico & Consultas</div>
           </div>
         </button>
       )}
