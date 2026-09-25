@@ -173,8 +173,14 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   const handleSavePhone = async (e: React.FormEvent) => {
     e.preventDefault();
     const clean = toWhatsAppNumber(tempWhatsApp);
-    if (clean.length < 11) {
-      setPhoneError('Ingresa el número completo con código de país, por ejemplo 573001234567.');
+    // Colombian mobiles: 57 + 10 digits. Other countries: at least 11 digits total.
+    const isValid = clean.startsWith('57') ? clean.length === 12 : clean.length >= 11;
+    if (!isValid) {
+      setPhoneError(
+        clean.startsWith('57')
+          ? `Al número le faltan o sobran dígitos: después del 57 deben ir los 10 dígitos del celular (escribiste ${clean.length - 2}).`
+          : 'Ingresa el número completo con código de país, por ejemplo 573001234567.'
+      );
       return;
     }
     setIsSavingPhone(true);
