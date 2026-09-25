@@ -9,10 +9,7 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 // Optional form fields are left as `undefined`; Firestore rejects those unless told to skip them.
 const firestoreSettings = { ignoreUndefinedProperties: true };
 
-// Explicitly pass custom databaseId if configured in the applet config
-export const db = firebaseConfig.firestoreDatabaseId
-  ? initializeFirestore(app, firestoreSettings, firebaseConfig.firestoreDatabaseId)
-  : initializeFirestore(app, firestoreSettings);
+export const db = initializeFirestore(app, firestoreSettings);
 
 export const auth = getAuth(app);
 auth.languageCode = 'es';

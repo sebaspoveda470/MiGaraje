@@ -1,8 +1,5 @@
 {
-  "firestore": [
-    {
-      "database": "ai-studio-migaraje-11da5a3c-734b-4627-97f2-a8d8fc16fd2d",
-      "rules": "firestore.rules"
-    }
-  ]
+  "firestore": {
+    "rules": "firestore.rules"
+  }
 }
