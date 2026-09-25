@@ -39,6 +39,21 @@ service cloud.firestore {
              == [request.auth.uid].toSet();
     }
 
+    function ownsOrderWithProduct(orderId, productId) {
+      let order = get(/databases/$(database)/documents/orders/$(orderId)).data;
+      return order.userId == request.auth.uid && productId in order.productIds;
+    }
+
+    function isValidReview(reviewId) {
+      return reviewId == incoming().productId + '_' + request.auth.uid
+        && incoming().userId == request.auth.uid
+        && isShortString(incoming().userName, 120)
+        && incoming().rating is int && incoming().rating >= 1 && incoming().rating <= 5
+        && incoming().comment is string && incoming().comment.size() <= 1000
+        && exists(/databases/$(database)/documents/products/$(incoming().productId))
+        && (!('orderId' in incoming()) || ownsOrderWithProduct(incoming().orderId, incoming().productId));
+    }
+
     function isCommunityMember(clubId) {
       return request.auth.uid in
         get(/databases/$(database)/documents/communities/$(clubId)).data.memberIds;
@@ -86,6 +101,18 @@ service cloud.firestore {
     match /config/{docId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // One review per user and product: id is "{productId}_{uid}"
+    match /productReviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && isValidReview(reviewId)
+        && incoming().createdAt == request.time;
+      allow update: if signedIn()
+        && isValidReview(reviewId)
+        && !changedKeys().hasAny(['createdAt', 'userId', 'productId']);
+      allow delete: if isUser(resource.data.userId) || isAdmin();
     }
 
     // ---------- Mi Comunidad ----------

@@ -305,7 +305,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
               <div className="space-y-3">
                 <div className="aspect-16/10 bg-slate-100 rounded-xl overflow-hidden relative">
                   <img
-                    src={prod.image}
+                    src={prod.images?.[0] || prod.image}
                     alt={prod.name}
                     className="w-full h-full object-cover"
                   />

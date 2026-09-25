@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Sparkles, 
   Search, 
@@ -20,10 +20,17 @@ import {
   Phone,
   Pencil,
   ShoppingCart,
-  Loader2
+  Loader2,
+  Images,
+  Link as LinkIcon
 } from 'lucide-react';
-import { CareProduct, CareCategory, CartItem } from '../types';
+import { CareProduct, CareCategory, CartItem, ProductReview, UserProfile } from '../types';
 import { compressImageFile, toWhatsAppNumber } from '../utils/media';
+import { subscribeToReviews, summarizeRatings } from '../services/reviewService';
+import { ProductDetailModal, getProductImages } from './ProductDetailModal';
+
+// Photos live inside the product document (1 MB max), so keep a few small ones.
+const MAX_PRODUCT_PHOTOS = 4;
 
 interface NuestrosProductosProps {
   products: CareProduct[];
@@ -35,6 +42,10 @@ interface NuestrosProductosProps {
   onSeedCatalog: () => void;
   onSaveSalesWhatsApp: (number: string) => Promise<void>;
   onAddToCart: (item: CartItem) => void;
+  currentUserId: string | null;
+  currentUser: UserProfile | null;
+  requireAuth: () => boolean;
+  onError: (message: string, err: unknown) => void;
 }
 
 const CATEGORIES: { id: CareCategory | 'todos'; label: string; icon: any }[] = [
@@ -55,7 +66,25 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   onSeedCatalog,
   onSaveSalesWhatsApp,
   onAddToCart,
+  currentUserId,
+  currentUser,
+  requireAuth,
+  onError,
 }) => {
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
+
+  useEffect(() => {
+    return subscribeToReviews(setReviews, (err) => onError('No se pudieron cargar las reseñas.', err));
+  }, []);
+
+  const reviewsByProduct = useMemo(() => {
+    const map: Record<string, ProductReview[]> = {};
+    reviews.forEach((r) => {
+      (map[r.productId] ||= []).push(r);
+    });
+    return map;
+  }, [reviews]);
+
   const [selectedCategory, setSelectedCategory] = useState<CareCategory | 'todos'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<CareProduct | null>(null);
@@ -80,7 +109,8 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   const [volume, setVolume] = useState('500 ml');
   const [description, setDescription] = useState('');
   const [benefitsText, setBenefitsText] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageList, setImageList] = useState<string[]>([]);
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const [isProcessingImage, setIsProcessingImage] = useState(false);
 
   // Filter products
@@ -130,7 +160,8 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     setVolume('500 ml');
     setDescription('');
     setBenefitsText('');
-    setImageUrl('');
+    setImageList([]);
+    setImageUrlInput('');
   };
 
   const openAddModal = () => {
@@ -149,26 +180,40 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     setVolume(prod.volume);
     setDescription(prod.description);
     setBenefitsText((prod.benefits || []).join('\n'));
-    setImageUrl(prod.image);
+    setImageList(getProductImages(prod));
+    setImageUrlInput('');
     setProductError(null);
     setSelectedProduct(null);
     setShowAddModal(true);
   };
 
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from<File>(e.target.files || []).slice(0, MAX_PRODUCT_PHOTOS - imageList.length);
+    e.target.value = '';
+    if (files.length === 0) return;
 
     try {
       setIsProcessingImage(true);
-      const compressedDataUrl = await compressImageFile(file);
-      setImageUrl(compressedDataUrl);
+      const compressed = await Promise.all(files.map((file) => compressImageFile(file, 800, 0.7)));
+      setImageList((prev) => [...prev, ...compressed].slice(0, MAX_PRODUCT_PHOTOS));
     } catch (err) {
       console.error('Error optimizando foto', err);
     } finally {
       setIsProcessingImage(false);
     }
   };
+
+  const handleAddImageUrl = () => {
+    const url = imageUrlInput.trim();
+    if (!/^https?:\/\//.test(url) || imageList.length >= MAX_PRODUCT_PHOTOS) return;
+    setImageList((prev) => [...prev, url]);
+    setImageUrlInput('');
+  };
+
+  const removeImage = (index: number) => setImageList((prev) => prev.filter((_, i) => i !== index));
+
+  const makeMainImage = (index: number) =>
+    setImageList((prev) => [prev[index], ...prev.filter((_, i) => i !== index)]);
 
   const handleSavePhone = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,7 +277,8 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
       description: description.trim(),
       volume: volume.trim(),
       benefits: benefitsArray,
-      image: imageUrl.trim() || 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=600&q=80',
+      image: imageList[0] || 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=600&q=80',
+      images: imageList,
     };
 
     setIsSavingProduct(true);
@@ -396,11 +442,17 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 className="aspect-4/3 bg-slate-100 relative overflow-hidden cursor-pointer"
               >
                 <img
-                  src={prod.image}
+                  src={getProductImages(prod)[0]}
                   alt={prod.name}
                   className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
                 />
-                
+
+                {getProductImages(prod).length > 1 && (
+                  <div className="absolute bottom-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                    <Images className="w-3 h-3" /> {getProductImages(prod).length} fotos
+                  </div>
+                )}
+
                 <div className="absolute top-3 left-3 bg-slate-950 text-white text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs">
                   MiGaraje Oficial
                 </div>
@@ -443,13 +495,18 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
                     {prod.subcategory}
                   </span>
-                  {prod.reviewsCount > 0 && (
-                    <div className="flex items-center gap-1 text-slate-700 font-bold">
-                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                      <span>{prod.rating.toFixed(1)}</span>
-                      <span className="text-slate-400 font-normal">({prod.reviewsCount})</span>
-                    </div>
-                  )}
+                  {(() => {
+                    const summary = summarizeRatings(reviewsByProduct[prod.id] || []);
+                    return summary.count > 0 ? (
+                      <div className="flex items-center gap-1 text-slate-700 font-bold">
+                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        <span>{summary.average.toFixed(1)}</span>
+                        <span className="text-slate-400 font-normal">({summary.count})</span>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-slate-400">Sin reseñas</span>
+                    );
+                  })()}
                 </div>
 
                 <h3 
@@ -559,106 +616,27 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
         </div>
       )}
 
-      {/* Product Detail Modal */}
+      {/* Product Detail Modal: gallery + reviews */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl p-6 sm:p-8 relative max-h-[90dvh] overflow-y-auto">
-            <button
-              onClick={() => setSelectedProduct(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 cursor-pointer p-1 rounded-full hover:bg-slate-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="aspect-square rounded-2xl bg-slate-100 overflow-hidden relative border border-slate-200">
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 left-3 bg-slate-950 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
-                    MiGaraje
-                  </div>
-                </div>
-
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
-                  <div className="font-bold text-slate-900">Presentación Oficial</div>
-                  <div className="text-slate-600">{selectedProduct.volume || 'Consultar presentación'}</div>
-                </div>
-              </div>
-
-              <div className="space-y-4 flex flex-col justify-between">
-                <div>
-                  <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
-                    {selectedProduct.subcategory}
-                  </span>
-
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-1">
-                    {selectedProduct.name}
-                  </h2>
-
-                  <div className="text-2xl font-black text-slate-950 mt-2">
-                    ${selectedProduct.price.toLocaleString()} <span className="text-sm font-normal text-slate-500">COP</span>
-                  </div>
-
-                  <p className="text-xs text-slate-600 mt-3 leading-relaxed">
-                    {selectedProduct.description}
-                  </p>
-
-                  {/* Benefits */}
-                  {selectedProduct.benefits && selectedProduct.benefits.length > 0 && (
-                    <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3">
-                      <div className="text-xs font-bold text-slate-900">Beneficios Clave:</div>
-                      {selectedProduct.benefits.map((b, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-xs text-slate-600">
-                          <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                          <span>{b}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Guide */}
-                  {selectedProduct.applicationGuide && selectedProduct.applicationGuide.length > 0 && (
-                    <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3">
-                      <div className="text-xs font-bold text-slate-900">Modo de Uso:</div>
-                      {selectedProduct.applicationGuide.map((step, idx) => (
-                        <div key={idx} className="text-[11px] text-slate-500">
-                          {idx + 1}. {step}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-4 border-t border-slate-200 space-y-2">
-                  {renderWhatsAppButton(
-                    selectedProduct,
-                    'Pedir este Producto por WhatsApp',
-                    'w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer'
-                  )}
-
-                  <button
-                    onClick={() => {
-                      handleAddToCart(selectedProduct);
-                      setSelectedProduct(null);
-                    }}
-                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 border border-slate-200 transition-all cursor-pointer"
-                  >
-                    <ShoppingCart className="w-4 h-4" />
-                    <span>Agregar al carrito</span>
-                  </button>
-
-                  <p className="text-[10px] text-slate-400 text-center">
-                    Enlace directo al WhatsApp de ventas MiGaraje con referencia del producto.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProductDetailModal
+          product={products.find((p) => p.id === selectedProduct.id) || selectedProduct}
+          reviews={reviewsByProduct[selectedProduct.id] || []}
+          currentUserId={currentUserId}
+          currentUser={currentUser}
+          isAdmin={isAdmin}
+          requireAuth={requireAuth}
+          onError={onError}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={() => {
+            handleAddToCart(selectedProduct);
+            setSelectedProduct(null);
+          }}
+          whatsAppButton={renderWhatsAppButton(
+            selectedProduct,
+            'Pedir este Producto por WhatsApp',
+            'w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer'
+          )}
+        />
       )}
 
       {/* Configure WhatsApp Modal */}
@@ -837,45 +815,79 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 />
               </div>
 
-              {/* Photo Upload: File from Device/Camera OR URL */}
-              <div className="space-y-2 border border-slate-200 rounded-2xl p-3.5 bg-slate-50/60">
-                <label className="block font-bold text-slate-800">Foto del Producto</label>
-                
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <label className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold px-4 py-2 rounded-xl cursor-pointer shadow-xs">
-                    <Camera className="w-4 h-4 text-blue-600" />
-                    <span>{isProcessingImage ? 'Procesando...' : 'Tomar Foto o Subir Archivo'}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageFileUpload}
-                    />
-                  </label>
-
-                  <span className="text-slate-400 text-xs">o ingresa una URL:</span>
-
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={imageUrl.startsWith('data:') ? '' : imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="flex-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                  />
+              {/* Photos: up to MAX_PRODUCT_PHOTOS, first one is the main photo */}
+              <div className="space-y-3 border border-slate-200 rounded-2xl p-3.5 bg-slate-50/60">
+                <div className="flex items-center justify-between">
+                  <label className="block font-bold text-slate-800">Fotos del Producto</label>
+                  <span className="text-[11px] text-slate-500">{imageList.length} de {MAX_PRODUCT_PHOTOS}</span>
                 </div>
 
-                {imageUrl && (
-                  <div className="mt-2 relative w-20 h-20 rounded-xl overflow-hidden border border-slate-300">
-                    <img src={imageUrl} alt="Vista previa" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setImageUrl('')}
-                      className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-0.5 text-[9px]"
-                    >
-                      ✕
-                    </button>
+                {imageList.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {imageList.map((src, idx) => (
+                      <div key={idx} className={`relative aspect-square rounded-xl overflow-hidden border-2 ${idx === 0 ? 'border-blue-600' : 'border-slate-200'}`}>
+                        <img src={src} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+                        {idx === 0 ? (
+                          <span className="absolute bottom-0 inset-x-0 bg-blue-600 text-white text-[9px] font-black text-center py-0.5">Principal</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => makeMainImage(idx)}
+                            className="absolute bottom-0 inset-x-0 bg-black/60 hover:bg-black/80 text-white text-[9px] font-bold text-center py-0.5 cursor-pointer"
+                          >
+                            Hacer principal
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeImage(idx)}
+                          aria-label={`Quitar foto ${idx + 1}`}
+                          className="absolute top-1 right-1 w-5 h-5 bg-black/70 hover:bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                {imageList.length < MAX_PRODUCT_PHOTOS && (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <label className="flex items-center justify-center gap-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold px-4 py-2 rounded-xl cursor-pointer shadow-xs shrink-0">
+                      {isProcessingImage ? <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> : <Camera className="w-4 h-4 text-blue-600" />}
+                      <span>{isProcessingImage ? 'Procesando...' : 'Subir Fotos'}</span>
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageFileUpload} />
+                    </label>
+
+                    <div className="flex flex-1 items-center gap-1.5">
+                      <input
+                        type="url"
+                        placeholder="o pega el enlace de una foto (https://...)"
+                        value={imageUrlInput}
+                        onChange={(e) => setImageUrlInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddImageUrl();
+                          }
+                        }}
+                        className="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddImageUrl}
+                        aria-label="Agregar foto desde enlace"
+                        className="shrink-0 w-9 h-9 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 flex items-center justify-center cursor-pointer"
+                      >
+                        <LinkIcon className="w-4 h-4 text-slate-600" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-[11px] text-slate-500">
+                  Puedes elegir varias fotos a la vez. La foto marcada como "Principal" es la que se ve en el catálogo.
+                </p>
               </div>
 
               {productError && (

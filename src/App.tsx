@@ -407,7 +407,8 @@ export function App() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 pb-32 sm:pb-12">
+      {/* No z-index here: it would trap the tabs' modals below the header */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative pb-32 sm:pb-12">
 
         {/* TAB 1: MI GARAJE (BITÁCORA, MANTENIMIENTO PREVENTIVO Y CONTROL) */}
         {activeTab === 'garaje' && (
@@ -457,6 +458,10 @@ export function App() {
             onSeedCatalog={handleSeedProducts}
             onSaveSalesWhatsApp={handleSaveSalesWhatsApp}
             onAddToCart={handleAddToCart}
+            currentUserId={authUser?.uid || null}
+            currentUser={user}
+            requireAuth={requireAuth}
+            onError={(message, err) => showError(message)(err)}
           />
         )}
 

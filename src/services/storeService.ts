@@ -29,12 +29,13 @@ export async function registerPartnerStore(
  * so every order starts as "pendiente".
  */
 export async function createOrder(
-  orderData: Omit<CheckoutOrder, 'id' | 'orderNumber' | 'status' | 'createdAt' | 'currency'>
+  orderData: Omit<CheckoutOrder, 'id' | 'orderNumber' | 'status' | 'createdAt' | 'currency' | 'productIds'>
 ): Promise<CheckoutOrder> {
   const ref = doc(collection(db, 'orders'));
   const orderNumber = `MG-${new Date().getFullYear()}-${ref.id.slice(0, 6).toUpperCase()}`;
   const order: CheckoutOrder = {
     ...orderData,
+    productIds: Array.from(new Set(orderData.items.map((i) => i.id))),
     id: ref.id,
     orderNumber,
     currency: 'COP',

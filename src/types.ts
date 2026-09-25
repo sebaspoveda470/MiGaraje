@@ -123,6 +123,21 @@ export interface CareProduct {
   idealFor: string[];
   whatsappNumber?: string;
   createdAt?: number;
+  /** All photos, main one first. `image` mirrors images[0] for older code paths. */
+  images?: string[];
+}
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  /** Set when the reviewer ordered this product through the cart */
+  orderId?: string;
+  createdAt: number;
+  updatedAt?: number;
 }
 
 export type MiGarajeProduct = CareProduct;
@@ -267,6 +282,8 @@ export interface CheckoutOrder {
   city: string;
   notes?: string;
   items: CartItem[];
+  /** Ids of the ordered products, so reviews can reference the order */
+  productIds: string[];
   total: number;
   currency: 'COP';
   status: 'pendiente' | 'confirmada' | 'despachada' | 'entregada' | 'cancelada';
