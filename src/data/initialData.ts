@@ -133,7 +133,7 @@ export const INITIAL_CARE_PRODUCTS: CareProduct[] = [
   },
 ];
 
-export const INITIAL_COMMUNITIES: CommunityClub[] = [
+export const INITIAL_COMMUNITIES: Omit<CommunityClub, 'memberIds'>[] = [
   {
     id: 'club-mazda',
     name: 'Club Mazda & Skyactiv Fans',

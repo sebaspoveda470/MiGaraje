@@ -32,7 +32,6 @@ import {
   subscribeToStoreSettings,
   saveSalesWhatsApp,
 } from './services/productService';
-import { initialCommunities } from './data/initialData';
 import {
   Vehicle,
   VehicleListing,
@@ -97,7 +96,6 @@ export function App() {
   const [careProducts, setCareProducts] = useState<CareProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [salesWhatsApp, setSalesWhatsApp] = useState('');
-  const communities = initialCommunities;
 
   // Cart (per-device convenience)
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
@@ -465,13 +463,13 @@ export function App() {
         {/* TAB 4: MI COMUNIDAD (CLUBES DE MARCA EN COLOMBIA) */}
         {activeTab === 'comunidades' && (
           <CommunityHub
-            communities={communities}
             activeVehicle={activeVehicle}
             currentUserId={authUser?.uid || null}
             currentUser={user}
             isAdmin={isAdmin}
             requireAuth={requireAuth}
             onError={(message, err) => showError(message)(err)}
+            onNotify={(message) => showToast(message)}
           />
         )}
 

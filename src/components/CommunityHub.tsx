@@ -12,9 +12,17 @@ import {
   Car,
   Trash2,
   Loader2,
+  Check,
+  UserPlus,
+  LogOut,
 } from 'lucide-react';
-import { BrandCommunity, CommunityPost, PostComment, PostCategory, UserProfile, Vehicle } from '../types';
+import { CommunityClub, CommunityPost, PostComment, PostCategory, UserProfile, Vehicle } from '../types';
 import {
+  subscribeToCommunities,
+  createCommunity,
+  deleteCommunity,
+  setCommunityMembership,
+  seedInitialCommunities,
   subscribeToClubPosts,
   createPost,
   deletePost,
@@ -23,15 +31,16 @@ import {
   addComment,
 } from '../services/communityService';
 import { timeAgo } from '../utils/media';
+import { CreateCommunityModal } from './CreateCommunityModal';
 
 interface CommunityHubProps {
-  communities: BrandCommunity[];
   activeVehicle: Vehicle | null;
   currentUserId: string | null;
   currentUser: UserProfile | null;
   isAdmin: boolean;
   requireAuth: () => boolean;
   onError: (message: string, err: unknown) => void;
+  onNotify: (message: string) => void;
 }
 
 const CATEGORY_LABELS: Record<PostCategory, string> = {
@@ -149,23 +158,24 @@ const PostComments: React.FC<{
 };
 
 export const CommunityHub: React.FC<CommunityHubProps> = ({
-  communities,
   activeVehicle,
   currentUserId,
   currentUser,
   isAdmin,
   requireAuth,
   onError,
+  onNotify,
 }) => {
-  // Default to the community matching activeVehicle brand or first community
-  const initialCommunityId = activeVehicle
-    ? communities.find((c) => c.brand.toLowerCase() === activeVehicle.brand.toLowerCase())?.id || communities[0].id
-    : communities[0].id;
-
-  const [selectedClubId, setSelectedClubId] = useState<string>(initialCommunityId);
+  const [communities, setCommunities] = useState<CommunityClub[]>([]);
+  const [communitiesLoading, setCommunitiesLoading] = useState(true);
+  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
+  const [clubFilter, setClubFilter] = useState<'todas' | 'mias'>('todas');
   const [selectedCategory, setSelectedCategory] = useState<PostCategory | 'todos'>('todos');
   const [searchPost, setSearchPost] = useState<string>('');
   const [showNewPostModal, setShowNewPostModal] = useState<boolean>(false);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [isTogglingMembership, setIsTogglingMembership] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   // New Post Form State
   const [postTitle, setPostTitle] = useState('');
@@ -175,12 +185,35 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const [isPosting, setIsPosting] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
 
-  const currentCommunity = communities.find((c) => c.id === selectedClubId) || communities[0];
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [expandedComments, setExpandedComments] = useState<{ [postId: string]: boolean }>({});
 
   useEffect(() => {
+    return subscribeToCommunities(
+      (list) => {
+        setCommunities(list);
+        setCommunitiesLoading(false);
+      },
+      (err) => {
+        setCommunitiesLoading(false);
+        onError('No se pudieron cargar las comunidades.', err);
+      }
+    );
+  }, []);
+
+  // Pick a default club: the one matching the active vehicle's brand, else the first one
+  useEffect(() => {
+    if (communities.length === 0) return;
+    if (selectedClubId && communities.some((c) => c.id === selectedClubId)) return;
+    const brandMatch = activeVehicle
+      ? communities.find((c) => c.brand.toLowerCase() === activeVehicle.brand.toLowerCase())
+      : undefined;
+    setSelectedClubId((brandMatch || communities[0]).id);
+  }, [communities, activeVehicle, selectedClubId]);
+
+  useEffect(() => {
+    if (!selectedClubId) return;
     setPostsLoading(true);
     setPosts([]);
     return subscribeToClubPosts(
@@ -195,6 +228,64 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       }
     );
   }, [selectedClubId]);
+
+  const currentCommunity = communities.find((c) => c.id === selectedClubId) || null;
+  const isMemberOf = (club: CommunityClub | null) => !!club && !!currentUserId && club.memberIds.includes(currentUserId);
+  const isMember = isMemberOf(currentCommunity);
+  const canManageClub = !!currentCommunity && (isAdmin || (!!currentUserId && currentCommunity.createdBy === currentUserId));
+
+  const visibleClubs = clubFilter === 'mias' ? communities.filter(isMemberOf) : communities;
+
+  const handleToggleMembership = async () => {
+    if (!currentCommunity || !requireAuth() || !currentUserId) return;
+    const joining = !isMember;
+    if (!joining && !confirm(`¿Salir de ${currentCommunity.name}?`)) return;
+    setIsTogglingMembership(true);
+    try {
+      await setCommunityMembership(currentCommunity.id, currentUserId, joining);
+      onNotify(joining ? `¡Te uniste a ${currentCommunity.name}!` : `Saliste de ${currentCommunity.name}`);
+    } catch (err) {
+      onError(joining ? 'No se pudo unir a la comunidad.' : 'No se pudo salir de la comunidad.', err);
+    } finally {
+      setIsTogglingMembership(false);
+    }
+  };
+
+  const handleOpenCreate = () => {
+    if (!requireAuth()) return;
+    setShowCreateModal(true);
+  };
+
+  const handleCreateCommunity = async (data: Omit<CommunityClub, 'id' | 'memberIds' | 'createdBy' | 'createdAt'>) => {
+    if (!currentUserId) return;
+    const id = await createCommunity(currentUserId, data);
+    setSelectedClubId(id);
+    onNotify(`¡Comunidad "${data.name}" creada! Invita a otros propietarios a unirse.`);
+  };
+
+  const handleDeleteCommunity = () => {
+    if (!currentCommunity) return;
+    if (!confirm(`¿Eliminar la comunidad "${currentCommunity.name}"? Esta acción no se puede deshacer.`)) return;
+    deleteCommunity(currentCommunity.id)
+      .then(() => {
+        setSelectedClubId(null);
+        onNotify('Comunidad eliminada');
+      })
+      .catch((err) => onError('No se pudo eliminar la comunidad.', err));
+  };
+
+  const handleSeedCommunities = async () => {
+    if (!currentUserId) return;
+    setIsSeeding(true);
+    try {
+      await seedInitialCommunities(currentUserId);
+      onNotify('Clubes iniciales cargados.');
+    } catch (err) {
+      onError('No se pudieron cargar los clubes iniciales.', err);
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   const handleToggleLike = (post: CommunityPost) => {
     if (!requireAuth() || !currentUserId) return;
@@ -212,19 +303,23 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   };
 
   const openNewPostModal = () => {
-    if (!requireAuth()) return;
+    if (!currentCommunity || !requireAuth()) return;
     setPostError(null);
     setShowNewPostModal(true);
   };
 
   const handleCreatePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!postTitle.trim() || !postContent.trim()) return;
+    if (!currentCommunity || !postTitle.trim() || !postContent.trim()) return;
     if (!requireAuth() || !currentUserId || !currentUser) return;
 
     setIsPosting(true);
     setPostError(null);
     try {
+      // Only members can post: join first when needed
+      if (!isMember) {
+        await setCommunityMembership(currentCommunity.id, currentUserId, true);
+      }
       await createPost({
         clubId: currentCommunity.id,
         authorId: currentUserId,
@@ -256,6 +351,8 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     return true;
   });
 
+  const memberLabel = (count: number) => `${count} ${count === 1 ? 'miembro' : 'miembros'}`;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
 
@@ -266,7 +363,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
             <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
               <Users className="w-4 h-4 text-blue-400" /> Mi Comunidad MiGaraje
             </span>
-            <span className="text-xs text-slate-500 font-medium">Clubes de Marca • Colombia</span>
+            <span className="text-xs text-slate-500 font-medium">Clubes • Colombia</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
@@ -274,259 +371,391 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-            El espacio para compartir experiencias, resolver dudas mecánicas, recomendar talleres de confianza y organizar rodadas automotrices en Colombia.
+            Únete a los clubes de tu marca o crea el tuyo. Comparte experiencias, resuelve dudas mecánicas, recomienda talleres de confianza y organiza rodadas en Colombia.
           </p>
         </div>
 
-        <button
-          onClick={openNewPostModal}
-          className="flex items-center gap-2 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xs transition-all shrink-0 cursor-pointer min-h-[46px]"
-        >
-          <PlusCircle className="w-4 h-4 text-blue-400" />
-          <span>+ Publicar en Mi Comunidad</span>
-        </button>
-      </div>
-
-      {/* Brand Community Selector Pills */}
-      <div className="space-y-3">
-        <div className="text-xs font-bold text-slate-700 flex items-center justify-between gap-2">
-          <span>Selecciona un Club Automotriz:</span>
-          {activeVehicle && (
-            <span className="text-slate-500 truncate">Tu garaje activo: <strong className="text-slate-900">{activeVehicle.brand} {activeVehicle.model}</strong></span>
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[46px]"
+          >
+            <PlusCircle className="w-4 h-4 text-blue-400" />
+            <span>Crear una Comunidad</span>
+          </button>
+          {currentCommunity && (
+            <button
+              onClick={openNewPostModal}
+              className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs px-6 py-3 rounded-xl border border-slate-200 transition-all cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4 text-blue-600" />
+              <span>Publicar en {currentCommunity.name}</span>
+            </button>
           )}
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {communities.map((comm) => {
-            const isMatch = activeVehicle && comm.brand.toLowerCase() === activeVehicle.brand.toLowerCase();
-            const isSelected = comm.id === selectedClubId;
-
-            return (
-              <button
-                key={comm.id}
-                onClick={() => setSelectedClubId(comm.id)}
-                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer ${
-                  isSelected
-                    ? 'bg-slate-950 text-white border-slate-950 shadow-md'
-                    : 'bg-white text-slate-900 border-slate-200 hover:border-slate-300 shadow-xs'
-                }`}
-              >
-                {isMatch && <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-blue-400"></span>}
-                <div>
-                  <img src={comm.logo} alt={comm.name} className="w-8 h-8 rounded-lg object-cover mb-2 border border-slate-200" />
-                  <h4 className="text-xs font-bold line-clamp-2">{comm.name}</h4>
-                  <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>{comm.brand}</p>
-                </div>
-                {isMatch && <span className="text-[9px] font-bold text-blue-400 mt-2 inline-block">Tu Vehículo</span>}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
-      {/* Main Community View: Feed + Club Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-        {/* Left Column: Feed & Discussions */}
-        <div className="lg:col-span-8 space-y-6">
-
-          {/* Active Club Spotlight Banner */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs flex items-center gap-4 min-w-0">
-            <img src={currentCommunity.logo} alt={currentCommunity.name} className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shrink-0" />
-            <div className="min-w-0">
-              <h2 className="text-lg sm:text-xl font-black text-slate-950 truncate">{currentCommunity.name}</h2>
-              <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{currentCommunity.description}</p>
-              <div className="text-[11px] text-slate-500 font-semibold mt-1">
-                {postsLoading ? 'Cargando…' : `${posts.length} ${posts.length === 1 ? 'publicación' : 'publicaciones'}`}
-              </div>
-            </div>
-          </div>
-
-          {/* Feed Filter Bar */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder={`Buscar en discusiones de ${currentCommunity.name}...`}
-                value={searchPost}
-                onChange={(e) => setSearchPost(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white"
-              />
-            </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-              {(['todos', ...Object.keys(CATEGORY_LABELS)] as Array<PostCategory | 'todos'>).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 rounded-xl text-xs whitespace-nowrap transition-colors cursor-pointer border ${
-                    selectedCategory === cat
-                      ? 'bg-slate-900 text-white font-bold border-slate-900'
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  {cat === 'todos' ? 'Todos' : CATEGORY_LABELS[cat]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Posts Feed */}
-          <div className="space-y-4">
-            {postsLoading && (
-              <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500 font-semibold">
-                <Loader2 className="w-5 h-5 animate-spin" /> Cargando publicaciones...
-              </div>
-            )}
-
-            {!postsLoading && posts.length === 0 && (
-              <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl p-8">
-                <MessageSquare className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-slate-950">Este club aún no tiene publicaciones</h3>
-                <p className="text-xs text-slate-500 mt-1 mb-4">Haz la primera pregunta o comparte tu experiencia con otros propietarios.</p>
-                <button onClick={openNewPostModal} className="bg-slate-950 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer">
-                  + Publicar en {currentCommunity.name}
-                </button>
-              </div>
-            )}
-
-            {!postsLoading && posts.length > 0 && visiblePosts.length === 0 && (
-              <p className="text-center text-xs text-slate-500 py-8">No hay publicaciones con estos filtros.</p>
-            )}
-
-            {visiblePosts.map((post) => {
-              const liked = !!currentUserId && post.likedBy.includes(currentUserId);
-              const canDelete = isAdmin || (!!currentUserId && post.authorId === currentUserId);
-              return (
-                <div
-                  key={post.id}
-                  className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-slate-300 transition-all space-y-4"
-                >
-                  {/* Author Header */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Avatar name={post.authorName} />
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-slate-950 truncate">{post.authorName}</h4>
-                        <p className="text-[10px] text-slate-500 truncate">
-                          {post.authorCar ? `${post.authorCar} • ` : ''}
-                          <span>{timeAgo(post.createdAt)}</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-200">
-                        {post.modelTag || CATEGORY_LABELS[post.category] || 'General'}
-                      </span>
-                      {canDelete && (
-                        <button
-                          onClick={() => handleDeletePost(post)}
-                          title="Eliminar publicación"
-                          className="w-7 h-7 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Post Content */}
-                  <div className="space-y-1.5">
-                    <h3 className="text-sm font-black text-slate-950">{post.title}</h3>
-                    <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line font-normal">{post.content}</p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
-                    <button
-                      onClick={() => handleToggleLike(post)}
-                      className={`flex items-center gap-1.5 font-semibold transition-colors cursor-pointer ${
-                        liked ? 'text-blue-600 font-bold' : 'hover:text-slate-900'
-                      }`}
-                    >
-                      <ThumbsUp className={`w-4 h-4 ${liked ? 'fill-blue-600' : ''}`} />
-                      <span>{post.likedBy.length} Me gusta</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleToggleComments(post.id)}
-                      className="flex items-center gap-1.5 font-semibold hover:text-slate-900 transition-colors cursor-pointer"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span>{post.commentsCount} {post.commentsCount === 1 ? 'Respuesta' : 'Respuestas'}</span>
-                    </button>
-                  </div>
-
-                  {expandedComments[post.id] && (
-                    <PostComments
-                      post={post}
-                      currentUserId={currentUserId}
-                      currentUser={currentUser}
-                      activeVehicle={activeVehicle}
-                      requireAuth={requireAuth}
-                      onError={onError}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
+      {communitiesLoading && (
+        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 font-semibold">
+          <Loader2 className="w-5 h-5 animate-spin" /> Cargando comunidades...
         </div>
+      )}
 
-        {/* Right Column: Club Tips, Rules and Models */}
-        <div className="lg:col-span-4 space-y-6">
+      {!communitiesLoading && communities.length === 0 && (
+        <div className="text-center py-14 bg-white border border-slate-200 rounded-3xl p-8 max-w-md mx-auto">
+          <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-slate-950">Aún no hay comunidades</h3>
+          <p className="text-xs text-slate-500 mt-1 mb-4">
+            {isAdmin
+              ? 'Carga los 5 clubes iniciales de MiGaraje (Mazda, Toyota, BMW, Chevrolet y Clásicos) o crea una comunidad nueva.'
+              : 'Crea la primera comunidad para tu marca, modelo o ciudad.'}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+            {isAdmin && (
+              <button
+                onClick={handleSeedCommunities}
+                disabled={isSeeding}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
+              >
+                {isSeeding && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Cargar clubes iniciales
+              </button>
+            )}
+            <button onClick={handleOpenCreate} className="bg-slate-950 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer">
+              + Crear una Comunidad
+            </button>
+          </div>
+        </div>
+      )}
 
-          {currentCommunity.recommendedTips && currentCommunity.recommendedTips.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-amber-500" />
-                <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">Consejos para {currentCommunity.brand}</h3>
-              </div>
-              <div className="space-y-2">
-                {currentCommunity.recommendedTips.map((tip, idx) => (
-                  <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
-                    {tip}
-                  </div>
+      {communities.length > 0 && (
+        <>
+          {/* Community Selector */}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-slate-700">
+              <div className="flex items-center gap-1.5">
+                {(['todas', 'mias'] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => {
+                      if (f === 'mias' && !requireAuth()) return;
+                      setClubFilter(f);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
+                      clubFilter === f ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {f === 'todas' ? `Todas (${communities.length})` : `Mis comunidades (${communities.filter(isMemberOf).length})`}
+                  </button>
                 ))}
               </div>
+              {activeVehicle && (
+                <span className="text-slate-500 truncate">
+                  Tu garaje activo: <strong className="text-slate-900">{activeVehicle.brand} {activeVehicle.model}</strong>
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              {visibleClubs.map((comm) => {
+                const isMatch = activeVehicle && comm.brand.toLowerCase() === activeVehicle.brand.toLowerCase();
+                const isSelected = comm.id === selectedClubId;
+                const joined = isMemberOf(comm);
+
+                return (
+                  <button
+                    key={comm.id}
+                    onClick={() => setSelectedClubId(comm.id)}
+                    className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer ${
+                      isSelected
+                        ? 'bg-slate-950 text-white border-slate-950 shadow-md'
+                        : 'bg-white text-slate-900 border-slate-200 hover:border-slate-300 shadow-xs'
+                    }`}
+                  >
+                    {joined && (
+                      <span className="absolute top-2.5 right-2.5 text-[9px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                        <Check className="w-2.5 h-2.5" /> Miembro
+                      </span>
+                    )}
+                    <div>
+                      <img src={comm.logo} alt={comm.name} className="w-8 h-8 rounded-lg object-cover mb-2 border border-slate-200" />
+                      <h4 className="text-xs font-bold line-clamp-2">{comm.name}</h4>
+                      <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {memberLabel(comm.memberIds.length)}
+                      </p>
+                    </div>
+                    {isMatch && <span className="text-[9px] font-bold text-blue-400 mt-2 inline-block">Tu Vehículo</span>}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={handleOpenCreate}
+                className="p-4 rounded-2xl border border-dashed border-slate-300 bg-white/60 hover:bg-white hover:border-slate-400 text-slate-500 hover:text-slate-900 flex flex-col items-center justify-center gap-1.5 text-xs font-bold cursor-pointer transition-all min-h-[110px]"
+              >
+                <PlusCircle className="w-5 h-5" />
+                Crear comunidad
+              </button>
+            </div>
+
+            {clubFilter === 'mias' && visibleClubs.length === 0 && (
+              <p className="text-xs text-slate-500">Todavía no te has unido a ninguna comunidad. Elige una en "Todas" y toca "Unirme".</p>
+            )}
+          </div>
+
+          {currentCommunity && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+              {/* Left Column: Feed & Discussions */}
+              <div className="lg:col-span-8 space-y-6">
+
+                {/* Active Club Banner with Join/Leave */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <img src={currentCommunity.logo} alt={currentCommunity.name} className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shrink-0" />
+                    <div className="min-w-0">
+                      <h2 className="text-lg sm:text-xl font-black text-slate-950 truncate">{currentCommunity.name}</h2>
+                      {currentCommunity.description && (
+                        <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{currentCommunity.description}</p>
+                      )}
+                      <div className="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-2">
+                        <span>{memberLabel(currentCommunity.memberIds.length)}</span>
+                        <span>•</span>
+                        <span>{postsLoading ? 'Cargando…' : `${posts.length} ${posts.length === 1 ? 'publicación' : 'publicaciones'}`}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                    <button
+                      onClick={handleToggleMembership}
+                      disabled={isTogglingMembership}
+                      className={`flex-1 sm:flex-none font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 ${
+                        isMember
+                          ? 'bg-white text-slate-700 border border-slate-300 hover:border-red-300 hover:text-red-700'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
+                      }`}
+                    >
+                      {isTogglingMembership ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : isMember ? (
+                        <LogOut className="w-4 h-4" />
+                      ) : (
+                        <UserPlus className="w-4 h-4" />
+                      )}
+                      <span>{isMember ? 'Salir' : 'Unirme'}</span>
+                    </button>
+                    {canManageClub && (
+                      <button
+                        onClick={handleDeleteCommunity}
+                        title="Eliminar comunidad"
+                        className="w-10 h-10 rounded-xl border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Feed Filter Bar */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder={`Buscar en discusiones de ${currentCommunity.name}...`}
+                      value={searchPost}
+                      onChange={(e) => setSearchPost(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                    {(['todos', ...Object.keys(CATEGORY_LABELS)] as Array<PostCategory | 'todos'>).map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-3 py-1 rounded-xl text-xs whitespace-nowrap transition-colors cursor-pointer border ${
+                          selectedCategory === cat
+                            ? 'bg-slate-900 text-white font-bold border-slate-900'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {cat === 'todos' ? 'Todos' : CATEGORY_LABELS[cat]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Posts Feed */}
+                <div className="space-y-4">
+                  {postsLoading && (
+                    <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500 font-semibold">
+                      <Loader2 className="w-5 h-5 animate-spin" /> Cargando publicaciones...
+                    </div>
+                  )}
+
+                  {!postsLoading && posts.length === 0 && (
+                    <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl p-8">
+                      <MessageSquare className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                      <h3 className="text-base font-bold text-slate-950">Esta comunidad aún no tiene publicaciones</h3>
+                      <p className="text-xs text-slate-500 mt-1 mb-4">Haz la primera pregunta o comparte tu experiencia con otros propietarios.</p>
+                      <button onClick={openNewPostModal} className="bg-slate-950 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer">
+                        + Publicar en {currentCommunity.name}
+                      </button>
+                    </div>
+                  )}
+
+                  {!postsLoading && posts.length > 0 && visiblePosts.length === 0 && (
+                    <p className="text-center text-xs text-slate-500 py-8">No hay publicaciones con estos filtros.</p>
+                  )}
+
+                  {visiblePosts.map((post) => {
+                    const liked = !!currentUserId && post.likedBy.includes(currentUserId);
+                    const canDelete = isAdmin || (!!currentUserId && post.authorId === currentUserId);
+                    return (
+                      <div
+                        key={post.id}
+                        className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-slate-300 transition-all space-y-4"
+                      >
+                        {/* Author Header */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar name={post.authorName} />
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-bold text-slate-950 truncate">{post.authorName}</h4>
+                              <p className="text-[10px] text-slate-500 truncate">
+                                {post.authorCar ? `${post.authorCar} • ` : ''}
+                                <span>{timeAgo(post.createdAt)}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-200">
+                              {post.modelTag || CATEGORY_LABELS[post.category] || 'General'}
+                            </span>
+                            {canDelete && (
+                              <button
+                                onClick={() => handleDeletePost(post)}
+                                title="Eliminar publicación"
+                                className="w-7 h-7 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Post Content */}
+                        <div className="space-y-1.5">
+                          <h3 className="text-sm font-black text-slate-950">{post.title}</h3>
+                          <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line font-normal">{post.content}</p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+                          <button
+                            onClick={() => handleToggleLike(post)}
+                            className={`flex items-center gap-1.5 font-semibold transition-colors cursor-pointer ${
+                              liked ? 'text-blue-600 font-bold' : 'hover:text-slate-900'
+                            }`}
+                          >
+                            <ThumbsUp className={`w-4 h-4 ${liked ? 'fill-blue-600' : ''}`} />
+                            <span>{post.likedBy.length} Me gusta</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleToggleComments(post.id)}
+                            className="flex items-center gap-1.5 font-semibold hover:text-slate-900 transition-colors cursor-pointer"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                            <span>{post.commentsCount} {post.commentsCount === 1 ? 'Respuesta' : 'Respuestas'}</span>
+                          </button>
+                        </div>
+
+                        {expandedComments[post.id] && (
+                          <PostComments
+                            post={post}
+                            currentUserId={currentUserId}
+                            currentUser={currentUser}
+                            activeVehicle={activeVehicle}
+                            requireAuth={requireAuth}
+                            onError={onError}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+
+              {/* Right Column: Club Tips, Rules and Models */}
+              <div className="lg:col-span-4 space-y-6">
+
+                {currentCommunity.recommendedTips && currentCommunity.recommendedTips.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4 text-amber-500" />
+                      <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">Consejos para {currentCommunity.brand}</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {currentCommunity.recommendedTips.map((tip, idx) => (
+                        <div key={idx} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                          {tip}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {currentCommunity.rules.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+                    <div className="flex items-center gap-2">
+                      <ScrollText className="w-4 h-4 text-blue-600" />
+                      <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">Normas de la Comunidad</h3>
+                    </div>
+                    <ul className="space-y-2 text-xs text-slate-600 list-disc pl-4">
+                      {currentCommunity.rules.map((rule, idx) => (
+                        <li key={idx}>{rule}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {currentCommunity.models.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Car className="w-4 h-4 text-blue-600" />
+                      <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">Modelos</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {currentCommunity.models.map((m) => (
+                        <span key={m} className="text-[11px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-lg font-semibold">
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
             </div>
           )}
+        </>
+      )}
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2">
-              <ScrollText className="w-4 h-4 text-blue-600" />
-              <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">Normas del Club</h3>
-            </div>
-            <ul className="space-y-2 text-xs text-slate-600 list-disc pl-4">
-              {currentCommunity.rules.map((rule, idx) => (
-                <li key={idx}>{rule}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2">
-              <Car className="w-4 h-4 text-blue-600" />
-              <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">Modelos del Club</h3>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {currentCommunity.models.map((m) => (
-                <span key={m} className="text-[11px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-lg font-semibold">
-                  {m}
-                </span>
-              ))}
-            </div>
-          </div>
-
-        </div>
-
-      </div>
+      <CreateCommunityModal
+        isOpen={showCreateModal}
+        defaultBrand={activeVehicle?.brand}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={handleCreateCommunity}
+      />
 
       {/* New Post Modal */}
-      {showNewPostModal && (
+      {showNewPostModal && currentCommunity && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
           <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full shadow-2xl p-6 relative">
             <button
@@ -546,6 +775,13 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                 <p className="text-xs text-slate-500">Recibe respuestas de propietarios y mecánicos en Colombia</p>
               </div>
             </div>
+
+            {!isMember && (
+              <div className="mb-4 flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl p-3 text-[11px] text-blue-900">
+                <UserPlus className="w-4 h-4 text-blue-600 shrink-0 mt-px" />
+                <span>Para publicar debes ser miembro. Al publicar te unirás automáticamente a esta comunidad.</span>
+              </div>
+            )}
 
             <form onSubmit={handleCreatePostSubmit} className="space-y-4 text-xs text-slate-700">
               <div>
@@ -619,7 +855,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                   className="bg-slate-950 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
                 >
                   {isPosting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  Publicar en la Comunidad
+                  {isMember ? 'Publicar en la Comunidad' : 'Unirme y Publicar'}
                 </button>
               </div>
             </form>

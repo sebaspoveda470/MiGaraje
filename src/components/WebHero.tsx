@@ -40,10 +40,12 @@ export const WebHero: React.FC<WebHeroProps> = ({
         {/* Hero Background Vehicle Image */}
         <div className="absolute right-[-15%] bottom-[-5%] sm:right-[-5%] sm:bottom-[-2%] lg:right-[0%] lg:bottom-[0%] w-[85%] sm:w-[70%] lg:w-[58%] max-w-4xl pointer-events-none select-none z-0 opacity-40 sm:opacity-90 transition-opacity">
           <img 
-            src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1600&q=85" 
-            alt="Vehículo en estudio automotriz"
+            src="https://images.unsplash.com/photo-1703780886413-363b92d095a0?auto=format&fit=crop&w=1600&q=85"
+            alt="Chevrolet clásico con placa colombiana en una calle colonial"
             className="w-full h-auto object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.18)]"
           />
+          {/* Fade the photo's left edge into the background so the headline stays readable */}
+          <div className="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-slate-50 via-slate-50/70 to-transparent" />
         </div>
 
         {/* Top Eyebrow Tag */}

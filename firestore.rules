@@ -31,6 +31,19 @@ service cloud.firestore {
       return value is string && value.size() > 0 && value.size() <= maxLength;
     }
 
+    // True when the only change to `field` (a list) is adding or removing the caller's uid.
+    function togglesOwnUid(field) {
+      return changedKeys().hasOnly([field])
+        && incoming()[field].toSet().difference(resource.data[field].toSet())
+             .union(resource.data[field].toSet().difference(incoming()[field].toSet()))
+             == [request.auth.uid].toSet();
+    }
+
+    function isCommunityMember(clubId) {
+      return request.auth.uid in
+        get(/databases/$(database)/documents/communities/$(clubId)).data.memberIds;
+    }
+
     // ---------- Users & their garage (private) ----------
 
     match /users/{userId} {
@@ -77,6 +90,30 @@ service cloud.firestore {
 
     // ---------- Mi Comunidad ----------
 
+    match /communities/{clubId} {
+      allow read: if true;
+
+      allow create: if isAdmin() || (signedIn()
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().memberIds == [request.auth.uid]
+        && isShortString(incoming().name, 80)
+        && isShortString(incoming().brand, 60)
+        && incoming().description is string && incoming().description.size() <= 1000
+        && incoming().rules is list && incoming().rules.size() <= 20
+        && incoming().models is list && incoming().models.size() <= 40);
+
+      allow update: if signedIn() && (
+        // Creator (or admin) edits the details, never the member list or authorship
+        ((isUser(resource.data.createdBy) || isAdmin())
+          && !changedKeys().hasAny(['memberIds', 'createdBy', 'createdAt']))
+        // Anyone signed in joins or leaves
+        || togglesOwnUid('memberIds')
+      );
+
+      allow delete: if isUser(resource.data.createdBy) || isAdmin();
+    }
+
     match /communityPosts/{postId} {
       allow read: if true;
 
@@ -86,6 +123,7 @@ service cloud.firestore {
         && incoming().likedBy == []
         && incoming().commentsCount == 0
         && isShortString(incoming().clubId, 60)
+        && isCommunityMember(incoming().clubId)
         && isShortString(incoming().title, 200)
         && isShortString(incoming().content, 5000);
 
@@ -94,10 +132,7 @@ service cloud.firestore {
         (isUser(resource.data.authorId)
           && changedKeys().hasOnly(['title', 'content', 'category', 'modelTag']))
         // Anyone signed in toggles only their own like
-        || (changedKeys().hasOnly(['likedBy'])
-          && incoming().likedBy.toSet().difference(resource.data.likedBy.toSet())
-               .union(resource.data.likedBy.toSet().difference(incoming().likedBy.toSet()))
-               == [request.auth.uid].toSet())
+        || togglesOwnUid('likedBy')
         // Comment counter goes up by exactly one (written together with the comment)
         || (changedKeys().hasOnly(['commentsCount'])
           && incoming().commentsCount == resource.data.commentsCount + 1)

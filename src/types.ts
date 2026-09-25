@@ -127,28 +127,23 @@ export interface CareProduct {
 
 export type MiGarajeProduct = CareProduct;
 
+export type CommunityCategory = 'marca' | 'clasicos' | 'offroad' | 'rendimiento' | 'region';
+
 export interface CommunityClub {
   id: string;
   name: string;
   brand: string;
   models: string[];
   description: string;
-  membersCount?: number;
-  postsCount?: number;
   logo: string;
-  coverImage: string;
+  coverImage?: string;
   rules: string[];
-  category: 'marca' | 'clasicos' | 'offroad' | 'rendimiento';
+  category: CommunityCategory;
   recommendedTips?: string[];
-  recommendedWorkshops?: Array<{
-    id: string;
-    name: string;
-    location: string;
-    phone: string;
-    rating: number;
-    reviewsCount: number;
-    specialty: string;
-  }>;
+  /** uids of the users who joined */
+  memberIds: string[];
+  createdBy?: string;
+  createdAt?: number;
 }
 
 export type BrandCommunity = CommunityClub;
