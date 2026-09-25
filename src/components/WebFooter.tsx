@@ -18,11 +18,13 @@ import {
 import { Logo } from './Logo';
 
 interface WebFooterProps {
+  salesWhatsApp?: string;
   onNavigateTab: (tab: string) => void;
   onOpenStoreModal?: () => void;
 }
 
 export const WebFooter: React.FC<WebFooterProps> = ({
+  salesWhatsApp,
   onNavigateTab,
   onOpenStoreModal,
 }) => {
@@ -141,10 +143,19 @@ export const WebFooter: React.FC<WebFooterProps> = ({
                 <Mail className="w-3.5 h-3.5 text-slate-800 shrink-0" />
                 <span>soporte@migaraje.co</span>
               </li>
-              <li className="flex items-center gap-2">
-                <MessageCircle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                <span>WhatsApp: +57 317 000 0000</span>
-              </li>
+              {salesWhatsApp && (
+                <li className="flex items-center gap-2">
+                  <MessageCircle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  <a
+                    href={`https://wa.me/${salesWhatsApp}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-slate-900 hover:underline"
+                  >
+                    WhatsApp: +{salesWhatsApp}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 

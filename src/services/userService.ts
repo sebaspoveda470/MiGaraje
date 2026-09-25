@@ -1,80 +1,66 @@
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  getDocs, 
-  serverTimestamp 
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  deleteDoc,
+  onSnapshot,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { UserProfile, Vehicle } from '../types';
 
 /**
- * Persists a user profile and their garage vehicles in Firestore
- * and synchronizes with local storage.
+ * Loads the profile stored at users/{uid}. Returns null when the account
+ * exists in Firebase Auth but hasn't completed onboarding yet.
  */
-export async function saveUserToDatabase(user: UserProfile, vehicles: Vehicle[]): Promise<void> {
-  try {
-    const userRef = doc(db, 'users', user.id);
-    await setDoc(userRef, {
-      ...user,
-      vehicles: vehicles,
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
-  } catch (error) {
-    console.warn('Notice: Firestore save fallback to local storage', error);
-  }
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+  const snap = await getDoc(doc(db, 'users', uid));
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return {
+    id: snap.id,
+    fullName: data.fullName,
+    email: data.email,
+    phone: data.phone,
+    city: data.city,
+    role: data.role,
+    avatar: data.avatar,
+    joinedDate: data.joinedDate,
+  };
+}
+
+export async function saveUserProfile(profile: UserProfile): Promise<void> {
+  await setDoc(
+    doc(db, 'users', profile.id),
+    { ...profile, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
 }
 
 /**
- * Loads a user profile and their vehicles from Firestore by email or user ID
+ * Streams the vehicles in users/{uid}/vehicles, oldest first.
  */
-export async function loadUserFromDatabase(identifier: string): Promise<{ user: UserProfile; vehicles: Vehicle[] } | null> {
-  try {
-    // Try by ID first
-    const userRef = doc(db, 'users', identifier);
-    const snap = await getDoc(userRef);
-    if (snap.exists()) {
-      const data = snap.data();
-      return {
-        user: {
-          id: snap.id,
-          fullName: data.fullName,
-          email: data.email,
-          phone: data.phone,
-          city: data.city,
-          role: data.role,
-          avatar: data.avatar,
-          joinedDate: data.joinedDate || new Date().toISOString(),
-        },
-        vehicles: Array.isArray(data.vehicles) ? data.vehicles : [],
-      };
-    }
+export function subscribeToVehicles(
+  uid: string,
+  onChange: (vehicles: Vehicle[]) => void,
+  onError?: (err: Error) => void
+): () => void {
+  return onSnapshot(
+    collection(db, 'users', uid, 'vehicles'),
+    (snapshot) => {
+      const vehicles = snapshot.docs.map((d) => ({ ...(d.data() as Vehicle), id: d.id }));
+      vehicles.sort((a, b) => (a.dateAdded || '').localeCompare(b.dateAdded || ''));
+      onChange(vehicles);
+    },
+    onError
+  );
+}
 
-    // Try finding by email
-    const usersCollection = collection(db, 'users');
-    const querySnapshot = await getDocs(usersCollection);
-    for (const userDoc of querySnapshot.docs) {
-      const data = userDoc.data();
-      if (data.email && data.email.toLowerCase() === identifier.toLowerCase().trim()) {
-        return {
-          user: {
-            id: userDoc.id,
-            fullName: data.fullName,
-            email: data.email,
-            phone: data.phone,
-            city: data.city,
-            role: data.role,
-            avatar: data.avatar,
-            joinedDate: data.joinedDate || new Date().toISOString(),
-          },
-          vehicles: Array.isArray(data.vehicles) ? data.vehicles : [],
-        };
-      }
-    }
-  } catch (error) {
-    console.warn('Could not query users from Firestore:', error);
-  }
+export async function saveVehicle(uid: string, vehicle: Vehicle): Promise<void> {
+  await setDoc(doc(db, 'users', uid, 'vehicles', vehicle.id), vehicle);
+}
 
-  return null;
+export async function deleteVehicle(uid: string, vehicleId: string): Promise<void> {
+  await deleteDoc(doc(db, 'users', uid, 'vehicles', vehicleId));
 }

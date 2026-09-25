@@ -99,6 +99,8 @@ export interface VehicleListing {
   tags: string[];
   intermediationProtected: boolean;
   publishedAt: string;
+  ownerId?: string;
+  createdAt?: number;
 }
 
 export type CareCategory = 'exterior' | 'interior' | 'motor_aditivos' | 'herramientas';
@@ -120,6 +122,7 @@ export interface CareProduct {
   inStock: boolean;
   idealFor: string[];
   whatsappNumber?: string;
+  createdAt?: number;
 }
 
 export type MiGarajeProduct = CareProduct;
@@ -130,8 +133,8 @@ export interface CommunityClub {
   brand: string;
   models: string[];
   description: string;
-  membersCount: number;
-  postsCount: number;
+  membersCount?: number;
+  postsCount?: number;
   logo: string;
   coverImage: string;
   rules: string[];
@@ -150,41 +153,30 @@ export interface CommunityClub {
 
 export type BrandCommunity = CommunityClub;
 
+export type PostCategory = 'fallas' | 'mantenimiento' | 'modificaciones' | 'rutas' | 'general';
+
 export interface PostComment {
   id: string;
+  authorId: string;
   authorName: string;
-  authorAvatar?: string;
-  vehicle?: string;
   authorCar?: string;
   content: string;
-  createdAt: string;
-  likes?: number;
-  isVerifiedExpert?: boolean;
-  isExpertAnswer?: boolean;
+  createdAt: number;
 }
 
 export interface CommunityPost {
   id: string;
-  clubId?: string;
-  clubName?: string;
+  clubId: string;
+  authorId: string;
   authorName: string;
-  authorAvatar: string;
   authorCar?: string;
-  vehicleModel?: string;
-  vehicleYear?: number;
-  authorBadge?: string;
   title: string;
   content: string;
-  category: 'discusion' | 'brico_diy' | 'falla_solucionada' | 'recomendacion' | 'evento_ruta' | 'mecanica' | 'repuestos' | 'bricos_detailing' | 'eventos' | 'compra_venta' | string;
-  likes: number;
-  likedByMe?: boolean;
+  category: PostCategory;
+  modelTag?: string;
+  likedBy: string[];
   commentsCount: number;
-  createdAt: string;
-  hasSolution?: boolean;
-  images?: string[];
-  tags?: string[];
-  comments: PostComment[];
-  specificModelTag?: string;
+  createdAt: number;
 }
 
 export interface VehicleInsight {
@@ -254,6 +246,7 @@ export interface PartnerStore {
   description?: string;
   createdAt: string;
   catalogCount?: number;
+  ownerId?: string;
 }
 
 export interface UserProfile {
@@ -271,6 +264,7 @@ export interface UserProfile {
 export interface CheckoutOrder {
   id: string;
   orderNumber: string;
+  userId: string;
   buyerName: string;
   buyerEmail: string;
   buyerPhone: string;
@@ -278,18 +272,8 @@ export interface CheckoutOrder {
   city: string;
   notes?: string;
   items: CartItem[];
-  subtotal: number;
-  shippingCost: number;
-  intermediationFee: number;
   total: number;
-  currency: string;
-  paymentMethod: 'tarjeta' | 'pse_transferencia' | 'contraentrega_custodia';
-  paymentStatus: 'aprobado' | 'pendiente' | 'en_custodia';
-  orderStatus: 'confirmada' | 'en_preparacion' | 'despachada' | 'entregada';
-  trackingNumber: string;
-  warrantyProtected: boolean;
-  createdAt: string;
-  storeNames: string[];
+  currency: 'COP';
+  status: 'pendiente' | 'confirmada' | 'despachada' | 'entregada' | 'cancelada';
+  createdAt: number;
 }
-
-

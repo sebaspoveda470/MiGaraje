@@ -20,17 +20,24 @@ import {
   CheckCircle2,
   SlidersHorizontal,
   X,
-  RefreshCcw
+  Loader2
 } from 'lucide-react';
 import { UserProfile, Vehicle, VehicleCategory } from '../types';
 import { Logo } from './Logo';
 import { getVehicleReferenceImage, getVehicleImageOptions } from '../utils/vehicleImages';
+import { compressImageFile } from '../utils/media';
+
+export interface OnboardingAccount {
+  uid: string;
+  email: string;
+  displayName?: string | null;
+}
 
 interface OnboardingModalProps {
   isOpen: boolean;
+  account: OnboardingAccount | null;
   onClose?: () => void;
-  onComplete: (user: UserProfile, vehicle: Vehicle) => void;
-  onLoginExisting?: (user: UserProfile) => void;
+  onComplete: (user: UserProfile, vehicle: Vehicle | null) => Promise<void>;
 }
 
 const POPULAR_BRANDS = [
@@ -57,19 +64,21 @@ const POPULAR_MODELS_BY_BRAND: Record<string, string[]> = {
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   isOpen,
+  account,
   onClose,
   onComplete,
-  onLoginExisting
 }) => {
   const [step, setStep] = useState<1 | 2>(1);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // User form state
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState(account?.displayName || '');
+  const email = account?.email || '';
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('Bogotá, Colombia');
   const [role, setRole] = useState<'propietario' | 'entusiasta' | 'coleccionista' | 'mecanico'>('propietario');
-  const [userErrors, setUserErrors] = useState<{ fullName?: string; email?: string }>({});
+  const [userErrors, setUserErrors] = useState<{ fullName?: string }>({});
 
   // Vehicle form state
   const [brand, setBrand] = useState('Mazda');
@@ -102,7 +111,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     return getVehicleReferenceImage(brand, model, year, type);
   }, [customUserPhoto, selectedVariantUrl, brand, model, year, type]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !account) return null;
 
   const handleBrandChange = (newBrand: string) => {
     setBrand(newBrand);
@@ -116,16 +125,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     setSelectedVariantUrl('');
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setCustomUserPhoto(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    try {
+      setCustomUserPhoto(await compressImageFile(file));
+    } catch (err) {
+      console.error('Error procesando foto', err);
     }
   };
 
@@ -134,12 +140,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   const validateUserStep = () => {
-    const errors: { fullName?: string; email?: string } = {};
+    const errors: { fullName?: string } = {};
     if (!fullName.trim()) {
       errors.fullName = 'Por favor ingresa tu nombre completo';
-    }
-    if (!email.trim() || !email.includes('@')) {
-      errors.email = 'Por favor ingresa un correo electrónico válido';
     }
     setUserErrors(errors);
     return Object.keys(errors).length === 0;
@@ -152,19 +155,32 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     }
   };
 
+  const buildProfile = (): UserProfile => ({
+    id: account.uid,
+    fullName: fullName.trim(),
+    email,
+    phone: phone.trim() || undefined,
+    city: city.trim() || undefined,
+    role,
+    joinedDate: new Date().toISOString(),
+  });
+
+  const save = async (vehicle: Vehicle | null) => {
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await onComplete(buildProfile(), vehicle);
+    } catch (err) {
+      console.error(err);
+      setSaveError('No pudimos guardar tus datos. Revisa tu conexión e inténtalo de nuevo.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleFinalize = (e: React.FormEvent) => {
     e.preventDefault();
     if (!brand || !model) return;
-
-    const newUser: UserProfile = {
-      id: `usr_${Date.now()}`,
-      fullName: fullName.trim() || 'Propietario MiGaraje',
-      email: email.trim() || 'usuario@migaraje.com',
-      phone: phone.trim() || undefined,
-      city: city.trim() || 'Ciudad',
-      role,
-      joinedDate: new Date().toISOString(),
-    };
 
     const finalImage = activePreviewImage;
 
@@ -184,7 +200,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       dateAdded: new Date().toISOString(),
     };
 
-    onComplete(newUser, newVehicle);
+    save(newVehicle);
   };
 
   return (
@@ -211,7 +227,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
           <div className="relative z-10">
             <div className="flex justify-center mb-2">
-              <Logo size="md" showTagline={false} showBadge={false} />
+              <Logo size="md" variant="icon-only" />
             </div>
             
             <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
@@ -219,7 +235,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </h2>
             <p className="text-[11px] sm:text-sm text-slate-300 mt-0.5 max-w-md mx-auto leading-relaxed">
               {step === 1 
-                ? 'Crea tu cuenta para acceder a tu plan de mantenimiento preventivo, compra y venta de vehículos y clubes en Mi Comunidad.'
+                ? 'Completa tu perfil para acceder a tu plan de mantenimiento preventivo, compra y venta de vehículos y clubes en Mi Comunidad.'
                 : 'Ingresa los datos de tu auto. Puedes subir tu propia foto o usar nuestra imagen de referencia automática.'}
             </p>
 
@@ -261,7 +277,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               
               <div className="flex items-center gap-3 bg-blue-50 border border-blue-200/80 rounded-2xl p-3.5 text-xs text-blue-900 font-medium">
                 <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
-                <span>Tus datos y tus vehículos quedarán guardados de forma segura en tu dispositivo para ingresar de inmediato.</span>
+                <span>Tus datos y tus vehículos quedan guardados en tu cuenta MiGaraje y podrás verlos desde cualquier dispositivo.</span>
               </div>
 
               {/* Full Name */}
@@ -291,15 +307,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </label>
                 <input
                   type="email"
-                  required
-                  placeholder="tu.correo@ejemplo.com"
+                  readOnly
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none shadow-xs cursor-not-allowed"
                 />
-                {userErrors.email && (
-                  <p className="text-[11px] text-red-600 font-semibold mt-1">{userErrors.email}</p>
-                )}
               </div>
 
               {/* Phone & City Grid */}
@@ -551,7 +562,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     type="number"
                     required
                     min={1940}
-                    max={2026}
+                    max={new Date().getFullYear() + 1}
                     value={year}
                     onChange={(e) => setYear(Number(e.target.value))}
                     className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2 text-sm text-slate-900 focus:outline-none shadow-xs font-bold"
@@ -657,6 +668,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </div>
               </div>
 
+              {saveError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold">{saveError}</p>
+              )}
+
               {/* Navigation Action Buttons */}
               <div className="pt-3 flex items-center gap-3">
                 <button
@@ -670,12 +685,22 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
                 <button
                   type="submit"
-                  className="flex-1 py-3.5 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-black text-sm tracking-wide shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isSaving}
+                  className="flex-1 py-3.5 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-black text-sm tracking-wide shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <Check className="w-4 h-4" />
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   <span>Guardar e Ingresar a MiGaraje</span>
                 </button>
               </div>
+
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => save(null)}
+                className="w-full text-xs font-bold text-slate-500 hover:text-slate-800 hover:underline cursor-pointer disabled:opacity-60"
+              >
+                Omitir por ahora (aún no tengo vehículo)
+              </button>
 
             </form>
           )}

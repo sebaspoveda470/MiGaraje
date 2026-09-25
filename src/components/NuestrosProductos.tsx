@@ -17,20 +17,24 @@ import {
   ExternalLink,
   Trash2,
   Camera,
-  Settings,
-  Phone
+  Phone,
+  Pencil,
+  ShoppingCart,
+  Loader2
 } from 'lucide-react';
-import { CareProduct, CareCategory } from '../types';
-import { 
-  getOfficialWhatsAppNumber, 
-  setOfficialWhatsAppNumber, 
-  compressImageFile 
-} from '../services/realDataService';
+import { CareProduct, CareCategory, CartItem } from '../types';
+import { compressImageFile, toWhatsAppNumber } from '../utils/media';
 
 interface NuestrosProductosProps {
   products: CareProduct[];
-  onRegisterProduct: (newProduct: CareProduct) => void;
-  onDeleteProduct?: (productId: string) => void;
+  isLoading: boolean;
+  isAdmin: boolean;
+  salesWhatsApp: string;
+  onSaveProduct: (product: CareProduct) => Promise<void>;
+  onDeleteProduct: (productId: string) => void;
+  onSeedCatalog: () => void;
+  onSaveSalesWhatsApp: (number: string) => Promise<void>;
+  onAddToCart: (item: CartItem) => void;
 }
 
 const CATEGORIES: { id: CareCategory | 'todos'; label: string; icon: any }[] = [
@@ -43,8 +47,14 @@ const CATEGORIES: { id: CareCategory | 'todos'; label: string; icon: any }[] = [
 
 export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   products,
-  onRegisterProduct,
+  isLoading,
+  isAdmin,
+  salesWhatsApp,
+  onSaveProduct,
   onDeleteProduct,
+  onSeedCatalog,
+  onSaveSalesWhatsApp,
+  onAddToCart,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<CareCategory | 'todos'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,8 +63,14 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   const [showPhoneModal, setShowPhoneModal] = useState(false);
 
   // WhatsApp Configuration State
-  const [currentWhatsApp, setCurrentWhatsApp] = useState<string>(() => getOfficialWhatsAppNumber());
-  const [tempWhatsApp, setTempWhatsApp] = useState<string>(currentWhatsApp);
+  const [tempWhatsApp, setTempWhatsApp] = useState<string>('');
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  // Product being edited (null = creating a new one)
+  const [editingProduct, setEditingProduct] = useState<CareProduct | null>(null);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [productError, setProductError] = useState<string | null>(null);
 
   // Add Product Form State
   const [name, setName] = useState('');
@@ -83,10 +99,60 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   });
 
   const generateWhatsAppUrl = (prod: CareProduct) => {
-    const phone = prod.whatsappNumber || currentWhatsApp || '573109876543';
-    const cleanPhone = phone.replace(/\D/g, '');
-    const message = `Hola MiGaraje! 👋 Estoy interesado en comprar el producto oficial *${prod.name}* por valor de $${prod.price.toLocaleString()} COP. ¿Tienen disponibilidad y hacen envíos a mi ciudad?`;
-    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    if (!salesWhatsApp) return undefined;
+    const message= `Hola MiGaraje! 👋 Estoy interesado en comprar el producto oficial *${prod.name}* por valor de $${prod.price.toLocaleString()} COP. ¿Tienen disponibilidad y hacen envíos a mi ciudad?`;
+    return `https://wa.me/${salesWhatsApp}?text=${encodeURIComponent(message)}`;
+  };
+
+  const handleAddToCart = (prod: CareProduct) => {
+    onAddToCart({
+      type: 'cuidado',
+      id: prod.id,
+      name: prod.name,
+      brand: prod.brand,
+      price: prod.price,
+      quantity: 1,
+      image: prod.image,
+    });
+  };
+
+  const openPhoneModal = () => {
+    setTempWhatsApp(salesWhatsApp);
+    setPhoneError(null);
+    setShowPhoneModal(true);
+  };
+
+  const resetProductForm = () => {
+    setName('');
+    setCategory('exterior');
+    setSubcategory('Detailing');
+    setPrice(35000);
+    setVolume('500 ml');
+    setDescription('');
+    setBenefitsText('');
+    setImageUrl('');
+  };
+
+  const openAddModal = () => {
+    setEditingProduct(null);
+    resetProductForm();
+    setProductError(null);
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (prod: CareProduct) => {
+    setEditingProduct(prod);
+    setName(prod.name);
+    setCategory(prod.category);
+    setSubcategory(prod.subcategory);
+    setPrice(prod.price);
+    setVolume(prod.volume);
+    setDescription(prod.description);
+    setBenefitsText((prod.benefits || []).join('\n'));
+    setImageUrl(prod.image);
+    setProductError(null);
+    setSelectedProduct(null);
+    setShowAddModal(true);
   };
 
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +161,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
 
     try {
       setIsProcessingImage(true);
-      const compressedDataUrl = await compressImageFile(file, 900, 0.85);
+      const compressedDataUrl = await compressImageFile(file);
       setImageUrl(compressedDataUrl);
     } catch (err) {
       console.error('Error optimizando foto', err);
@@ -104,15 +170,27 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     }
   };
 
-  const handleSavePhone = (e: React.FormEvent) => {
+  const handleSavePhone = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tempWhatsApp.trim()) return;
-    setOfficialWhatsAppNumber(tempWhatsApp);
-    setCurrentWhatsApp(tempWhatsApp.replace(/\D/g, ''));
-    setShowPhoneModal(false);
+    const clean = toWhatsAppNumber(tempWhatsApp);
+    if (clean.length < 11) {
+      setPhoneError('Ingresa el número completo con código de país, por ejemplo 573001234567.');
+      return;
+    }
+    setIsSavingPhone(true);
+    setPhoneError(null);
+    try {
+      await onSaveSalesWhatsApp(clean);
+      setShowPhoneModal(false);
+    } catch (err) {
+      console.error(err);
+      setPhoneError('No se pudo guardar el número. Inténtalo de nuevo.');
+    } finally {
+      setIsSavingPhone(false);
+    }
   };
 
-  const handleAddProductSubmit = (e: React.FormEvent) => {
+  const handleAddProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || price <= 0) return;
 
@@ -121,35 +199,68 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
       .map((b) => b.trim())
       .filter((b) => b.length > 0);
 
-    const newProd: CareProduct = {
+    const base: CareProduct = editingProduct || {
       id: `mg-prod-${Date.now()}`,
-      name: name.trim(),
+      name: '',
       brand: 'MiGaraje',
+      category,
+      subcategory: '',
+      price: 0,
+      rating: 0,
+      reviewsCount: 0,
+      description: '',
+      volume: '',
+      applicationGuide: [],
+      benefits: [],
+      image: '',
+      inStock: true,
+      idealFor: [],
+    };
+
+    const product: CareProduct = {
+      ...base,
+      name: name.trim(),
       category,
       subcategory: subcategory.trim() || 'Cuidado Oficial',
       price: Number(price),
-      rating: 5.0,
-      reviewsCount: 1,
-      description: description.trim() || 'Producto oficial de la línea de detailing MiGaraje.',
-      volume: volume.trim() || '500 ml',
-      applicationGuide: [
-        'Lavar la superficie previamente.',
-        'Aplicar con paño de microfibra limpio.',
-        'Dejar curar y retirar exceso para máximo brillo.',
-      ],
-      benefits: benefitsArray.length > 0 ? benefitsArray : ['Fórmula profesional garantizada', 'Diseñado para el clima de Colombia'],
+      description: description.trim(),
+      volume: volume.trim(),
+      benefits: benefitsArray,
       image: imageUrl.trim() || 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=600&q=80',
-      inStock: true,
-      idealFor: ['Todo tipo de vehículos'],
-      whatsappNumber: currentWhatsApp,
     };
 
-    onRegisterProduct(newProd);
-    setShowAddModal(false);
-    setName('');
-    setDescription('');
-    setBenefitsText('');
-    setImageUrl('');
+    setIsSavingProduct(true);
+    setProductError(null);
+    try {
+      await onSaveProduct(product);
+      setShowAddModal(false);
+      setEditingProduct(null);
+      resetProductForm();
+    } catch (err) {
+      console.error(err);
+      setProductError('No se pudo guardar el producto. Verifica que iniciaste sesión con la cuenta administradora.');
+    } finally {
+      setIsSavingProduct(false);
+    }
+  };
+
+  const renderWhatsAppButton = (prod: CareProduct, label: string, className: string) => {
+    const href = generateWhatsAppUrl(prod);
+    if (!href) {
+      return (
+        <div className={`${className} !bg-slate-200 !text-slate-500 !cursor-not-allowed`} title="El WhatsApp de ventas aún no está configurado">
+          <MessageCircle className="w-4 h-4 shrink-0" />
+          <span>WhatsApp de ventas no disponible</span>
+        </div>
+      );
+    }
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        <MessageCircle className="w-4 h-4 text-blue-400 shrink-0" />
+        <span>{label}</span>
+        <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+      </a>
+    );
   };
 
   return (
@@ -178,17 +289,22 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
               <Truck className="w-4 h-4 text-blue-600" />
               <span>Envíos a nivel nacional</span>
             </div>
-            <span>•</span>
-            <div className="flex items-center gap-1.5">
-              <MessageCircle className="w-4 h-4 text-blue-600" />
-              <span>WhatsApp de Ventas: +{currentWhatsApp}</span>
-            </div>
+            {salesWhatsApp && (
+              <>
+                <span>•</span>
+                <div className="flex items-center gap-1.5">
+                  <MessageCircle className="w-4 h-4 text-blue-600" />
+                  <span>WhatsApp de Ventas: +{salesWhatsApp}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
+        {isAdmin && (
         <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0">
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
           >
             <Plus className="w-4 h-4 text-blue-400" />
@@ -196,15 +312,22 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
           </button>
 
           <button
-            onClick={() => setShowPhoneModal(true)}
+            onClick={openPhoneModal}
             className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 cursor-pointer transition-all"
             title="Cambiar el número de WhatsApp receptor de pedidos"
           >
             <Phone className="w-3.5 h-3.5 text-blue-600" />
-            <span>Configurar WhatsApp de Ventas</span>
+            <span>{salesWhatsApp ? 'Configurar WhatsApp de Ventas' : 'Configurar WhatsApp de Ventas (pendiente)'}</span>
           </button>
         </div>
+        )}
       </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 font-semibold">
+          <Loader2 className="w-5 h-5 animate-spin" /> Cargando productos...
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
@@ -280,19 +403,31 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   {prod.volume}
                 </div>
 
-                {onDeleteProduct && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm(`¿Eliminar "${prod.name}" de la tienda?`)) {
-                        onDeleteProduct(prod.id);
-                      }
-                    }}
-                    title="Eliminar producto"
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                {isAdmin && (
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(prod);
+                      }}
+                      title="Editar producto"
+                      className="w-8 h-8 rounded-full bg-white/90 hover:bg-blue-50 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`¿Eliminar "${prod.name}" de la tienda?`)) {
+                          onDeleteProduct(prod.id);
+                        }
+                      }}
+                      title="Eliminar producto"
+                      className="w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -302,11 +437,13 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
                     {prod.subcategory}
                   </span>
-                  <div className="flex items-center gap-1 text-slate-700 font-bold">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    <span>{prod.rating.toFixed(1)}</span>
-                    <span className="text-slate-400 font-normal">({prod.reviewsCount})</span>
-                  </div>
+                  {prod.reviewsCount > 0 && (
+                    <div className="flex items-center gap-1 text-slate-700 font-bold">
+                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                      <span>{prod.rating.toFixed(1)}</span>
+                      <span className="text-slate-400 font-normal">({prod.reviewsCount})</span>
+                    </div>
+                  )}
                 </div>
 
                 <h3 
@@ -353,35 +490,66 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 </button>
               </div>
 
-              {/* Direct WhatsApp Purchase Button */}
-              <a
-                href={generateWhatsAppUrl(prod)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
-              >
-                <MessageCircle className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>Comprar por WhatsApp</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              </a>
+              {/* Direct WhatsApp Purchase + Cart */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  {renderWhatsAppButton(
+                    prod,
+                    'Comprar por WhatsApp',
+                    'w-full bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white font-bold text-xs py-3 px-3 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer'
+                  )}
+                </div>
+                <button
+                  onClick={() => handleAddToCart(prod)}
+                  title="Agregar al carrito"
+                  aria-label={`Agregar ${prod.name} al carrito`}
+                  className="shrink-0 w-11 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {filteredProducts.length === 0 && (
+      {!isLoading && products.length === 0 && (
+        <div className="text-center py-16 bg-white border border-slate-200 rounded-3xl p-8 max-w-md mx-auto">
+          <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-slate-950">
+            {isAdmin ? 'Tu catálogo está vacío' : 'Muy pronto publicaremos nuestros productos'}
+          </h3>
+          <p className="text-xs text-slate-500 mt-1 mb-4">
+            {isAdmin
+              ? 'Carga el catálogo inicial de MiGaraje (6 productos) para editarlo, o publica tus productos uno por uno.'
+              : 'Vuelve en unos días para conocer la línea oficial MiGaraje.'}
+          </p>
+          {isAdmin && (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+              <button
+                onClick={onSeedCatalog}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer"
+              >
+                Cargar catálogo inicial
+              </button>
+              <button
+                onClick={openAddModal}
+                className="bg-slate-950 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer"
+              >
+                + Publicar Producto
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!isLoading && products.length > 0 && filteredProducts.length === 0 && (
         <div className="text-center py-16 bg-white border border-slate-200 rounded-3xl p-8 max-w-md mx-auto">
           <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-950">No hay productos en esta categoría</h3>
-          <p className="text-xs text-slate-500 mt-1 mb-4">
-            Puedes agregar el primer producto usando el botón superior.
+          <p className="text-xs text-slate-500 mt-1">
+            Prueba con otra categoría o cambia tu búsqueda.
           </p>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-slate-950 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer"
-          >
-            + Publicar Producto
-          </button>
         </div>
       )}
 
@@ -411,7 +579,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
 
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
                   <div className="font-bold text-slate-900">Presentación Oficial</div>
-                  <div className="text-slate-600">{selectedProduct.volume} • Envase sellado con válvula dosificadora</div>
+                  <div className="text-slate-600">{selectedProduct.volume || 'Consultar presentación'}</div>
                 </div>
               </div>
 
@@ -434,7 +602,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   </p>
 
                   {/* Benefits */}
-                  {selectedProduct.benefits && (
+                  {selectedProduct.benefits && selectedProduct.benefits.length > 0 && (
                     <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3">
                       <div className="text-xs font-bold text-slate-900">Beneficios Clave:</div>
                       {selectedProduct.benefits.map((b, idx) => (
@@ -447,7 +615,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   )}
 
                   {/* Guide */}
-                  {selectedProduct.applicationGuide && (
+                  {selectedProduct.applicationGuide && selectedProduct.applicationGuide.length > 0 && (
                     <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3">
                       <div className="text-xs font-bold text-slate-900">Modo de Uso:</div>
                       {selectedProduct.applicationGuide.map((step, idx) => (
@@ -460,16 +628,22 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 </div>
 
                 <div className="pt-4 border-t border-slate-200 space-y-2">
-                  <a
-                    href={generateWhatsAppUrl(selectedProduct)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+                  {renderWhatsAppButton(
+                    selectedProduct,
+                    'Pedir este Producto por WhatsApp',
+                    'w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer'
+                  )}
+
+                  <button
+                    onClick={() => {
+                      handleAddToCart(selectedProduct);
+                      setSelectedProduct(null);
+                    }}
+                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 border border-slate-200 transition-all cursor-pointer"
                   >
-                    <MessageCircle className="w-4 h-4 text-blue-400" />
-                    <span>Pedir este Producto por WhatsApp</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                  </a>
+                    <ShoppingCart className="w-4 h-4" />
+                    <span>Agregar al carrito</span>
+                  </button>
 
                   <p className="text-[10px] text-slate-400 text-center">
                     Enlace directo al WhatsApp de ventas MiGaraje con referencia del producto.
@@ -518,6 +692,9 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 <p className="text-[11px] text-slate-500 mt-1">
                   Para Colombia empieza por 57 seguido de tu número celular (ejemplo: 573001234567).
                 </p>
+                {phoneError && (
+                  <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold mt-2">{phoneError}</p>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
@@ -530,8 +707,10 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold cursor-pointer"
+                  disabled={isSavingPhone}
+                  className="px-5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
                 >
+                  {isSavingPhone && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Guardar Número
                 </button>
               </div>
@@ -556,7 +735,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 Línea Oficial MiGaraje
               </span>
               <h3 className="text-xl font-black text-slate-950 tracking-tight mt-1">
-                Subir Producto para la Venta
+                {editingProduct ? 'Editar Producto' : 'Subir Producto para la Venta'}
               </h3>
               <p className="text-xs text-slate-500">
                 Los clientes podrán pedirlo directamente a tu WhatsApp oficial.
@@ -693,6 +872,10 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 )}
               </div>
 
+              {productError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold">{productError}</p>
+              )}
+
               <div className="pt-2 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
@@ -703,10 +886,11 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
+                  disabled={isSavingProduct || isProcessingImage}
+                  className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <Plus className="w-4 h-4 text-blue-400" />
-                  <span>Publicar en Nuestros Productos</span>
+                  {isSavingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-blue-400" />}
+                  <span>{editingProduct ? 'Guardar Cambios' : 'Publicar en Nuestros Productos'}</span>
                 </button>
               </div>
             </form>

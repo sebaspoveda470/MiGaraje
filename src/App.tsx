@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { onAuthStateChanged, User as AuthUser } from 'firebase/auth';
 import { Header } from './components/Header';
 import { SmartRecommendations } from './components/SmartRecommendations';
 import { CarMarketplace } from './components/CarMarketplace';
@@ -6,71 +7,83 @@ import { NuestrosProductos } from './components/NuestrosProductos';
 import { CommunityHub } from './components/CommunityHub';
 import { GarageModal } from './components/GarageModal';
 import { CartDrawer } from './components/CartDrawer';
-import { IntermediationModal } from './components/IntermediationModal';
 import { OnboardingModal } from './components/OnboardingModal';
+import { AuthModal } from './components/AuthModal';
 import { ProfileModal } from './components/ProfileModal';
 import { WebHero } from './components/WebHero';
 import { WebFooter } from './components/WebFooter';
 import { PartnerStoreModal } from './components/PartnerStoreModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
-import { saveUserToDatabase } from './services/userService';
-import { 
-  loadRealVehicleListings, 
-  saveRealVehicleListing, 
-  deleteRealVehicleListing,
-  loadRealProducts,
-  saveRealProduct,
-  deleteRealProduct
-} from './services/realDataService';
-import { 
-  initialSpareParts, 
-  initialCarListings, 
-  initialCareProducts, 
-  initialCommunities 
-} from './data/initialData';
-import { 
-  Vehicle, 
-  SparePart, 
-  VehicleListing, 
-  CareProduct, 
-  BrandCommunity, 
+import { auth, isAdminEmail } from './firebase';
+import { signOut } from './services/authService';
+import {
+  getUserProfile,
+  saveUserProfile,
+  subscribeToVehicles,
+  saveVehicle,
+  deleteVehicle,
+} from './services/userService';
+import { subscribeToListings, publishListing, deleteListing } from './services/listingService';
+import {
+  subscribeToProducts,
+  saveProduct,
+  deleteProduct,
+  seedInitialProducts,
+  subscribeToStoreSettings,
+  saveSalesWhatsApp,
+} from './services/productService';
+import { initialCommunities } from './data/initialData';
+import {
+  Vehicle,
+  VehicleListing,
+  CareProduct,
   CartItem,
-  UserProfile 
+  UserProfile,
 } from './types';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, AlertCircle } from 'lucide-react';
+
+// Keys written by the previous localStorage-only version of the app.
+const LEGACY_STORAGE_KEYS = [
+  'migaraje_user',
+  'migaraje_vehicles',
+  'migaraje_care_products',
+  'migaraje_car_listings',
+  'migaraje_official_whatsapp',
+  'migaraje_partner_stores_local',
+  'migaraje_orders_local',
+];
+
+function readStorage(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key: string, value: string | null) {
+  try {
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+  } catch {
+    // Storage unavailable (private mode, blocked site data): conveniences only.
+  }
+}
 
 export function App() {
-  // User Profile State (persisted in localStorage)
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    try {
-      const saved = localStorage.getItem('migaraje_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  // Auth & profile
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const isAdmin = isAdminEmail(authUser?.email) && !!authUser?.emailVerified;
 
-  // Core Vehicles State (persisted in localStorage, starts EMPTY until registered!)
-  const [vehicles, setVehicles] = useState<Vehicle[]>(() => {
-    try {
-      const saved = localStorage.getItem('migaraje_vehicles');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [activeVehicleId, setActiveVehicleId] = useState<string | null>(() => {
-    try {
-      const saved = localStorage.getItem('migaraje_active_vehicle');
-      return saved || null;
-    } catch {
-      return null;
-    }
-  });
+  // Garage
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [activeVehicleId, setActiveVehicleId] = useState<string | null>(() => readStorage('migaraje_active_vehicle'));
 
   // Navigation & UI Modals State
   const [activeTab, setActiveTab] = useState<string>('garaje');
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
   const [isStoreRegisterOpen, setIsStoreRegisterOpen] = useState<boolean>(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
@@ -78,138 +91,172 @@ export function App() {
   const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
-  // Store Market Catalog Data
-  const [spareParts] = useState<SparePart[]>(initialSpareParts);
-  const [carListings, setCarListings] = useState<VehicleListing[]>(initialCarListings);
-  const [careProducts, setCareProducts] = useState<CareProduct[]>(() => {
-    try {
-      const saved = localStorage.getItem('migaraje_care_products');
-      return saved ? JSON.parse(saved) : initialCareProducts;
-    } catch {
-      return initialCareProducts;
-    }
-  });
-  const [communities] = useState<BrandCommunity[]>(initialCommunities);
+  // Shared catalog data (Firestore, realtime)
+  const [carListings, setCarListings] = useState<VehicleListing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [careProducts, setCareProducts] = useState<CareProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [salesWhatsApp, setSalesWhatsApp] = useState('');
+  const communities = initialCommunities;
 
-  // Sync custom published care products to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('migaraje_care_products', JSON.stringify(careProducts));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [careProducts]);
-
-  const handleRegisterCareProduct = (newProduct: CareProduct) => {
-    setCareProducts((prev) => [newProduct, ...prev]);
-    showToast(`Producto "${newProduct.name}" publicado exitosamente para la venta`);
-  };
-
-  // Cart & Intermediation State
+  // Cart (per-device convenience)
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
-      const saved = localStorage.getItem('migaraje_cart');
+      const saved = readStorage('migaraje_cart');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
-  const [selectedIntermediationListing, setSelectedIntermediationListing] = useState<VehicleListing | null>(null);
 
   // Toast Notification
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; isError: boolean } | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3500);
+  const showToast = (message: string, isError = false) => {
+    setToast({ message, isError });
+    setTimeout(() => setToast(null), isError ? 5000 : 3500);
   };
 
-  // Sync to localStorage
+  const showError = (message: string) => (err: unknown) => {
+    console.error(message, err);
+    showToast(message, true);
+  };
+
+  // One-time cleanup of data from the old localStorage-only version
   useEffect(() => {
-    try {
-      if (user) {
-        localStorage.setItem('migaraje_user', JSON.stringify(user));
-      } else {
-        localStorage.removeItem('migaraje_user');
+    LEGACY_STORAGE_KEYS.forEach((key) => writeStorage(key, null));
+  }, []);
+
+  // Auth session → profile
+  useEffect(() => {
+    return onAuthStateChanged(auth, async (firebaseUser) => {
+      setAuthUser(firebaseUser);
+      if (!firebaseUser) {
+        setUser(null);
+        setAuthReady(true);
+        return;
       }
-    } catch (e) {
-      console.error(e);
+      setIsAuthOpen(false);
+      try {
+        const profile = await getUserProfile(firebaseUser.uid);
+        setUser(profile);
+        if (!profile) setIsOnboardingOpen(true);
+      } catch (err) {
+        showError('No pudimos cargar tu perfil. Revisa tu conexión.')(err);
+      } finally {
+        setAuthReady(true);
+      }
+    });
+  }, []);
+
+  // Garage vehicles for the signed-in user
+  useEffect(() => {
+    if (!authUser) {
+      setVehicles([]);
+      return;
     }
-  }, [user]);
+    return subscribeToVehicles(authUser.uid, setVehicles, showError('No pudimos cargar tus vehículos.'));
+  }, [authUser]);
+
+  // Public data
+  useEffect(() => {
+    return subscribeToListings(
+      (listings) => {
+        setCarListings(listings);
+        setListingsLoading(false);
+      },
+      (err) => {
+        setListingsLoading(false);
+        showError('No pudimos cargar los vehículos en venta.')(err);
+      }
+    );
+  }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('migaraje_vehicles', JSON.stringify(vehicles));
-      if (vehicles.length > 0 && (!activeVehicleId || !vehicles.some(v => v.id === activeVehicleId))) {
-        setActiveVehicleId(vehicles[0].id);
+    return subscribeToProducts(
+      (products) => {
+        setCareProducts(products);
+        setProductsLoading(false);
+      },
+      (err) => {
+        setProductsLoading(false);
+        showError('No pudimos cargar los productos.')(err);
       }
-      if (user) {
-        saveUserToDatabase(user, vehicles);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [vehicles]);
+    );
+  }, []);
 
   useEffect(() => {
-    try {
-      if (activeVehicleId) {
-        localStorage.setItem('migaraje_active_vehicle', activeVehicleId);
-      } else {
-        localStorage.removeItem('migaraje_active_vehicle');
-      }
-    } catch (e) {
-      console.error(e);
+    return subscribeToStoreSettings((settings) => setSalesWhatsApp(settings.salesWhatsApp), (err) =>
+      console.error('No se pudo cargar la configuración de la tienda', err)
+    );
+  }, []);
+
+  // Keep a valid active vehicle selected
+  useEffect(() => {
+    if (vehicles.length > 0 && (!activeVehicleId || !vehicles.some((v) => v.id === activeVehicleId))) {
+      setActiveVehicleId(vehicles[0].id);
     }
+  }, [vehicles, activeVehicleId]);
+
+  useEffect(() => {
+    writeStorage('migaraje_active_vehicle', activeVehicleId);
   }, [activeVehicleId]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('migaraje_cart', JSON.stringify(cartItems));
-    } catch (e) {
-      console.error(e);
-    }
+    writeStorage('migaraje_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Find active vehicle
   const activeVehicle = vehicles.find((v) => v.id === activeVehicleId) || (vehicles.length > 0 ? vehicles[0] : null);
 
-  // Registration / Onboarding Completion
-  const handleCompleteOnboarding = (newUser: UserProfile, newVehicle: Vehicle) => {
-    setUser(newUser);
-    const updatedVehicles = [newVehicle];
-    setVehicles(updatedVehicles);
-    setActiveVehicleId(newVehicle.id);
-    setIsOnboardingOpen(false);
-    
-    // Save to Firestore cloud database
-    saveUserToDatabase(newUser, updatedVehicles);
-
-    showToast(`¡Bienvenido, ${newUser.fullName.split(' ')[0]}! Tu ${newVehicle.brand} ${newVehicle.model} ha sido registrado.`);
+  /**
+   * Gate for actions that need an account. Opens login or profile completion
+   * when needed and returns false so the caller can stop.
+   */
+  const requireAuth = (): boolean => {
+    if (!authUser) {
+      setIsAuthOpen(true);
+      return false;
+    }
+    if (!user) {
+      setIsOnboardingOpen(true);
+      return false;
+    }
+    return true;
   };
 
-  // Quick Login
-  const handleLoginExisting = (existingUser: UserProfile) => {
-    setUser(existingUser);
+  // Profile completion (after first sign-in)
+  const handleCompleteOnboarding = async (profile: UserProfile, vehicle: Vehicle | null) => {
+    await saveUserProfile(profile);
+    if (vehicle) {
+      await saveVehicle(profile.id, vehicle);
+      setActiveVehicleId(vehicle.id);
+    }
+    setUser(profile);
     setIsOnboardingOpen(false);
-    showToast(`Sesión iniciada como ${existingUser.fullName}`);
+    const firstName = profile.fullName.split(' ')[0];
+    showToast(
+      vehicle
+        ? `¡Bienvenido, ${firstName}! Tu ${vehicle.brand} ${vehicle.model} ha sido registrado.`
+        : `¡Bienvenido, ${firstName}! Tu cuenta está lista.`
+    );
   };
 
-  // Logout / Reset
-  const handleLogout = () => {
-    setUser(null);
-    setVehicles([]);
-    setActiveVehicleId(null);
-    setCartItems([]);
-    localStorage.removeItem('migaraje_user');
-    localStorage.removeItem('migaraje_vehicles');
-    localStorage.removeItem('migaraje_active_vehicle');
-    localStorage.removeItem('migaraje_cart');
-    setIsProfileModalOpen(false);
-    setIsOnboardingOpen(true);
-    showToast('Sesión cerrada. Regístrate para vincular tu vehículo.');
+  const handleOpenAccount = () => {
+    if (!authUser) setIsAuthOpen(true);
+    else if (!user) setIsOnboardingOpen(true);
+    else setIsProfileModalOpen(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setCartItems([]);
+      setActiveVehicleId(null);
+      setIsProfileModalOpen(false);
+      showToast('Sesión cerrada.');
+    } catch (err) {
+      showError('No se pudo cerrar la sesión.')(err);
+    }
   };
 
   // Cart Operations
@@ -250,6 +297,7 @@ export function App() {
 
   // Vehicle Management
   const handleOpenAddVehicle = () => {
+    if (!requireAuth()) return;
     setVehicleToEdit(null);
     setIsGarageModalOpen(true);
   };
@@ -260,33 +308,61 @@ export function App() {
   };
 
   const handleAddVehicle = (newVeh: Vehicle) => {
-    setVehicles((prev) => [...prev, newVeh]);
+    if (!authUser) return;
     setActiveVehicleId(newVeh.id);
-    showToast(`Vehículo ${newVeh.brand} ${newVeh.model} registrado y activado`);
+    saveVehicle(authUser.uid, newVeh)
+      .then(() => showToast(`Vehículo ${newVeh.brand} ${newVeh.model} registrado y activado`))
+      .catch(showError('No se pudo guardar el vehículo. Inténtalo de nuevo.'));
   };
 
   const handleUpdateVehicle = (updatedVeh: Vehicle) => {
-    setVehicles((prev) =>
-      prev.map((v) => (v.id === updatedVeh.id ? updatedVeh : v))
-    );
-    showToast(`Datos de ${updatedVeh.brand} ${updatedVeh.model} actualizados con éxito`);
+    if (!authUser) return;
+    saveVehicle(authUser.uid, updatedVeh)
+      .then(() => showToast(`Datos de ${updatedVeh.brand} ${updatedVeh.model} actualizados con éxito`))
+      .catch(showError('No se pudieron guardar los cambios del vehículo.'));
   };
 
   const handleDeleteVehicle = (vehicleId: string) => {
-    setVehicles((prev) => {
-      const filtered = prev.filter((v) => v.id !== vehicleId);
-      if (activeVehicleId === vehicleId) {
-        setActiveVehicleId(filtered.length > 0 ? filtered[0].id : null);
-      }
-      return filtered;
-    });
-    showToast('Vehículo eliminado de tu garaje');
+    if (!authUser) return;
+    deleteVehicle(authUser.uid, vehicleId)
+      .then(() => showToast('Vehículo eliminado de tu garaje'))
+      .catch(showError('No se pudo eliminar el vehículo.'));
   };
 
   // Listing Management (Compra & Venta de Vehículos)
-  const handlePublishListing = (newListing: VehicleListing) => {
-    setCarListings((prev) => [newListing, ...prev]);
+  const handlePublishListing = async (newListing: Omit<VehicleListing, 'id'>) => {
+    if (!authUser) return;
+    await publishListing(authUser.uid, newListing);
     showToast(`¡Tu ${newListing.title} ha sido publicado exitosamente en Compra & Venta!`);
+  };
+
+  const handleDeleteListing = (listingId: string) => {
+    deleteListing(listingId)
+      .then(() => showToast('Publicación eliminada'))
+      .catch(showError('No se pudo eliminar la publicación.'));
+  };
+
+  // Product catalog (admin)
+  const handleSaveProduct = async (product: CareProduct) => {
+    await saveProduct(product);
+    showToast(`Producto "${product.name}" guardado`);
+  };
+
+  const handleDeleteProduct = (productId: string) => {
+    deleteProduct(productId)
+      .then(() => showToast('Producto eliminado'))
+      .catch(showError('No se pudo eliminar el producto.'));
+  };
+
+  const handleSeedProducts = () => {
+    seedInitialProducts()
+      .then(() => showToast('Catálogo inicial cargado. Revisa precios y fotos antes de vender.'))
+      .catch(showError('No se pudo cargar el catálogo inicial.'));
+  };
+
+  const handleSaveSalesWhatsApp = async (number: string) => {
+    await saveSalesWhatsApp(number);
+    showToast('WhatsApp de ventas actualizado');
   };
 
   const totalCartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
@@ -294,12 +370,17 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans relative overflow-x-hidden selection:bg-slate-900 selection:text-white">
-      
+
       {/* Toast Banner */}
-      {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-slate-950 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-200 border border-slate-800">
-          <Sparkles className="w-4 h-4 text-blue-400" />
-          <span>{toastMessage}</span>
+      {toast && (
+        <div
+          role="status"
+          className={`fixed top-20 right-4 left-4 sm:left-auto sm:right-6 z-[60] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-semibold animate-in slide-in-from-top-4 duration-200 border ${
+            toast.isError ? 'bg-red-700 text-white border-red-800' : 'bg-slate-950 text-white border-slate-800'
+          }`}
+        >
+          {toast.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <Sparkles className="w-4 h-4 text-blue-400 shrink-0" />}
+          <span>{toast.message}</span>
         </div>
       )}
 
@@ -312,7 +393,7 @@ export function App() {
           vehicles={vehicles}
           user={user}
           onOpenProfile={() => setIsProfileModalOpen(true)}
-          onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          onOpenOnboarding={handleOpenAccount}
           onSelectVehicle={(vOrId) => {
             if (typeof vOrId === 'string') {
               setActiveVehicleId(vOrId);
@@ -329,36 +410,26 @@ export function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 pb-32 sm:pb-12">
-        
+
         {/* TAB 1: MI GARAJE (BITÁCORA, MANTENIMIENTO PREVENTIVO Y CONTROL) */}
         {activeTab === 'garaje' && (
           <div className="space-y-8">
-            {/* Website Hero Presentation Section */}
             <WebHero
+              listingsCount={listingsLoading ? null : carListings.length}
               onExploreVehicles={() => setActiveTab('vehiculos')}
               onExploreProducts={() => setActiveTab('productos')}
-              onRegisterCar={() => {
-                if (!user) {
-                  setIsOnboardingOpen(true);
-                } else {
-                  handleOpenAddVehicle();
-                }
-              }}
+              onRegisterCar={handleOpenAddVehicle}
             />
 
-            <SmartRecommendations
-              activeVehicle={activeVehicle}
-              onOpenAddVehicleModal={() => {
-                if (!user) {
-                  setIsOnboardingOpen(true);
-                } else {
-                  handleOpenAddVehicle();
-                }
-              }}
-              onEditVehicle={handleOpenEditVehicle}
-              careProducts={careProducts}
-              onNavigateToTab={setActiveTab}
-            />
+            {authReady && (
+              <SmartRecommendations
+                activeVehicle={activeVehicle}
+                onOpenAddVehicleModal={handleOpenAddVehicle}
+                onEditVehicle={handleOpenEditVehicle}
+                careProducts={careProducts}
+                onNavigateToTab={setActiveTab}
+              />
+            )}
           </div>
         )}
 
@@ -366,10 +437,13 @@ export function App() {
         {activeTab === 'vehiculos' && (
           <CarMarketplace
             carListings={carListings}
+            isLoading={listingsLoading}
+            currentUserId={authUser?.uid || null}
+            currentUser={user}
+            isAdmin={isAdmin}
+            requireAuth={requireAuth}
             onPublishListing={handlePublishListing}
-            onOpenIntermediationModal={(listing) => {
-              setSelectedIntermediationListing(listing);
-            }}
+            onDeleteListing={handleDeleteListing}
           />
         )}
 
@@ -377,7 +451,14 @@ export function App() {
         {activeTab === 'productos' && (
           <NuestrosProductos
             products={careProducts}
-            onRegisterProduct={handleRegisterCareProduct}
+            isLoading={productsLoading}
+            isAdmin={isAdmin}
+            salesWhatsApp={salesWhatsApp}
+            onSaveProduct={handleSaveProduct}
+            onDeleteProduct={handleDeleteProduct}
+            onSeedCatalog={handleSeedProducts}
+            onSaveSalesWhatsApp={handleSaveSalesWhatsApp}
+            onAddToCart={handleAddToCart}
           />
         )}
 
@@ -386,8 +467,11 @@ export function App() {
           <CommunityHub
             communities={communities}
             activeVehicle={activeVehicle}
-            onSelectCommunity={() => {}}
-            onNavigateToTab={setActiveTab}
+            currentUserId={authUser?.uid || null}
+            currentUser={user}
+            isAdmin={isAdmin}
+            requireAuth={requireAuth}
+            onError={(message, err) => showError(message)(err)}
           />
         )}
 
@@ -403,20 +487,25 @@ export function App() {
         activeVehicle={activeVehicle || null}
       />
 
-      {/* User Registration & First Vehicle Onboarding Modal */}
+      {/* Sign in / Sign up */}
+      <AuthModal isOpen={isAuthOpen && !authUser} onClose={() => setIsAuthOpen(false)} />
+
+      {/* Profile completion & first vehicle (after first sign-in) */}
       <OnboardingModal
-        isOpen={isOnboardingOpen}
+        key={authUser?.uid || 'anon'}
+        isOpen={isOnboardingOpen && !!authUser && !user}
+        account={authUser ? { uid: authUser.uid, email: authUser.email || '', displayName: authUser.displayName } : null}
         onClose={() => setIsOnboardingOpen(false)}
         onComplete={handleCompleteOnboarding}
-        onLoginExisting={handleLoginExisting}
       />
 
       {/* Partner Store Registration Modal */}
       <PartnerStoreModal
         isOpen={isStoreRegisterOpen}
+        ownerId={authUser?.uid || null}
         onClose={() => setIsStoreRegisterOpen(false)}
-        onStoreCreated={() => {
-          showToast('¡Almacén registrado con éxito! Tu tienda ahora aparece en la red oficial.');
+        onStoreRegistered={() => {
+          showToast('¡Solicitud enviada! Revisaremos los datos de tu almacén y te contactaremos.');
         }}
       />
 
@@ -451,21 +540,22 @@ export function App() {
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         items={cartItems}
+        user={user}
+        salesWhatsApp={salesWhatsApp}
+        requireAuth={requireAuth}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         onClearCart={handleClearCart}
       />
 
-      {/* Vehicle Purchase Intermediation Modal */}
-      <IntermediationModal
-        listing={selectedIntermediationListing}
-        onClose={() => setSelectedIntermediationListing(null)}
-      />
-
       {/* Rich Web Ecosystem Footer */}
       <WebFooter
+        salesWhatsApp={salesWhatsApp}
         onNavigateTab={setActiveTab}
-        onOpenStoreModal={() => setIsStoreRegisterOpen(true)}
+        onOpenStoreModal={() => {
+          if (!requireAuth()) return;
+          setIsStoreRegisterOpen(true);
+        }}
       />
 
     </div>

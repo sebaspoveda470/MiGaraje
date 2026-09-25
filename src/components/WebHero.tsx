@@ -11,12 +11,14 @@ import {
 } from 'lucide-react';
 
 interface WebHeroProps {
+  listingsCount: number | null;
   onExploreVehicles: () => void;
   onExploreProducts: () => void;
   onRegisterCar: () => void;
 }
 
 export const WebHero: React.FC<WebHeroProps> = ({
+  listingsCount,
   onExploreVehicles,
   onExploreProducts,
   onRegisterCar,
@@ -96,9 +98,9 @@ export const WebHero: React.FC<WebHeroProps> = ({
       <div className="grid grid-cols-2 md:grid-cols-4 border-t border-slate-200 bg-white divide-x divide-y md:divide-y-0 divide-slate-100">
         
         <div className="p-3.5 sm:p-6 text-left">
-          <div className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight">+500</div>
+          <div className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight">{listingsCount ?? '…'}</div>
           <div className="text-[10px] sm:text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Vehículos en Venta</div>
-          <div className="text-[10px] sm:text-[11px] text-slate-600 mt-0.5">Bogotá, Medellín, Cali & nacional</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-600 mt-0.5">Publicados por propietarios en Colombia</div>
         </div>
 
         <div className="p-3.5 sm:p-6 text-left">
@@ -108,15 +110,15 @@ export const WebHero: React.FC<WebHeroProps> = ({
         </div>
 
         <div className="p-3.5 sm:p-6 text-left">
-          <div className="text-xl sm:text-3xl font-black text-blue-600 tracking-tight">100%</div>
-          <div className="text-[10px] sm:text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Traspaso Seguro</div>
-          <div className="text-[10px] sm:text-[11px] text-slate-600 mt-0.5">Revisión RUNT y peritaje confiable</div>
+          <div className="text-xl sm:text-3xl font-black text-blue-600 tracking-tight">Directo</div>
+          <div className="text-[10px] sm:text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Trato con el Vendedor</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-600 mt-0.5">Contacto por WhatsApp, sin comisiones</div>
         </div>
 
         <div className="p-3.5 sm:p-6 text-left">
           <div className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight">Clubes</div>
           <div className="text-[10px] sm:text-xs font-bold text-slate-800 uppercase tracking-wider mt-1">Mi Comunidad</div>
-          <div className="text-[10px] sm:text-[11px] text-slate-600 mt-0.5">Red de propietarios y rodadas</div>
+          <div className="text-[10px] sm:text-[11px] text-slate-600 mt-0.5">Clubes por marca y consultas técnicas</div>
         </div>
 
       </div>

@@ -83,7 +83,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
             <div className="flex items-center gap-1.5 shrink-0 pl-2">
               <span className="text-xs font-mono font-black text-blue-400">
-                ${cartTotalPrice.toLocaleString()}
+                ${cartTotalPrice.toLocaleString('es-CO')}
               </span>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </div>

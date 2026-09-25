@@ -22,17 +22,27 @@ import {
   Shield,
   BadgeCheck,
   Camera,
-  Trash2
+  Trash2,
+  Loader2,
+  Clock
 } from 'lucide-react';
-import { VehicleListing } from '../types';
-import { compressImageFile } from '../services/realDataService';
+import { VehicleListing, UserProfile } from '../types';
+import { compressImageFile, timeAgo, toWhatsAppNumber } from '../utils/media';
+import { getVehicleReferenceImage } from '../utils/vehicleImages';
 
 interface CarMarketplaceProps {
   carListings: VehicleListing[];
-  onPublishListing: (listing: VehicleListing) => void;
-  onOpenIntermediationModal: (listing: VehicleListing) => void;
-  onDeleteListing?: (listingId: string) => void;
+  isLoading: boolean;
+  currentUserId: string | null;
+  currentUser: UserProfile | null;
+  isAdmin: boolean;
+  requireAuth: () => boolean;
+  onPublishListing: (listing: Omit<VehicleListing, 'id'>) => Promise<void>;
+  onDeleteListing: (listingId: string) => void;
 }
+
+// The price slider's top position means "no limit".
+const PRICE_CAP = 500000000;
 
 const COLOMBIAN_CITIES = [
   'todas',
@@ -49,15 +59,19 @@ const COLOMBIAN_CITIES = [
 
 export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   carListings,
+  isLoading,
+  currentUserId,
+  currentUser,
+  isAdmin,
+  requireAuth,
   onPublishListing,
-  onOpenIntermediationModal,
   onDeleteListing,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('todas');
   const [selectedCity, setSelectedCity] = useState('todas');
   const [selectedTransmission, setSelectedTransmission] = useState('todas');
-  const [maxPrice, setMaxPrice] = useState<number>(300000000);
+  const [maxPrice, setMaxPrice] = useState<number>(PRICE_CAP);
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
   const [selectedCar, setSelectedCar] = useState<VehicleListing | null>(null);
 
@@ -77,14 +91,30 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [pubDescription, setPubDescription] = useState('');
   const [pubImageUrl, setPubImageUrl] = useState('');
   const [pubIsUniqueOwner, setPubIsUniqueOwner] = useState(true);
+  const [pubSoatValid, setPubSoatValid] = useState(true);
+  const [pubTecnoValid, setPubTecnoValid] = useState(true);
+  const [pubColor, setPubColor] = useState('');
+  const [pubEngine, setPubEngine] = useState('');
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+
+  const canDelete = (car: VehicleListing) => isAdmin || (!!currentUserId && car.ownerId === currentUserId);
+
+  const openPublishModal = () => {
+    if (!requireAuth()) return;
+    if (!pubSellerName && currentUser?.fullName) setPubSellerName(currentUser.fullName);
+    if (!pubSellerPhone && currentUser?.phone) setPubSellerPhone(currentUser.phone);
+    setPublishError(null);
+    setShowPublishModal(true);
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       setIsProcessingImage(true);
-      const dataUrl = await compressImageFile(file, 1000, 0.85);
+      const dataUrl = await compressImageFile(file);
       setPubImageUrl(dataUrl);
     } catch (err) {
       console.error('Error procesando foto', err);
@@ -113,7 +143,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
         return false;
       }
     }
-    if (car.price > maxPrice) {
+    if (maxPrice < PRICE_CAP && car.price > maxPrice) {
       return false;
     }
     if (searchTerm) {
@@ -131,20 +161,23 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   });
 
   const getWhatsAppLink = (car: VehicleListing) => {
-    const rawPhone = car.whatsappNumber || car.sellerPhone || '573108924410';
-    const cleanPhone = rawPhone.replace(/\D/g, '');
-    const phoneWithCountry = cleanPhone.startsWith('57') ? cleanPhone : `57${cleanPhone}`;
+    const phoneWithCountry = toWhatsAppNumber(car.whatsappNumber || car.sellerPhone);
     const text = `Hola ${car.sellerName}! 👋 Vi tu vehículo publicado en MiGaraje: *${car.title}* por $${car.price.toLocaleString()} COP en ${car.location}. ¿Aún está disponible para agendar una cita o peritaje?`;
     return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`;
   };
 
-  const handlePublishSubmit = (e: React.FormEvent) => {
+  const handlePublishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pubModel.trim() || !pubPrice) return;
+    if (!toWhatsAppNumber(pubSellerPhone)) {
+      setPublishError('Ingresa un número de WhatsApp válido para que los compradores te contacten.');
+      return;
+    }
 
     const title = `${pubBrand} ${pubModel.trim()} ${pubYear}`;
-    const newListing: VehicleListing = {
-      id: `car-${Date.now()}`,
+    const tags = [pubIsUniqueOwner ? 'Único Dueño' : null, pubPlateEnding ? `Placa ${pubPlateEnding} ${pubPlateCity}` : null]
+      .filter(Boolean) as string[];
+    const newListing: Omit<VehicleListing, 'id'> = {
       title,
       brand: pubBrand,
       model: pubModel.trim(),
@@ -158,39 +191,48 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       plateEnding: pubPlateEnding,
       plateCity: pubPlateCity,
       isUniqueOwner: pubIsUniqueOwner,
-      isInsurable: true,
-      soatValid: true,
-      tecnoValid: true,
-      sellerName: pubSellerName.trim() || 'Vendedor Particular',
+      soatValid: pubSoatValid,
+      tecnoValid: pubTecnoValid,
+      sellerName: pubSellerName.trim(),
       sellerType: 'particular',
-      sellerPhone: pubSellerPhone.trim() || '+57 310 000 0000',
-      whatsappNumber: pubSellerPhone.trim().replace(/\D/g, '') || '573100000000',
-      sellerVerified: true,
+      sellerPhone: pubSellerPhone.trim(),
+      whatsappNumber: toWhatsAppNumber(pubSellerPhone),
+      sellerVerified: false,
       images: [
-        pubImageUrl.trim() || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
+        pubImageUrl.trim() || getVehicleReferenceImage(pubBrand, pubModel.trim(), Number(pubYear), 'diario'),
       ],
       specs: {
-        engine: 'Motor original de fábrica',
+        engine: pubEngine.trim(),
         transmission: pubTransmission,
         fuel: pubFuel,
-        horsepower: 150,
-        color: 'Original',
-        doors: 5,
+        horsepower: 0,
+        color: pubColor.trim(),
+        doors: 0,
       },
       isClassicPlate: false,
-      description: pubDescription.trim() || 'Excelente vehículo familiar, papeles al día, listo para traspaso inmediato.',
-      tags: [pubIsUniqueOwner ? 'Único Dueño' : 'Excelente Estado', `Placa ${pubPlateEnding} ${pubPlateCity}`, '100% Asegurable'],
-      intermediationProtected: true,
-      publishedAt: 'Recién publicado',
+      description: pubDescription.trim(),
+      tags,
+      intermediationProtected: false,
+      publishedAt: new Date().toISOString(),
     };
 
-    onPublishListing(newListing);
-    setShowPublishModal(false);
-
-    // Reset form
-    setPubModel('');
-    setPubDescription('');
-    setPubImageUrl('');
+    setIsPublishing(true);
+    setPublishError(null);
+    try {
+      await onPublishListing(newListing);
+      setShowPublishModal(false);
+      // Reset form
+      setPubModel('');
+      setPubDescription('');
+      setPubImageUrl('');
+      setPubColor('');
+      setPubEngine('');
+    } catch (err) {
+      console.error(err);
+      setPublishError('No se pudo publicar el vehículo. Revisa tu conexión e inténtalo de nuevo.');
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (
@@ -211,18 +253,18 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-            Encuentra vehículos verificados en Bogotá, Medellín, Cali, Barranquilla y todo el país. Contacta directo con el vendedor por WhatsApp, revisa el estado del RUNT y agenda peritaje técnico de confianza.
+            Encuentra vehículos publicados por sus propietarios en Bogotá, Medellín, Cali, Barranquilla y todo el país. Contacta directo con el vendedor por WhatsApp y, antes de pagar, consulta el RUNT y agenda un peritaje de tu confianza.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 font-medium pt-1">
             <div className="flex items-center gap-1.5">
               <BadgeCheck className="w-4 h-4 text-blue-600" />
-              <span>Vehículos 100% Asegurables</span>
+              <span>Publicación gratuita</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1.5">
               <FileCheck className="w-4 h-4 text-blue-600" />
-              <span>Revisión de RUNT y Traspaso</span>
+              <span>Datos declarados por el vendedor</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1.5">
@@ -235,7 +277,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
         {/* Action Button: Vender mi Vehículo */}
         <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
           <button
-            onClick={() => setShowPublishModal(true)}
+            onClick={openPublishModal}
             className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-black text-xs sm:text-sm px-6 py-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
           >
             <Plus className="w-4 h-4 text-blue-400" />
@@ -311,14 +353,14 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           <div className="flex items-center gap-2">
             <span className="text-slate-500 font-bold">Precio máximo:</span>
             <span className="font-mono font-black text-slate-950 text-sm">
-              ${(maxPrice / 1000000).toFixed(0)} Millones COP
+              {maxPrice >= PRICE_CAP ? 'Sin límite' : `$${(maxPrice / 1000000).toFixed(0)} Millones COP`}
             </span>
           </div>
 
           <input
             type="range"
             min={20000000}
-            max={300000000}
+            max={PRICE_CAP}
             step={5000000}
             value={maxPrice}
             onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -326,6 +368,12 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           />
         </div>
       </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 font-semibold">
+          <Loader2 className="w-5 h-5 animate-spin" /> Cargando vehículos...
+        </div>
+      )}
 
       {/* Vehicle Listings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -368,7 +416,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     <span>{car.city || car.location}</span>
                   </div>
 
-                  {onDeleteListing && (
+                  {canDelete(car) && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -394,6 +442,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                       <Gauge className="w-3.5 h-3.5 text-slate-400" />
                       <span>{car.mileage.toLocaleString()} km</span>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 text-[11px] text-slate-400 font-medium">
+                    <Clock className="w-3 h-3" />
+                    <span>{timeAgo(car.createdAt)}</span>
                   </div>
 
                   <h3 
@@ -463,7 +516,23 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
         })}
       </div>
 
-      {filteredListings.length === 0 && (
+      {!isLoading && carListings.length === 0 && (
+        <div className="text-center py-16 bg-white border border-slate-200 rounded-3xl p-8 max-w-md mx-auto">
+          <Car className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-slate-950">Aún no hay vehículos publicados</h3>
+          <p className="text-xs text-slate-500 mt-1 mb-4">
+            Sé el primero en publicar tu vehículo. Es gratis y los compradores te escriben directo a tu WhatsApp.
+          </p>
+          <button
+            onClick={openPublishModal}
+            className="bg-slate-950 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer"
+          >
+            + Vender mi Vehículo
+          </button>
+        </div>
+      )}
+
+      {!isLoading && carListings.length > 0 && filteredListings.length === 0 && (
         <div className="text-center py-16 bg-white border border-slate-200 rounded-3xl p-8 max-w-md mx-auto">
           <Car className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-950">No hay vehículos con estos filtros</h3>
@@ -476,7 +545,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               setSelectedCity('todas');
               setSelectedTransmission('todas');
               setSearchTerm('');
-              setMaxPrice(300000000);
+              setMaxPrice(PRICE_CAP);
             }}
             className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
           >
@@ -548,23 +617,23 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 <div className="bg-blue-50/60 border border-blue-200 rounded-2xl p-4 sm:p-5 space-y-3">
                   <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                     <FileCheck className="w-4 h-4 text-blue-600" />
-                    <span>Verificación de Documentos & Historial RUNT</span>
+                    <span>Documentos (declarados por el vendedor)</span>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div className="p-2.5 rounded-xl bg-white border border-blue-100">
                       <div className="text-[10px] text-slate-500 font-bold uppercase">SOAT</div>
-                      <div className="font-bold text-blue-700 mt-0.5">Vigente</div>
+                      <div className={`font-bold mt-0.5 ${selectedCar.soatValid ? 'text-blue-700' : 'text-slate-500'}`}>{selectedCar.soatValid ? 'Vigente' : 'No declarado'}</div>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-white border border-blue-100">
                       <div className="text-[10px] text-slate-500 font-bold uppercase">Tecno-Mecánica</div>
-                      <div className="font-bold text-blue-700 mt-0.5">Al Día</div>
+                      <div className={`font-bold mt-0.5 ${selectedCar.tecnoValid ? 'text-blue-700' : 'text-slate-500'}`}>{selectedCar.tecnoValid ? 'Al Día' : 'No declarada'}</div>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-white border border-blue-100">
-                      <div className="text-[10px] text-slate-500 font-bold uppercase">Asegurabilidad</div>
-                      <div className="font-bold text-blue-700 mt-0.5">100% Asegurable</div>
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Único Dueño</div>
+                      <div className="font-bold text-slate-900 mt-0.5">{selectedCar.isUniqueOwner ? 'Sí' : 'No'}</div>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-white border border-blue-100">
@@ -579,8 +648,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                     Detalles y Comentarios del Vendedor
                   </h4>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                    {selectedCar.description}
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200 whitespace-pre-line">
+                    {selectedCar.description || 'El vendedor no agregó una descripción. Escríbele por WhatsApp para más detalles.'}
                   </p>
                 </div>
 
@@ -592,7 +661,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="text-[10px] text-slate-500">Motor</div>
-                      <div className="font-bold text-slate-900">{selectedCar.specs?.engine || '2.0L'}</div>
+                      <div className="font-bold text-slate-900">{selectedCar.specs?.engine || 'No indicado'}</div>
                     </div>
 
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
@@ -607,17 +676,17 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="text-[10px] text-slate-500">Color</div>
-                      <div className="font-bold text-slate-900">{selectedCar.specs?.color || 'Gris'}</div>
+                      <div className="font-bold text-slate-900">{selectedCar.specs?.color || 'No indicado'}</div>
                     </div>
 
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Puertas</div>
-                      <div className="font-bold text-slate-900">{selectedCar.specs?.doors || 5} Puertas</div>
+                      <div className="text-[10px] text-slate-500">Kilometraje</div>
+                      <div className="font-bold text-slate-900">{selectedCar.mileage.toLocaleString()} km</div>
                     </div>
 
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Traspaso</div>
-                      <div className="font-bold text-blue-700">Inmediato / Sin Prendas</div>
+                      <div className="text-[10px] text-slate-500">Publicado</div>
+                      <div className="font-bold text-slate-900">{timeAgo(selectedCar.createdAt)}</div>
                     </div>
                   </div>
                 </div>
@@ -630,7 +699,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-950">{selectedCar.sellerName}</div>
-                      <div className="text-[11px] text-slate-500 capitalize">{selectedCar.sellerType} • Vendedor Verificado</div>
+                      <div className="text-[11px] text-slate-500">Vendedor particular</div>
                     </div>
                   </div>
 
@@ -744,8 +813,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   <input
                     type="number"
                     required
-                    min={1960}
-                    max={2026}
+                    min={1940}
+                    max={new Date().getFullYear() + 1}
                     value={pubYear}
                     onChange={(e) => setPubYear(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
@@ -799,10 +868,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   <label className="block font-bold text-slate-800 mb-1">Último Dígito Placa</label>
                   <input
                     type="text"
+                    inputMode="numeric"
                     maxLength={1}
                     placeholder="Ej: 5"
                     value={pubPlateEnding}
-                    onChange={(e) => setPubPlateEnding(e.target.value)}
+                    onChange={(e) => setPubPlateEnding(e.target.value.replace(/\D/g, ''))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white font-mono"
                   />
                 </div>
@@ -833,6 +903,30 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     <option value="Híbrido">Híbrido</option>
                     <option value="Eléctrico">Eléctrico</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Color</label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Gris Titanio"
+                    value={pubColor}
+                    onChange={(e) => setPubColor(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Motor</label>
+                  <input
+                    type="text"
+                    placeholder="Ej: 2.0L Skyactiv"
+                    value={pubEngine}
+                    onChange={(e) => setPubEngine(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
+                  />
                 </div>
               </div>
 
@@ -914,18 +1008,30 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 )}
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="uniqueOwner"
-                  checked={pubIsUniqueOwner}
-                  onChange={(e) => setPubIsUniqueOwner(e.target.checked)}
-                  className="w-4 h-4 rounded text-slate-950 focus:ring-0 cursor-pointer"
-                />
-                <label htmlFor="uniqueOwner" className="font-bold text-slate-700 cursor-pointer">
-                  Soy el único dueño del vehículo
-                </label>
+              <div className="space-y-2 pt-1">
+                {[
+                  { id: 'uniqueOwner', label: 'Soy el único dueño del vehículo', checked: pubIsUniqueOwner, set: setPubIsUniqueOwner },
+                  { id: 'soatValid', label: 'SOAT vigente', checked: pubSoatValid, set: setPubSoatValid },
+                  { id: 'tecnoValid', label: 'Revisión técnico-mecánica al día', checked: pubTecnoValid, set: setPubTecnoValid },
+                ].map((opt) => (
+                  <div key={opt.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={opt.id}
+                      checked={opt.checked}
+                      onChange={(e) => opt.set(e.target.checked)}
+                      className="w-4 h-4 rounded text-slate-950 focus:ring-0 cursor-pointer"
+                    />
+                    <label htmlFor={opt.id} className="font-bold text-slate-700 cursor-pointer">
+                      {opt.label}
+                    </label>
+                  </div>
+                ))}
               </div>
+
+              {publishError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold">{publishError}</p>
+              )}
 
               <div className="pt-3 flex items-center justify-end gap-2.5">
                 <button
@@ -937,9 +1043,10 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black shadow-xs cursor-pointer flex items-center gap-1.5"
+                  disabled={isPublishing || isProcessingImage}
+                  className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <Plus className="w-4 h-4 text-blue-400" />
+                  {isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-blue-400" />}
                   <span>Publicar mi Vehículo en Venta</span>
                 </button>
               </div>

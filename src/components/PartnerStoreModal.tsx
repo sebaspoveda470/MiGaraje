@@ -14,6 +14,7 @@ import { registerPartnerStore } from '../services/storeService';
 
 interface PartnerStoreModalProps {
   isOpen: boolean;
+  ownerId: string | null;
   onClose: () => void;
   onStoreRegistered: (store: PartnerStore) => void;
 }
@@ -25,6 +26,7 @@ const COMMON_BRANDS = [
 
 export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
   isOpen,
+  ownerId,
   onClose,
   onStoreRegistered
 }) => {
@@ -43,6 +45,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
   const [commissionRate, setCommissionRate] = useState(5.0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [registeredData, setRegisteredData] = useState<PartnerStore | null>(null);
 
   if (!isOpen) return null;
@@ -64,7 +67,9 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!ownerId) return;
     setIsSubmitting(true);
+    setSubmitError(null);
 
     const specialties = specialtiesText
       .split(',')
@@ -74,7 +79,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
     const cleanWhatsapp = whatsapp.replace(/\D/g, '') || phone.replace(/\D/g, '');
 
     try {
-      const newStore = await registerPartnerStore({
+      const newStore = await registerPartnerStore(ownerId, {
         commercialName,
         taxId: taxId || 'En trámite',
         ownerName,
@@ -86,9 +91,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
         brands: selectedBrands,
         specialties: specialties.length > 0 ? specialties : ['Repuestos mecánicos', 'Autopartes OEM'],
         commissionRate,
-        description: description || `Tienda especializada en repuestos para ${selectedBrands.join(', ')}. Despacho con garantía MiGaraje.`,
-        logoUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=150&auto=format&fit=crop&q=80',
-        catalogCount: 25
+        description: description || `Tienda especializada en repuestos para ${selectedBrands.join(', ')}.`,
       });
 
       setRegisteredData(newStore);
@@ -96,6 +99,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
       onStoreRegistered(newStore);
     } catch (err) {
       console.error('Error registrando tienda:', err);
+      setSubmitError('No se pudo enviar la solicitud. Revisa tu conexión e inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -147,9 +151,9 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
               <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center mx-auto shadow-xs">
                 <Check className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-black text-slate-950">¡Tienda Inscrita en MiGaraje!</h3>
+              <h3 className="text-xl font-black text-slate-950">¡Solicitud Recibida!</h3>
               <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-                <strong className="text-slate-950">{registeredData.commercialName}</strong> ha sido registrada y dada de alta en el Marketplace. Los usuarios ya pueden contactarte directamente y solicitar compras con intermediación segura.
+                Recibimos la solicitud de <strong className="text-slate-950">{registeredData.commercialName}</strong>. Revisaremos los datos y te contactaremos para activar tu tienda en MiGaraje.
               </p>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-left max-w-md mx-auto space-y-2">
@@ -167,8 +171,8 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Estado:</span>
-                  <span className="bg-blue-50 text-blue-800 font-bold px-2 py-0.5 rounded-full border border-blue-200">
-                    Activa en Marketplace
+                  <span className="bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                    En revisión
                   </span>
                 </div>
               </div>
@@ -325,6 +329,10 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
                 </div>
               </div>
 
+              {submitError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold">{submitError}</p>
+              )}
+
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -338,7 +346,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
                   disabled={isSubmitting}
                   className="bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
                 >
-                  {isSubmitting ? 'Inscribiendo Tienda...' : 'Completar Inscripción'}
+                  {isSubmitting ? 'Enviando Solicitud...' : 'Enviar Solicitud'}
                 </button>
               </div>
 

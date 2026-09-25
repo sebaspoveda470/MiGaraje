@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Vehicle, VehicleCategory } from '../types';
 import { getVehicleReferenceImage, getVehicleImageOptions } from '../utils/vehicleImages';
+import { compressImageFile } from '../utils/media';
 
 interface GarageModalProps {
   isOpen: boolean;
@@ -142,16 +143,13 @@ export const GarageModal: React.FC<GarageModalProps> = ({
     setSelectedVariantUrl('');
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setCustomUserPhoto(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    try {
+      setCustomUserPhoto(await compressImageFile(file));
+    } catch (err) {
+      console.error('Error procesando foto', err);
     }
   };
 

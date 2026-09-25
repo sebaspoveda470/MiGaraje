@@ -1,25 +1,144 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // User accounts and garages
+
+    // ---------- Helpers ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Keep in sync with ADMIN_EMAILS in src/firebase.ts
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['sebaspoveda317@gmail.com'];
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function changedKeys() {
+      return incoming().diff(resource.data).affectedKeys();
+    }
+
+    function isShortString(value, maxLength) {
+      return value is string && value.size() > 0 && value.size() <= maxLength;
+    }
+
+    // ---------- Users & their garage (private) ----------
+
     match /users/{userId} {
-      allow read, write: if true;
+      allow read, write: if isUser(userId);
+
+      match /vehicles/{vehicleId} {
+        allow read, write: if isUser(userId);
+      }
     }
 
-    // Vehicle Listings in Compra & Venta
+    // ---------- Compra & Venta ----------
+
     match /vehicleListings/{listingId} {
-      allow read, write: if true;
+      allow read: if true;
+
+      allow create: if signedIn()
+        && incoming().ownerId == request.auth.uid
+        && incoming().createdAt == request.time
+        && isShortString(incoming().title, 200)
+        && isShortString(incoming().brand, 60)
+        && incoming().price is number && incoming().price > 0
+        && incoming().year is number
+        && incoming().mileage is number && incoming().mileage >= 0
+        && isShortString(incoming().sellerPhone, 30)
+        && incoming().images is list && incoming().images.size() <= 5;
+
+      allow update: if isUser(resource.data.ownerId)
+        && !changedKeys().hasAny(['ownerId', 'createdAt']);
+
+      allow delete: if isUser(resource.data.ownerId) || isAdmin();
     }
 
-    // Official MiGaraje Products
+    // ---------- Nuestros Productos (admin only) ----------
+
     match /products/{productId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
-    // Default fallback
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---------- Mi Comunidad ----------
+
+    match /communityPosts/{postId} {
+      allow read: if true;
+
+      allow create: if signedIn()
+        && incoming().authorId == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().likedBy == []
+        && incoming().commentsCount == 0
+        && isShortString(incoming().clubId, 60)
+        && isShortString(incoming().title, 200)
+        && isShortString(incoming().content, 5000);
+
+      allow update: if signedIn() && (
+        // Author edits their own text
+        (isUser(resource.data.authorId)
+          && changedKeys().hasOnly(['title', 'content', 'category', 'modelTag']))
+        // Anyone signed in toggles only their own like
+        || (changedKeys().hasOnly(['likedBy'])
+          && incoming().likedBy.toSet().difference(resource.data.likedBy.toSet())
+               .union(resource.data.likedBy.toSet().difference(incoming().likedBy.toSet()))
+               == [request.auth.uid].toSet())
+        // Comment counter goes up by exactly one (written together with the comment)
+        || (changedKeys().hasOnly(['commentsCount'])
+          && incoming().commentsCount == resource.data.commentsCount + 1)
+      );
+
+      allow delete: if isUser(resource.data.authorId) || isAdmin();
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if signedIn()
+          && incoming().authorId == request.auth.uid
+          && incoming().createdAt == request.time
+          && isShortString(incoming().content, 2000);
+        allow delete: if isUser(resource.data.authorId) || isAdmin();
+      }
+    }
+
+    // ---------- Orders & partner stores ----------
+
+    match /orders/{orderId} {
+      allow create: if signedIn()
+        && incoming().userId == request.auth.uid
+        && incoming().status == 'pendiente';
+      allow read: if isUser(resource.data.userId) || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /partnerStores/{storeId} {
+      allow create: if signedIn()
+        && incoming().ownerId == request.auth.uid
+        && incoming().verified == false
+        && incoming().status == 'revision';
+      allow read: if resource.data.status != 'revision'
+        || isUser(resource.data.ownerId)
+        || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // Everything else is closed.
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }
