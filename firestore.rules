@@ -2,31 +2,19 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check auth
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Public read and authenticated write for catalog and partner stores
-    match /partnerStores/{storeId} {
-      allow read: if true;
-      allow write: if true; // Allow new stores to sign up and update profiles
-    }
-
-    match /customParts/{partId} {
-      allow read: if true;
-      allow write: if true; // Allow stores to publish items
-    }
-
-    match /orders/{orderId} {
-      allow read: if true;
-      allow create: if true; // Allow buyers to checkout
-      allow update, delete: if isAuthenticated();
-    }
-
+    // User accounts and garages
     match /users/{userId} {
-      allow read: if true;
-      allow write: if true;
+      allow read, write: if true;
+    }
+
+    // Vehicle Listings in Compra & Venta
+    match /vehicleListings/{listingId} {
+      allow read, write: if true;
+    }
+
+    // Official MiGaraje Products
+    match /products/{productId} {
+      allow read, write: if true;
     }
 
     // Default fallback

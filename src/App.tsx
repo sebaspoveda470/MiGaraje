@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { SmartRecommendations } from './components/SmartRecommendations';
-import { RepuestosMarketplace } from './components/RepuestosMarketplace';
 import { CarMarketplace } from './components/CarMarketplace';
-import { ClasicosRestauracion } from './components/ClasicosRestauracion';
-import { CuidadoEsteticoMotor } from './components/CuidadoEsteticoMotor';
+import { NuestrosProductos } from './components/NuestrosProductos';
 import { CommunityHub } from './components/CommunityHub';
 import { GarageModal } from './components/GarageModal';
 import { CartDrawer } from './components/CartDrawer';
 import { IntermediationModal } from './components/IntermediationModal';
-import { AiMechanicChat } from './components/AiMechanicChat';
 import { OnboardingModal } from './components/OnboardingModal';
 import { ProfileModal } from './components/ProfileModal';
-import { Logo } from './components/Logo';
 import { WebHero } from './components/WebHero';
 import { WebFooter } from './components/WebFooter';
 import { PartnerStoreModal } from './components/PartnerStoreModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { saveUserToDatabase } from './services/userService';
+import { 
+  loadRealVehicleListings, 
+  saveRealVehicleListing, 
+  deleteRealVehicleListing,
+  loadRealProducts,
+  saveRealProduct,
+  deleteRealProduct
+} from './services/realDataService';
 import { 
   initialSpareParts, 
   initialCarListings, 
@@ -32,13 +37,7 @@ import {
   CartItem,
   UserProfile 
 } from './types';
-import { 
-  Bot, 
-  Sparkles, 
-  ShoppingCart,
-  ChevronRight,
-  UserPlus
-} from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export function App() {
   // User Profile State (persisted in localStorage)
@@ -78,7 +77,6 @@ export function App() {
   const [isGarageModalOpen, setIsGarageModalOpen] = useState<boolean>(false);
   const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
-  const [isAiChatOpen, setIsAiChatOpen] = useState<boolean>(false);
 
   // Store Market Catalog Data
   const [spareParts] = useState<SparePart[]>(initialSpareParts);
@@ -225,7 +223,7 @@ export function App() {
       }
       return [...prev, item];
     });
-    showToast(`"${item.name}" añadido al carrito con garantía`);
+    showToast(`"${item.name}" añadido al carrito`);
   };
 
   const handleUpdateQuantity = (id: string, delta: number) => {
@@ -285,10 +283,10 @@ export function App() {
     showToast('Vehículo eliminado de tu garaje');
   };
 
-  // Listing Management
+  // Listing Management (Compra & Venta de Vehículos)
   const handlePublishListing = (newListing: VehicleListing) => {
     setCarListings((prev) => [newListing, ...prev]);
-    showToast('Vehículo publicado exitosamente en el Marketplace');
+    showToast(`¡Tu ${newListing.title} ha sido publicado exitosamente en Compra & Venta!`);
   };
 
   const totalCartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
@@ -330,16 +328,15 @@ export function App() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 pb-28 sm:pb-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 pb-32 sm:pb-12">
         
-        {/* TAB 1: GARAJE INTELIGENTE & RECOMENDACIONES IA */}
+        {/* TAB 1: MI GARAJE (BITÁCORA, MANTENIMIENTO PREVENTIVO Y CONTROL) */}
         {activeTab === 'garaje' && (
           <div className="space-y-8">
             {/* Website Hero Presentation Section */}
             <WebHero
-              onExploreCatalog={() => setActiveTab('repuestos')}
-              onExploreStores={() => setActiveTab('repuestos')}
-              onAskAi={() => setIsAiChatOpen(true)}
+              onExploreVehicles={() => setActiveTab('vehiculos')}
+              onExploreProducts={() => setActiveTab('productos')}
               onRegisterCar={() => {
                 if (!user) {
                   setIsOnboardingOpen(true);
@@ -359,30 +356,13 @@ export function App() {
                 }
               }}
               onEditVehicle={handleOpenEditVehicle}
-              spareParts={spareParts}
               careProducts={careProducts}
-              onAddToCart={handleAddToCart}
               onNavigateToTab={setActiveTab}
-              onOpenPartDetail={() => {
-                setActiveTab('repuestos');
-              }}
             />
           </div>
         )}
 
-        {/* TAB 2: INTERMEDIACIÓN DE REPUESTOS & AUTOPARTES */}
-        {activeTab === 'repuestos' && (
-          <RepuestosMarketplace
-            spareParts={spareParts}
-            activeVehicle={activeVehicle}
-            onAddToCart={handleAddToCart}
-            onRequestSpecialQuote={() => {
-              showToast('Solicitud de cotización enviada a 80+ tiendas aliadas');
-            }}
-          />
-        )}
-
-        {/* TAB 3: COMPRA Y VENTA DE VEHÍCULOS (MARKETPLACE) */}
+        {/* TAB 2: COMPRA Y VENTA DE VEHÍCULOS */}
         {activeTab === 'vehiculos' && (
           <CarMarketplace
             carListings={carListings}
@@ -393,26 +373,15 @@ export function App() {
           />
         )}
 
-        {/* TAB 4: VEHÍCULOS CLÁSICOS & RESTAURACIÓN */}
-        {activeTab === 'clasicos' && (
-          <ClasicosRestauracion
-            carListings={carListings}
-            onOpenIntermediationModal={(listing) => {
-              setSelectedIntermediationListing(listing);
-            }}
-          />
-        )}
-
-        {/* TAB 5: CUIDADO ESTÉTICO & MOTOR */}
-        {activeTab === 'cuidado' && (
-          <CuidadoEsteticoMotor
-            careProducts={careProducts}
-            onAddToCart={handleAddToCart}
+        {/* TAB 3: NUESTROS PRODUCTOS MIGARAJE (VENTA DIRECTA POR WHATSAPP) */}
+        {activeTab === 'productos' && (
+          <NuestrosProductos
+            products={careProducts}
             onRegisterProduct={handleRegisterCareProduct}
           />
         )}
 
-        {/* TAB 6: CLUBES & COMUNIDADES DE MARCA */}
+        {/* TAB 4: MI COMUNIDAD (CLUBES DE MARCA EN COLOMBIA) */}
         {activeTab === 'comunidades' && (
           <CommunityHub
             communities={communities}
@@ -424,58 +393,15 @@ export function App() {
 
       </main>
 
-      {/* Persistent Mobile Bottom Sticky Cart & Action Bar */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 flex items-center justify-between shadow-lg">
-        <button
-          onClick={() => setIsCartOpen(true)}
-          className="flex items-center gap-3 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all flex-1 mr-2 cursor-pointer"
-        >
-          <div className="relative">
-            <ShoppingCart className="w-5 h-5 text-white" />
-            {totalCartCount > 0 && (
-              <span className="absolute -top-2 -right-2.5 bg-blue-600 text-white font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center shadow">
-                {totalCartCount}
-              </span>
-            )}
-          </div>
-          <div className="flex-1 text-left">
-            <div className="text-xs font-black leading-tight flex items-center justify-between">
-              <span>{totalCartCount > 0 ? `Carrito (${totalCartCount})` : 'Ver Carrito'}</span>
-              {totalCartCount > 0 && (
-                <span className="text-blue-300 font-mono text-xs">${totalCartPrice.toFixed(2)}</span>
-              )}
-            </div>
-            <div className="text-[10px] text-slate-300 font-normal">Intermediación & Garantía</div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-slate-300" />
-        </button>
-
-        {/* Mobile AI Quick Trigger */}
-        <button
-          onClick={() => setIsAiChatOpen(true)}
-          className="p-3 bg-slate-100 hover:bg-slate-200 active:scale-98 rounded-xl border border-slate-300 text-slate-900 shrink-0 shadow-xs cursor-pointer"
-          title="Consultar Mecánico IA"
-        >
-          <Bot className="w-5 h-5 text-slate-950" />
-        </button>
-      </div>
-
-      {/* Floating AI Mechanic Button (Visible on Desktop / Tablet) */}
-      {!isAiChatOpen && (
-        <button
-          onClick={() => setIsAiChatOpen(true)}
-          className="hidden sm:flex fixed bottom-6 right-6 z-40 bg-white text-slate-900 hover:bg-slate-50 border border-slate-300 font-bold p-3.5 sm:px-5 sm:py-3.5 rounded-2xl shadow-xl items-center gap-3 transition-all hover:scale-102 cursor-pointer group"
-          title="Consultar Mecánico IA"
-        >
-          <div className="w-9 h-9 rounded-xl bg-slate-950 text-white flex items-center justify-center font-bold shadow-xs">
-            <Bot className="w-5 h-5 text-blue-400" />
-          </div>
-          <div className="hidden sm:block text-left text-xs">
-            <div className="font-black text-slate-950 leading-tight">Mecánico IA 24/7</div>
-            <div className="text-[10px] text-slate-600 font-medium">Diagnóstico & Consultas</div>
-          </div>
-        </button>
-      )}
+      {/* Mobile-Native Bottom Navigation */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onOpenCart={() => setIsCartOpen(true)}
+        cartItemCount={totalCartCount}
+        cartTotalPrice={totalCartPrice}
+        activeVehicle={activeVehicle || null}
+      />
 
       {/* User Registration & First Vehicle Onboarding Modal */}
       <OnboardingModal
@@ -536,22 +462,14 @@ export function App() {
         onClose={() => setSelectedIntermediationListing(null)}
       />
 
-      {/* AI Mechanic Chat Modal/Drawer */}
-      <AiMechanicChat
-        isOpen={isAiChatOpen}
-        onClose={() => setIsAiChatOpen(false)}
-        activeVehicle={activeVehicle}
-        onNavigateToTab={setActiveTab}
-      />
-
       {/* Rich Web Ecosystem Footer */}
       <WebFooter
         onNavigateTab={setActiveTab}
         onOpenStoreModal={() => setIsStoreRegisterOpen(true)}
-        onOpenAiMechanic={() => setIsAiChatOpen(true)}
       />
 
     </div>
   );
 }
+
 export default App;

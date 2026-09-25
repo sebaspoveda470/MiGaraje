@@ -92,8 +92,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <span className="truncate">{user.city}</span>
               </div>
             )}
-            <div className="flex items-center gap-2 text-emerald-700 font-bold min-w-0">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <div className="flex items-center gap-2 text-blue-700 font-bold min-w-0">
+              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
               <span>Cuenta Verificada</span>
             </div>
           </div>

@@ -20,13 +20,11 @@ import { Logo } from './Logo';
 interface WebFooterProps {
   onNavigateTab: (tab: string) => void;
   onOpenStoreModal?: () => void;
-  onOpenAiMechanic?: () => void;
 }
 
 export const WebFooter: React.FC<WebFooterProps> = ({
   onNavigateTab,
   onOpenStoreModal,
-  onOpenAiMechanic
 }) => {
   return (
     <footer className="mt-16 border-t border-slate-200 bg-white text-slate-600 text-xs">
@@ -37,28 +35,22 @@ export const WebFooter: React.FC<WebFooterProps> = ({
           <div className="space-y-1.5 text-center md:text-left">
             <div className="inline-flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
               <Store className="w-4 h-4 text-blue-600" />
-              <span>¿Tienes un almacén, distribuidora o vendes productos automotrices?</span>
+              <span>¿Quieres distribuir productos oficiales o vender tu vehículo?</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-              Vende en MiGaraje y conecta con miles de propietarios en Colombia
+              Únete a MiGaraje y conecta con la comunidad automotriz de Colombia
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 max-w-xl font-normal leading-relaxed">
-              Inscribe tu catálogo de repuestos o productos de detailing. Ofrece despacho seguro con sistema de retención en custodia hasta que el cliente reciba conforme.
+              Publica tu vehículo en Compra & Venta, adquiere nuestra línea exclusiva de estética y detailing MiGaraje con venta por WhatsApp, y forma parte de los clubes de tu marca.
             </p>
           </div>
 
           <button
-            onClick={() => {
-              if (onOpenStoreModal) {
-                onOpenStoreModal();
-              } else {
-                onNavigateTab('repuestos');
-              }
-            }}
+            onClick={() => onNavigateTab('vehiculos')}
             className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-black px-6 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer shrink-0"
           >
-            <Store className="w-4 h-4 text-blue-400" />
-            <span>Inscribir mi Negocio Gratis</span>
+            <Car className="w-4 h-4 text-blue-400" />
+            <span>Publicar Vehículo en Venta</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -72,17 +64,17 @@ export const WebFooter: React.FC<WebFooterProps> = ({
           <div className="lg:col-span-2 space-y-4">
             <Logo size="md" onClick={() => onNavigateTab('garaje')} />
             <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
-              Plataforma tecnológica automotriz que digitaliza el mantenimiento de tu vehículo, intermedia repuestos garantizados y conecta a la comunidad de amantes del motor en Colombia.
+              Plataforma automotriz colombiana para la compra y venta de vehículos verificados, productos oficiales de cuidado MiGaraje por WhatsApp y la red de comunidades por marca más activa del país.
             </p>
             <div className="flex items-center gap-3 pt-2 text-slate-600">
               <div className="flex items-center gap-1.5 text-xs">
                 <ShieldCheck className="w-4 h-4 text-blue-600" />
-                <span>Pagos Protegidos</span>
+                <span>Compra & Venta Segura</span>
               </div>
               <span>•</span>
               <div className="flex items-center gap-1.5 text-xs">
                 <Award className="w-4 h-4 text-slate-800" />
-                <span>Tiendas Verificadas</span>
+                <span>Marca Oficial MiGaraje</span>
               </div>
             </div>
           </div>
@@ -93,32 +85,22 @@ export const WebFooter: React.FC<WebFooterProps> = ({
             <ul className="space-y-2">
               <li>
                 <button onClick={() => onNavigateTab('garaje')} className="hover:text-slate-950 transition-colors cursor-pointer">
-                  Mi Garaje & Bitácora
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigateTab('repuestos')} className="hover:text-slate-950 transition-colors cursor-pointer">
-                  Repuestos & Autopartes
+                  Mi Garaje
                 </button>
               </li>
               <li>
                 <button onClick={() => onNavigateTab('vehiculos')} className="hover:text-slate-950 transition-colors cursor-pointer">
-                  Compra & Venta Verificada
+                  Compra & Venta de Vehículos
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigateTab('clasicos')} className="hover:text-slate-950 transition-colors cursor-pointer">
-                  Clásicos & Restauración
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigateTab('cuidado')} className="hover:text-slate-950 transition-colors cursor-pointer">
-                  Estética & Motor
+                <button onClick={() => onNavigateTab('productos')} className="hover:text-slate-950 transition-colors cursor-pointer">
+                  Nuestros Productos MiGaraje
                 </button>
               </li>
               <li>
                 <button onClick={() => onNavigateTab('comunidades')} className="hover:text-slate-950 transition-colors cursor-pointer">
-                  Clubes & Comunidades
+                  Mi Comunidad (Clubes)
                 </button>
               </li>
             </ul>
@@ -130,21 +112,19 @@ export const WebFooter: React.FC<WebFooterProps> = ({
             <ul className="space-y-2 text-slate-600">
               <li className="flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5 text-blue-600" />
-                <span>Pago en Custodia Escrow</span>
+                <span>Traspaso & Peritaje Verificado</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <Wrench className="w-3.5 h-3.5 text-blue-600" />
-                <span>Garantía de Compatibilidad</span>
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <span>Productos MiGaraje Garantizados</span>
               </li>
               <li className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-amber-600" />
-                <span>Despacho 24-48 Horas</span>
+                <span>Despacho Nacional Inmediato</span>
               </li>
-              <li>
-                <button onClick={onOpenAiMechanic} className="text-blue-600 hover:text-blue-800 font-bold transition-colors cursor-pointer flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Mecánico IA 24/7</span>
-                </button>
+              <li className="flex items-center gap-1.5">
+                <MessageCircle className="w-3.5 h-3.5 text-blue-600" />
+                <span>Venta Directa por WhatsApp</span>
               </li>
             </ul>
           </div>

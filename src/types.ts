@@ -66,10 +66,18 @@ export interface VehicleListing {
   mileage: number;
   condition: 'usado' | 'seminuevo' | 'clasico_antiguo' | 'para_restaurar';
   location: string;
+  city?: string;
+  plateEnding?: string;
+  plateCity?: string;
+  isUniqueOwner?: boolean;
+  isInsurable?: boolean;
+  soatValid?: boolean;
+  tecnoValid?: boolean;
   sellerName: string;
   sellerType: 'particular' | 'tienda_aliada' | 'coleccionista';
   sellerPhone: string;
   sellerVerified: boolean;
+  whatsappNumber?: string;
   images: string[];
   specs: {
     engine: string;
@@ -111,7 +119,10 @@ export interface CareProduct {
   image: string;
   inStock: boolean;
   idealFor: string[];
+  whatsappNumber?: string;
 }
+
+export type MiGarajeProduct = CareProduct;
 
 export interface CommunityClub {
   id: string;

@@ -16,79 +16,63 @@
       },
       "required": ["id", "fullName", "email"]
     },
-    "partnerStores": {
-      "title": "Tiendas Aliadas de Repuestos",
-      "description": "Tiendas, distribuidoras y autopartes inscritas",
+    "vehicleListings": {
+      "title": "Vehículos en Venta",
+      "description": "Vehículos publicados para compra y venta con contacto directo por WhatsApp",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "commercialName": { "type": "string" },
-        "taxId": { "type": "string" },
-        "ownerName": { "type": "string" },
-        "email": { "type": "string" },
-        "phone": { "type": "string" },
-        "whatsapp": { "type": "string" },
-        "city": { "type": "string" },
-        "address": { "type": "string" },
-        "specialties": { "type": "array", "items": { "type": "string" } },
-        "rating": { "type": "number" },
-        "verified": { "type": "boolean" },
-        "commissionRate": { "type": "number" },
-        "bankAccount": { "type": "string" },
-        "status": { "type": "string" },
-        "logoUrl": { "type": "string" },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["id", "commercialName", "email", "phone", "city"]
-    },
-    "orders": {
-      "title": "Órdenes de Compra & Intermediación",
-      "description": "Pedidos y pagos intermediados con garantía MiGaraje",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "orderNumber": { "type": "string" },
-        "buyerId": { "type": "string" },
-        "buyerName": { "type": "string" },
-        "buyerEmail": { "type": "string" },
-        "buyerPhone": { "type": "string" },
-        "shippingAddress": { "type": "string" },
-        "city": { "type": "string" },
-        "items": { "type": "array" },
-        "subtotal": { "type": "number" },
-        "shippingCost": { "type": "number" },
-        "intermediationFee": { "type": "number" },
-        "total": { "type": "number" },
+        "title": { "type": "string" },
+        "brand": { "type": "string" },
+        "model": { "type": "string" },
+        "year": { "type": "number" },
+        "price": { "type": "number" },
         "currency": { "type": "string" },
-        "paymentMethod": { "type": "string" },
-        "paymentStatus": { "type": "string" },
-        "orderStatus": { "type": "string" },
-        "trackingNumber": { "type": "string" },
-        "warrantyProtected": { "type": "boolean" },
-        "createdAt": { "type": "string" }
+        "mileage": { "type": "number" },
+        "city": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "sellerPhone": { "type": "string" },
+        "whatsappNumber": { "type": "string" },
+        "plateEnding": { "type": "string" },
+        "plateCity": { "type": "string" },
+        "isUniqueOwner": { "type": "boolean" },
+        "description": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["id", "orderNumber", "buyerName", "total", "paymentMethod"]
+      "required": ["id", "title", "brand", "model", "price", "sellerPhone"]
     },
-    "customParts": {
-      "title": "Catálogo de Repuestos Publicados por Tiendas",
-      "description": "Repuestos agregados por almacenes aliados",
+    "products": {
+      "title": "Productos Oficiales MiGaraje",
+      "description": "Productos de la marca oficial MiGaraje con venta directa por WhatsApp",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
-        "partNumber": { "type": "string" },
-        "category": { "type": "string" },
         "brand": { "type": "string" },
+        "category": { "type": "string" },
+        "subcategory": { "type": "string" },
         "price": { "type": "number" },
-        "storeId": { "type": "string" },
-        "storeName": { "type": "string" },
+        "volume": { "type": "string" },
         "description": { "type": "string" },
         "image": { "type": "string" },
-        "inStock": { "type": "boolean" },
-        "warrantyMonths": { "type": "number" },
-        "createdAt": { "type": "string" }
+        "whatsappNumber": { "type": "string" },
+        "inStock": { "type": "boolean" }
       },
-      "required": ["id", "name", "price", "category", "storeName"]
+      "required": ["id", "name", "price", "category"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "Perfiles y vehículos registrados de los usuarios"
+    },
+    "/vehicleListings/{listingId}": {
+      "schema": "vehicleListings",
+      "description": "Vehículos publicados para venta en Colombia"
+    },
+    "/products/{productId}": {
+      "schema": "products",
+      "description": "Catálogo de productos oficiales MiGaraje"
     }
   }
 }

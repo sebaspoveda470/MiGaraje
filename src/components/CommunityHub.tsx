@@ -137,26 +137,27 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
           <div className="flex items-center gap-2">
-            <span className="bg-slate-100 text-slate-900 border border-slate-200 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-emerald-600" /> Clubes & Comunidades por Marca
+            <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+              <Users className="w-4 h-4 text-blue-400" /> Mi Comunidad MiGaraje
             </span>
+            <span className="text-xs text-slate-500 font-medium">Clubes de Marca • Colombia</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
-            La experiencia colectiva de propietarios de tu mismo vehículo
+            Mi Comunidad de Propietarios & Apasionados
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-            Consulta fallas típicas, soluciones mecánicas verificadas, compatibilidad de repuestos y talleres recomendados por otros dueños en Colombia.
+            El espacio oficial para compartir experiencias, resolver dudas mecánicas, descubrir talleres recomendados con peritaje real y organizar rodadas automotrices en Colombia.
           </p>
         </div>
 
         <button
           onClick={() => setShowNewPostModal(true)}
-          className="flex items-center gap-2 bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xs transition-all shrink-0 cursor-pointer"
+          className="flex items-center gap-2 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xs transition-all shrink-0 cursor-pointer min-h-[46px]"
         >
-          <PlusCircle className="w-4 h-4 text-lime-400" />
-          <span>Publicar Consulta en el Club</span>
+          <PlusCircle className="w-4 h-4 text-blue-400" />
+          <span>+ Publicar en Mi Comunidad</span>
         </button>
       </div>
 
@@ -188,7 +189,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                 }`}
               >
                 {isMatch && (
-                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-lime-400"></span>
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-blue-400"></span>
                 )}
                 <div>
                   <img
@@ -202,7 +203,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                   </p>
                 </div>
                 {isMatch && (
-                  <span className="text-[9px] font-bold text-lime-400 mt-2 inline-block">
+                  <span className="text-[9px] font-bold text-blue-400 mt-2 inline-block">
                     Tu Vehículo
                   </span>
                 )}
@@ -218,6 +219,45 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
         {/* Left Column: Feed & Discussions */}
         <div className="lg:col-span-8 space-y-6">
           
+          {/* Active Club Spotlight Banner */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              <img
+                src={currentCommunity.logo}
+                alt={currentCommunity.name}
+                className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shrink-0"
+              />
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-950 truncate">
+                    {currentCommunity.name}
+                  </h2>
+                  <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 font-bold px-2 py-0.5 rounded-full shrink-0">
+                    Mi Comunidad Oficial
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5 line-clamp-1">
+                  {currentCommunity.description}
+                </p>
+                <div className="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-2">
+                  <span>{currentCommunity.membersCount.toLocaleString()} Propietarios en Colombia</span>
+                  <span>•</span>
+                  <span className="text-blue-600">Comunidad Activa</span>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href={`https://wa.me/573109876543?text=${encodeURIComponent(`Hola MiGaraje! 👋 Deseo unirme al grupo oficial de WhatsApp de Mi Comunidad para la marca ${currentCommunity.brand} en Colombia.`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-xs transition-all shrink-0 cursor-pointer w-full sm:w-auto justify-center"
+            >
+              <MessageSquare className="w-4 h-4 text-blue-400" />
+              <span>Unirse al WhatsApp del Club</span>
+            </a>
+          </div>
+
           {/* Feed Filter Bar */}
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
             <div className="relative">
@@ -413,8 +453,8 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                   <div className="text-[11px] text-slate-600 mt-0.5">{issue.solution}</div>
                   <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
                     <span>Modelo: {issue.affectedModel}</span>
-                    <span className="text-blue-600 font-bold hover:underline cursor-pointer" onClick={() => onNavigateToTab('repuestos')}>
-                      Ver repuesto →
+                    <span className="text-blue-600 font-bold hover:underline cursor-pointer" onClick={() => onNavigateToTab('garaje')}>
+                      Ver en Mi Garaje →
                     </span>
                   </div>
                 </div>
@@ -422,10 +462,39 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
             </div>
           </div>
 
+          {/* Colombian Rodadas & Car Meets */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-blue-600" />
+              <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">
+                Próximas Rodadas de Mi Comunidad
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 font-normal">
+              Encuentros de propietarios y rodadas por carreteras de Colombia:
+            </p>
+            <div className="space-y-2.5">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                <div className="flex items-center justify-between font-bold text-slate-950">
+                  <span>Rodada {currentCommunity.brand} • Embalse del Sisga</span>
+                  <span className="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Bogotá</span>
+                </div>
+                <div className="text-[11px] text-slate-600">Próximo Domingo • 7:00 AM • Peaje Los Andes</div>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                <div className="flex items-center justify-between font-bold text-slate-950">
+                  <span>Encuentro Nocturno • Mirador Las Palmas</span>
+                  <span className="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Medellín</span>
+                </div>
+                <div className="text-[11px] text-slate-600">Viernes de Motor • 8:30 PM • Asador San Jerónimo</div>
+              </div>
+            </div>
+          </div>
+
           {/* Recommended Workshops */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
               <h3 className="text-xs font-black text-slate-950 uppercase tracking-wider">
                 Talleres Avalados por el Club
               </h3>
