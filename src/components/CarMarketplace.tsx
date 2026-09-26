@@ -27,7 +27,8 @@ import {
   Clock,
   Images,
   CircleCheck,
-  RotateCcw
+  RotateCcw,
+  Heart
 } from 'lucide-react';
 import { VehicleListing, UserProfile } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
@@ -48,6 +49,8 @@ interface CarMarketplaceProps {
   onDeleteListing: (listingId: string) => void;
   onToggleSold: (listing: VehicleListing, sold: boolean) => void;
   initialListingId?: string | null;
+  favoriteIds: string[];
+  onToggleFavorite: (listingId: string) => void;
 }
 
 // The cover lives in the listing and each extra photo in its own document
@@ -100,6 +103,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   onDeleteListing,
   onToggleSold,
   initialListingId,
+  favoriteIds,
+  onToggleFavorite,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('todas');
@@ -143,6 +148,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [pubImages, setPubImages] = useState<string[]>([]);
   const [showSold, setShowSold] = useState(true);
   const [sortBy, setSortBy] = useState<SortKey>('recientes');
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [pubIsUniqueOwner, setPubIsUniqueOwner] = useState(true);
   const [pubSoatValid, setPubSoatValid] = useState(true);
   const [pubTecnoValid, setPubTecnoValid] = useState(true);
@@ -190,6 +196,9 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
   // Filter listings (available first, sold at the end)
   const filteredListings = carListings.filter((car) => {
+    if (onlyFavorites && !favoriteIds.includes(car.id)) {
+      return false;
+    }
     if (!showSold && isSold(car)) {
       return false;
     }
@@ -459,6 +468,16 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               Mostrar vendidos ({soldCount})
             </label>
           )}
+
+          <button
+            onClick={() => setOnlyFavorites((v) => !v)}
+            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border cursor-pointer transition-colors ${
+              onlyFavorites ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${onlyFavorites ? 'fill-white' : ''}`} />
+            Mis favoritos ({carListings.filter((c) => favoriteIds.includes(c.id)).length})
+          </button>
         </div>
       </div>
 
@@ -632,6 +651,15 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   >
                     Ver Vehículo
                   </button>
+
+                  <button
+                    onClick={() => onToggleFavorite(car.id)}
+                    aria-label={favoriteIds.includes(car.id) ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                    title={favoriteIds.includes(car.id) ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                    className="shrink-0 w-11 min-h-[42px] rounded-xl bg-slate-100 hover:bg-rose-50 border border-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <Heart className={`w-4 h-4 ${favoriteIds.includes(car.id) ? 'text-rose-600 fill-rose-600' : 'text-slate-600'}`} />
+                  </button>
                 </div>
               </div>
 
@@ -685,6 +713,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           isSold={isSold(carListings.find((c) => c.id === selectedCar.id) || selectedCar)}
           canManage={canDelete(selectedCar)}
           whatsAppLink={getWhatsAppLink(selectedCar)}
+          isFavorite={favoriteIds.includes(selectedCar.id)}
+          onToggleFavorite={() => onToggleFavorite(selectedCar.id)}
           onToggleSold={() => {
             handleToggleSold(carListings.find((c) => c.id === selectedCar.id) || selectedCar);
           }}

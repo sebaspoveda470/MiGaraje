@@ -18,13 +18,16 @@ import { WebFooter } from './components/WebFooter';
 import { PartnerStoreModal } from './components/PartnerStoreModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { auth, isAdminEmail } from './firebase';
-import { signOut } from './services/authService';
+import { signOut, ensureRecentLogin, authErrorMessage } from './services/authService';
 import {
   getUserProfile,
   saveUserProfile,
   subscribeToVehicles,
   saveVehicle,
   deleteVehicle,
+  deleteAccount,
+  setFavorite,
+  FavoriteKind,
 } from './services/userService';
 import { subscribeToListings, publishListing, deleteListing, setListingSold, ExtraPhotosError } from './services/listingService';
 import {
@@ -272,6 +275,43 @@ export function App() {
     else setIsProfileModalOpen(true);
   };
 
+  const handleSaveProfile = async (profile: UserProfile) => {
+    await saveUserProfile(profile);
+    setUser(profile);
+    showToast('Perfil actualizado');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!authUser) return;
+    try {
+      const recent = await ensureRecentLogin(authUser);
+      if (!recent) {
+        showToast('Por seguridad, cierra sesión y vuelve a entrar; luego elimina tu cuenta de inmediato.', true);
+        return;
+      }
+    } catch (err) {
+      showToast(authErrorMessage(err), true);
+      return;
+    }
+    await deleteAccount(authUser);
+    setIsProfileModalOpen(false);
+    setCartItems([]);
+    setActiveVehicleId(null);
+    showToast('Tu cuenta y tus datos fueron eliminados.');
+  };
+
+  /** Adds or removes a favorite, updating the screen right away */
+  const handleToggleFavorite = (kind: FavoriteKind, itemId: string) => {
+    if (!requireAuth() || !authUser || !user) return;
+    const current = user[kind] || [];
+    const favorite = !current.includes(itemId);
+    setUser({ ...user, [kind]: favorite ? [...current, itemId] : current.filter((id) => id !== itemId) });
+    setFavorite(authUser.uid, kind, itemId, favorite).catch((err) => {
+      setUser((prev) => (prev ? { ...prev, [kind]: current } : prev));
+      showError('No se pudo guardar el favorito.')(err);
+    });
+  };
+
   const handleLogout = async () => {
     try {
       await signOut();
@@ -504,7 +544,9 @@ export function App() {
             onPublishListing={handlePublishListing}
             onDeleteListing={handleDeleteListing}
             onToggleSold={handleToggleSold}
-            initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
+            favoriteIds={user?.favoriteListings || []}
+            onToggleFavorite={(id) => handleToggleFavorite('favoriteListings', id)}
+initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
 />
         )}
 
@@ -526,6 +568,8 @@ export function App() {
             onError={(message, err) => showError(message)(err)}
             pendingOrdersCount={orders.filter((o) => o.status === 'pendiente').length}
             initialProductId={deepLink?.type === 'producto' ? deepLink.id : null}
+            favoriteIds={user?.favoriteProducts || []}
+            onToggleFavorite={(id) => handleToggleFavorite('favoriteProducts', id)}
             onOpenOrders={() => setIsOrdersOpen(true)}
           />
         )}
@@ -590,6 +634,8 @@ export function App() {
         onOpenAddVehicle={handleOpenAddVehicle}
         onEditVehicle={handleOpenEditVehicle}
         onLogout={handleLogout}
+        onSaveProfile={handleSaveProfile}
+        onDeleteAccount={handleDeleteAccount}
       />
 
       {/* Vehicle Garage Registration & Editing Modal */}

@@ -24,7 +24,8 @@ import {
   Images,
   ClipboardList,
   PackageX,
-  PackageCheck
+  PackageCheck,
+  Heart
 } from 'lucide-react';
 import { CareProduct, CareCategory, CartItem, ProductReview, UserProfile } from '../types';
 import { toWhatsAppNumber } from '../utils/media';
@@ -54,6 +55,8 @@ interface NuestrosProductosProps {
   pendingOrdersCount: number;
   onOpenOrders: () => void;
   initialProductId?: string | null;
+  favoriteIds: string[];
+  onToggleFavorite: (productId: string) => void;
 }
 
 const CATEGORIES: { id: CareCategory | 'todos'; label: string; icon: any }[] = [
@@ -81,6 +84,8 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   pendingOrdersCount,
   onOpenOrders,
   initialProductId,
+  favoriteIds,
+  onToggleFavorite,
 }) => {
   const [reviews, setReviews] = useState<ProductReview[]>([]);
   const confirmAction = useConfirm();
@@ -142,7 +147,12 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   const [inStock, setInStock] = useState(true);
 
   // Filter products
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
+
   const filteredProducts = products.filter((p) => {
+    if (onlyFavorites && !favoriteIds.includes(p.id)) {
+      return false;
+    }
     if (selectedCategory !== 'todos' && p.category !== selectedCategory) {
       return false;
     }
@@ -446,6 +456,15 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
               </button>
             );
           })}
+          <button
+            onClick={() => setOnlyFavorites((v) => !v)}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+              onlyFavorites ? 'bg-rose-600 text-white border-rose-600' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${onlyFavorites ? 'fill-white' : ''}`} />
+            <span>Mis favoritos ({products.filter((p) => favoriteIds.includes(p.id)).length})</span>
+          </button>
         </div>
 
       </div>
@@ -613,6 +632,14 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 >
                   <ShoppingCart className="w-4 h-4" />
                 </button>
+                <button
+                    onClick={() => onToggleFavorite(prod.id)}
+                    aria-label={favoriteIds.includes(prod.id) ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                    title={favoriteIds.includes(prod.id) ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                    className="shrink-0 w-11 h-11 rounded-xl bg-slate-100 hover:bg-rose-50 border border-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <Heart className={`w-4 h-4 ${favoriteIds.includes(prod.id) ? 'text-rose-600 fill-rose-600' : 'text-slate-600'}`} />
+                  </button>
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User } from 'lucide-react';
+import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart } from 'lucide-react';
 import { VehicleListing } from '../types';
 import { PhotoGallery } from './PhotoPicker';
 import { ShareButtons } from './ShareButtons';
@@ -11,6 +11,8 @@ interface VehicleDetailModalProps {
   isSold: boolean;
   canManage: boolean;
   whatsAppLink: string;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
   onToggleSold: () => void;
   onClose: () => void;
 }
@@ -36,6 +38,8 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   isSold,
   canManage,
   whatsAppLink,
+  isFavorite,
+  onToggleFavorite,
   onToggleSold,
   onClose,
 }) => {
@@ -117,12 +121,23 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     {formatCOP(car.price)} <span className="text-xs text-slate-500 font-normal">COP</span>
                   </div>
                 </div>
-                <ShareButtons
-                  type="vehiculo"
-                  id={car.id}
-                  text={`Mira este ${car.title} en venta por ${formatCOP(car.price)} en MiGaraje:`}
-                  iconsOnly
-                />
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={onToggleFavorite}
+                    aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                    title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+                    className="w-9 h-9 rounded-full border border-slate-200 bg-white hover:bg-rose-50 flex items-center justify-center cursor-pointer"
+                  >
+                    <Heart className={`w-4 h-4 ${isFavorite ? 'text-rose-600 fill-rose-600' : 'text-slate-600'}`} />
+                  </button>
+                  <ShareButtons
+                    type="vehiculo"
+                    id={car.id}
+                    text={`Mira este ${car.title} en venta por ${formatCOP(car.price)} en MiGaraje:`}
+                    iconsOnly
+                  />
+                </div>
               </div>
             </div>
 

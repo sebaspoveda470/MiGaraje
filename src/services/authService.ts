@@ -6,7 +6,9 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
   updateProfile,
+  reauthenticateWithPopup,
   signOut as firebaseSignOut,
+  User,
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -71,4 +73,19 @@ export function authErrorMessage(err: unknown): string {
     default:
       return 'No se pudo completar la operación. Inténtalo de nuevo.';
   }
+}
+
+/**
+ * Sensitive operations (like deleting the account) need a sign-in from the last few minutes.
+ * Google accounts confirm with a popup; email accounts must sign in again.
+ * Returns false when the user has to sign out and back in first.
+ */
+export async function ensureRecentLogin(user: User): Promise<boolean> {
+  const lastSignIn = new Date(user.metadata.lastSignInTime || 0).getTime();
+  if (Date.now() - lastSignIn < 4 * 60 * 1000) return true;
+  if (user.providerData.some((p) => p.providerId === 'google.com')) {
+    await reauthenticateWithPopup(user, new GoogleAuthProvider());
+    return true;
+  }
+  return false;
 }

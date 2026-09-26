@@ -278,6 +278,10 @@ export interface UserProfile {
   joinedDate: string;
   /** When the user authorized data processing and accepted the terms (Ley 1581) */
   acceptedTermsAt?: string;
+  /** SOAT / tecnomecánica reminders by email (on unless the user turns them off) */
+  emailReminders?: boolean;
+  favoriteListings?: string[];
+  favoriteProducts?: string[];
 }
 
 export interface CheckoutOrder {
