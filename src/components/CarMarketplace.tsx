@@ -28,12 +28,14 @@ import {
   Images,
   CircleCheck,
   RotateCcw,
-  Heart
+  Heart,
+  Pencil
 } from 'lucide-react';
 import { VehicleListing, UserProfile } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { PhotoPicker } from './PhotoPicker';
 import { VehicleDetailModal } from './VehicleDetailModal';
+import { getListingPhotos } from '../services/listingService';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
@@ -46,6 +48,7 @@ interface CarMarketplaceProps {
   isAdmin: boolean;
   requireAuth: () => boolean;
   onPublishListing: (listing: Omit<VehicleListing, 'id'>, photos: string[]) => Promise<void>;
+  onUpdateListing: (listingId: string, changes: Partial<VehicleListing>, photos: string[]) => Promise<void>;
   onDeleteListing: (listingId: string) => void;
   onToggleSold: (listing: VehicleListing, sold: boolean) => void;
   initialListingId?: string | null;
@@ -100,6 +103,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   isAdmin,
   requireAuth,
   onPublishListing,
+  onUpdateListing,
   onDeleteListing,
   onToggleSold,
   initialListingId,
@@ -157,15 +161,63 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  // Listing being edited (null = publishing a new one)
+  const [editingListing, setEditingListing] = useState<VehicleListing | null>(null);
 
   const canDelete = (car: VehicleListing) => isAdmin || (!!currentUserId && car.ownerId === currentUserId);
 
+  const resetPublishForm = () => {
+    setPubModel('');
+    setPubDescription('');
+    setPubImages([]);
+    setPubColor('');
+    setPubEngine('');
+    setEditingListing(null);
+  };
+
   const openPublishModal = () => {
     if (!requireAuth()) return;
+    if (editingListing) resetPublishForm();
     if (!pubSellerName && currentUser?.fullName) setPubSellerName(currentUser.fullName);
     if (!pubSellerPhone && currentUser?.phone) setPubSellerPhone(currentUser.phone);
     setPublishError(null);
     setShowPublishModal(true);
+  };
+
+  const closePublishModal = () => {
+    setShowPublishModal(false);
+    if (editingListing) resetPublishForm();
+  };
+
+  const openEditModal = async (car: VehicleListing) => {
+    setEditingListing(car);
+    setPubBrand(car.brand);
+    setPubModel(car.model);
+    setPubYear(car.year);
+    setPubPrice(car.price);
+    setPubMileage(car.mileage);
+    setPubCity(car.city || 'Bogotá D.C.');
+    setPubPlateEnding(car.plateEnding || '');
+    setPubPlateCity(car.plateCity || '');
+    setPubTransmission(car.specs?.transmission || 'Automática');
+    setPubFuel(car.specs?.fuel || 'Gasolina');
+    setPubSellerName(car.sellerName);
+    setPubSellerPhone(car.sellerPhone);
+    setPubDescription(car.description || '');
+    setPubIsUniqueOwner(Boolean(car.isUniqueOwner));
+    setPubSoatValid(Boolean(car.soatValid));
+    setPubTecnoValid(Boolean(car.tecnoValid));
+    setPubColor(car.specs?.color || '');
+    setPubEngine(car.specs?.engine || '');
+    setPubImages(car.images);
+    setPublishError(null);
+    setSelectedCar(null);
+    setShowPublishModal(true);
+    try {
+      setPubImages(await getListingPhotos(car));
+    } catch (err) {
+      console.error('No se pudieron cargar todas las fotos', err);
+    }
   };
 
   // Extract unique brands
@@ -294,17 +346,22 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     setIsPublishing(true);
     setPublishError(null);
     try {
-      await onPublishListing(newListing, pubImages);
+      if (editingListing) {
+        // Keep the original publication date and sale status
+        const { status, publishedAt, ...changes } = newListing;
+        await onUpdateListing(editingListing.id, changes, pubImages);
+      } else {
+        await onPublishListing(newListing, pubImages);
+      }
       setShowPublishModal(false);
-      // Reset form
-      setPubModel('');
-      setPubDescription('');
-      setPubImages([]);
-      setPubColor('');
-      setPubEngine('');
+      resetPublishForm();
     } catch (err) {
       console.error(err);
-      setPublishError('No se pudo publicar el vehículo. Revisa tu conexión e inténtalo de nuevo.');
+      setPublishError(
+        editingListing
+          ? 'No se pudieron guardar los cambios. Revisa tu conexión e inténtalo de nuevo.'
+          : 'No se pudo publicar el vehículo. Revisa tu conexión e inténtalo de nuevo.'
+      );
     } finally {
       setIsPublishing(false);
     }
@@ -547,6 +604,16 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          openEditModal(car);
+                        }}
+                        title="Editar anuncio"
+                        className="w-8 h-8 rounded-full bg-white/90 hover:bg-blue-50 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
                           handleToggleSold(car);
                         }}
                         title={isSold(car) ? 'Volver a poner disponible' : 'Marcar como vendido'}
@@ -715,6 +782,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           whatsAppLink={getWhatsAppLink(selectedCar)}
           isFavorite={favoriteIds.includes(selectedCar.id)}
           onToggleFavorite={() => onToggleFavorite(selectedCar.id)}
+          onEdit={() => openEditModal(carListings.find((c) => c.id === selectedCar.id) || selectedCar)}
           onToggleSold={() => {
             handleToggleSold(carListings.find((c) => c.id === selectedCar.id) || selectedCar);
           }}
@@ -728,7 +796,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           <div className="bg-white border border-slate-200 rounded-3xl max-w-xl w-full shadow-2xl p-6 relative max-h-[92dvh] overflow-y-auto">
             
             <button
-              onClick={() => setShowPublishModal(false)}
+              onClick={closePublishModal}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 cursor-pointer p-1"
             >
               <X className="w-5 h-5" />
@@ -739,7 +807,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 Compra & Venta de Vehículos
               </span>
               <h3 className="text-xl font-black text-slate-950 tracking-tight mt-1">
-                Publicar mi Vehículo para la Venta
+                {editingListing ? 'Editar mi Anuncio' : 'Publicar mi Vehículo para la Venta'}
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Los compradores te escribirán directamente a tu WhatsApp personal.
@@ -980,7 +1048,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               <div className="pt-3 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setShowPublishModal(false)}
+                  onClick={closePublishModal}
                   className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 cursor-pointer"
                 >
                   Cancelar
@@ -991,7 +1059,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-blue-400" />}
-                  <span>Publicar mi Vehículo en Venta</span>
+                  <span>{editingListing ? 'Guardar Cambios' : 'Publicar mi Vehículo en Venta'}</span>
                 </button>
               </div>
 

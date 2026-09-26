@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart } from 'lucide-react';
+import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart, Pencil } from 'lucide-react';
 import { VehicleListing } from '../types';
 import { PhotoGallery } from './PhotoPicker';
 import { ShareButtons } from './ShareButtons';
@@ -13,6 +13,7 @@ interface VehicleDetailModalProps {
   whatsAppLink: string;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onEdit: () => void;
   onToggleSold: () => void;
   onClose: () => void;
 }
@@ -40,6 +41,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   whatsAppLink,
   isFavorite,
   onToggleFavorite,
+  onEdit,
   onToggleSold,
   onClose,
 }) => {
@@ -195,6 +197,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   <span className="font-bold text-slate-900">Este anuncio es tuyo.</span>{' '}
                   {isSold ? 'Está marcado como vendido.' : '¿Ya lo vendiste? Márcalo para que no te sigan escribiendo.'}
                 </div>
+                <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={onEdit}
+                  className="font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Editar
+                </button>
                 <button
                   onClick={onToggleSold}
                   className={`shrink-0 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer ${
@@ -204,6 +214,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   {isSold ? <RotateCcw className="w-4 h-4" /> : <CircleCheck className="w-4 h-4" />}
                   {isSold ? 'Volver a publicar' : 'Marcar como vendido'}
                 </button>
+                </div>
               </section>
             )}
           </div>

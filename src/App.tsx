@@ -29,7 +29,7 @@ import {
   setFavorite,
   FavoriteKind,
 } from './services/userService';
-import { subscribeToListings, publishListing, deleteListing, setListingSold, ExtraPhotosError } from './services/listingService';
+import { subscribeToListings, publishListing, updateListing, deleteListing, setListingSold, ExtraPhotosError } from './services/listingService';
 import {
   subscribeToProducts,
   saveProduct,
@@ -409,6 +409,11 @@ export function App() {
     showToast(`¡Tu ${newListing.title} ha sido publicado exitosamente en Compra & Venta!`);
   };
 
+  const handleUpdateListing = async (listingId: string, changes: Partial<VehicleListing>, photos: string[]) => {
+    await updateListing(listingId, changes, photos);
+    showToast('Anuncio actualizado');
+  };
+
   const handleToggleSold = (listing: VehicleListing, sold: boolean) => {
     setListingSold(listing.id, sold)
       .then(() => showToast(sold ? `¡Felicitaciones por la venta de tu ${listing.title}! 🎉` : 'Tu anuncio vuelve a estar disponible'))
@@ -543,7 +548,8 @@ export function App() {
             requireAuth={requireAuth}
             onPublishListing={handlePublishListing}
             onDeleteListing={handleDeleteListing}
-            onToggleSold={handleToggleSold}
+            onUpdateListing={handleUpdateListing}
+onToggleSold={handleToggleSold}
             favoriteIds={user?.favoriteListings || []}
             onToggleFavorite={(id) => handleToggleFavorite('favoriteListings', id)}
 initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}

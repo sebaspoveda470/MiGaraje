@@ -106,3 +106,30 @@ export async function deleteListing(listingId: string): Promise<void> {
   batch.delete(doc(listingsRef, listingId));
   await batch.commit();
 }
+
+/**
+ * Updates a listing's details and replaces its photos (cover in the listing, extras one per document).
+ */
+export async function updateListing(
+  listingId: string,
+  changes: Partial<Omit<VehicleListing, 'id' | 'ownerId' | 'createdAt' | 'status'>>,
+  photos: string[]
+): Promise<void> {
+  const [cover, ...extra] = photos;
+  await updateDoc(doc(listingsRef, listingId), {
+    ...changes,
+    ...(cover ? { images: [cover] } : {}),
+    photoCount: Math.max(1, photos.length),
+    updatedAt: serverTimestamp(),
+  });
+
+  const newIds = extra.map((_, i) => String(i + 1).padStart(2, '0'));
+  const existing = await getDocs(photosRef(listingId));
+  const batch = writeBatch(db);
+  // set() overwrites the photos we keep; only leftovers are deleted (one write per document)
+  existing.docs.filter((d) => !newIds.includes(d.id)).forEach((d) => batch.delete(d.ref));
+  extra.forEach((url, i) => {
+    batch.set(doc(photosRef(listingId), newIds[i]), { url, index: i + 1, createdAt: serverTimestamp() });
+  });
+  await batch.commit();
+}
