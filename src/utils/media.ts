@@ -1,21 +1,17 @@
 /**
- * Resizes an image file and returns it as a JPEG data URL.
+ * Resizes an image file (longest side <= maxSize) and returns it as a JPEG data URL.
  * Photos are stored inline in Firestore documents (1 MB max per document),
- * so they must stay small: ~900px wide at 0.75 quality is usually 80–200 KB.
+ * so they must stay small: ~900px at 0.75 quality is usually 80–200 KB.
  */
-export function compressImageFile(file: File, maxWidth = 900, quality = 0.75): Promise<string> {
+export function compressImageFile(file: File, maxSize = 900, quality = 0.75): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (readerEvent) => {
       const img = new Image();
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const width = Math.round(img.width * scale);
+        const height = Math.round(img.height * scale);
 
         const canvas = document.createElement('canvas');
         canvas.width = width;
@@ -27,6 +23,9 @@ export function compressImageFile(file: File, maxWidth = 900, quality = 0.75): P
           return;
         }
 
+        // White background so transparent PNGs don't turn black as JPEG
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         resolve(canvas.toDataURL('image/jpeg', quality));
       };

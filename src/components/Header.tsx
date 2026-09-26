@@ -148,12 +148,13 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-3">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           
-          {/* Logo & Slogan */}
-          <Logo 
-            size="md" 
-            onClick={() => handleTabChange('garaje')} 
-            className="shrink-0"
-          />
+          {/* Logo & Slogan (compact on phones so the right-side buttons fit) */}
+          <div className="hidden sm:block shrink-0">
+            <Logo size="md" onClick={() => handleTabChange('garaje')} />
+          </div>
+          <div className="sm:hidden shrink-0">
+            <Logo size="sm" showTagline={false} onClick={() => handleTabChange('garaje')} />
+          </div>
 
           {/* Quick Search (Desktop) */}
           {setGlobalSearch && (
@@ -208,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
 
             {/* Active Vehicle Selector */}
-            <div className="relative shrink min-w-0">
+            <div className="relative shrink-0">
               <button
                 onClick={() => {
                   if (allVehicles.length === 0) {
@@ -219,7 +220,8 @@ export const Header: React.FC<HeaderProps> = ({
                     setGarageDropdownOpen(!garageDropdownOpen);
                   }
                 }}
-                className="flex items-center gap-1.5 sm:gap-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl text-left transition-all shadow-xs cursor-pointer max-w-[125px] xs:max-w-[160px] sm:max-w-[200px]"
+                aria-label="Mi Auto"
+                className="flex items-center gap-1.5 sm:gap-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl text-left transition-all shadow-xs cursor-pointer sm:max-w-[200px]"
               >
                 <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 overflow-hidden shrink-0">
                   {activeVehicle?.image ? (
@@ -230,19 +232,22 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <div className="min-w-0 flex-1 truncate">
                   <div className="flex items-center gap-1">
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-900 truncate">
-                      {activeVehicle ? `${activeVehicle.brand} ${activeVehicle.model}` : 'Registrar Auto'}
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-900 truncate whitespace-nowrap">
+                      <span className="sm:hidden">Mi Auto</span>
+                      <span className="hidden sm:inline">
+                        {activeVehicle ? `${activeVehicle.brand} ${activeVehicle.model}` : 'Mi Auto'}
+                      </span>
                     </span>
                     {activeVehicle?.hasClassicPlates && (
                       <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 shrink-0" title="Placa de Antiguo" />
                     )}
                   </div>
-                  <span className="text-[9px] sm:text-[10px] text-slate-500 font-medium truncate block">
+                  <span className="hidden sm:block text-[10px] text-slate-500 font-medium truncate">
                     {activeVehicle ? `${activeVehicle.year} • ${(activeVehicle.mileage / 1000).toFixed(0)}k km` : '+ Agregar'}
                   </span>
                 </div>
                 {allVehicles.length > 0 && (
-                  <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 transition-transform shrink-0 ${garageDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`hidden sm:block w-3.5 h-3.5 text-slate-400 transition-transform shrink-0 ${garageDropdownOpen ? 'rotate-180' : ''}`} />
                 )}
               </button>
 
@@ -359,7 +364,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Module Navigation Tabs */}
-      <nav className="border-t border-slate-200 px-2 sm:px-4 relative bg-slate-50/50">
+      <nav className="hidden sm:block border-t border-slate-200 px-2 sm:px-4 relative bg-slate-50/50">
         <div className="max-w-7xl mx-auto relative flex items-center">
           
           {/* Scroll Left Button */}

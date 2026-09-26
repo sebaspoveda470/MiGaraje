@@ -129,6 +129,7 @@ const summary = summarizeRatings(reviews);
               key={product.id}
               images={images}
               alt={product.name}
+              fit="contain"
               overlay={
                 <div className="absolute top-3 left-3 bg-slate-950 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
                   MiGaraje

@@ -354,7 +354,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
             </div>
             {salesWhatsApp && (
               <>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <div className="flex items-center gap-1.5">
                   <MessageCircle className="w-4 h-4 text-blue-600" />
                   <span>WhatsApp de Ventas: +{salesWhatsApp}</span>
@@ -461,12 +461,12 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
               {/* Product Image */}
               <div 
                 onClick={() => setSelectedProduct(prod)}
-                className="aspect-4/3 bg-slate-100 relative overflow-hidden cursor-pointer"
+                className="aspect-4/3 bg-white relative overflow-hidden cursor-pointer border-b border-slate-100"
               >
                 <img
                   src={getProductImages(prod)[0]}
                   alt={prod.name}
-                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
+                  className="w-full h-full object-contain group-hover:scale-103 transition-transform duration-300"
                 />
 
                 {getProductImages(prod).length > 1 && (

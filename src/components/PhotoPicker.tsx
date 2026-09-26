@@ -58,8 +58,8 @@ export const PhotoPicker: React.FC<PhotoPickerProps> = ({ label, images, onChang
       {images.length > 0 && (
         <div className="grid grid-cols-4 gap-2">
           {images.map((src, idx) => (
-            <div key={idx} className={`relative aspect-square rounded-xl overflow-hidden border-2 ${idx === 0 ? 'border-blue-600' : 'border-slate-200'}`}>
-              <img src={src} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+            <div key={idx} className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-white ${idx === 0 ? 'border-blue-600' : 'border-slate-200'}`}>
+              <img src={src} alt={`Foto ${idx + 1}`} className="w-full h-full object-contain" />
               {idx === 0 ? (
                 <span className="absolute bottom-0 inset-x-0 bg-blue-600 text-white text-[9px] font-black text-center py-0.5">Principal</span>
               ) : (
@@ -133,14 +133,16 @@ export const PhotoGallery: React.FC<{
   alt: string;
   aspectClass?: string;
   overlay?: React.ReactNode;
-}> = ({ images, alt, aspectClass = 'aspect-square', overlay }) => {
+  /** "contain" shows the whole photo (no cropping) */
+  fit?: 'cover' | 'contain';
+}> = ({ images, alt, aspectClass = 'aspect-square', overlay, fit = 'cover' }) => {
   const [active, setActive] = useState(0);
   const current = images[active] || images[0];
 
   return (
     <div className="space-y-2">
-      <div className={`${aspectClass} rounded-2xl bg-slate-100 overflow-hidden relative border border-slate-200`}>
-        <img src={current} alt={alt} className="w-full h-full object-cover" />
+      <div className={`${aspectClass} rounded-2xl ${fit === 'contain' ? 'bg-white' : 'bg-slate-100'} overflow-hidden relative border border-slate-200`}>
+        <img src={current} alt={alt} className={`w-full h-full ${fit === 'contain' ? 'object-contain' : 'object-cover'}`} />
         {overlay}
         {images.length > 1 && (
           <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -156,11 +158,11 @@ export const PhotoGallery: React.FC<{
               type="button"
               onClick={() => setActive(idx)}
               aria-label={`Ver foto ${idx + 1}`}
-              className={`aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
-                idx === active ? 'border-blue-600' : 'border-transparent opacity-70 hover:opacity-100'
+              className={`aspect-square rounded-xl overflow-hidden border-2 bg-white cursor-pointer transition-all ${
+                idx === active ? 'border-blue-600' : 'border-slate-200 opacity-70 hover:opacity-100'
               }`}
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt="" className="w-full h-full object-contain" />
             </button>
           ))}
         </div>

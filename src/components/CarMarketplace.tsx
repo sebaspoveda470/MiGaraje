@@ -665,6 +665,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   images={selectedCar.images}
                   alt={selectedCar.title}
                   aspectClass="aspect-16/9"
+                  fit="contain"
                   overlay={
                     <div className="absolute top-3 left-3 flex flex-wrap gap-2 pr-12">
                       <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-md">

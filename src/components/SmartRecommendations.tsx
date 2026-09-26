@@ -312,11 +312,11 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
               className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div className="space-y-3">
-                <div className="aspect-16/10 bg-slate-100 rounded-xl overflow-hidden relative">
+                <div className="aspect-16/10 bg-white border border-slate-100 rounded-xl overflow-hidden relative">
                   <img
                     src={prod.images?.[0] || prod.image}
                     alt={prod.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                   <div className="absolute top-2 left-2 bg-slate-950 text-white text-[10px] font-bold px-2 py-0.5 rounded">
                     MiGaraje Oficial
