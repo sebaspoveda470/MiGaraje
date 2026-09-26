@@ -53,6 +53,24 @@ interface CarMarketplaceProps {
 // The cover lives in the listing and each extra photo in its own document
 const MAX_LISTING_PHOTOS = 10;
 
+type SortKey = 'recientes' | 'precio_asc' | 'precio_desc' | 'km_asc' | 'anio_desc';
+
+const SORT_OPTIONS: { id: SortKey; label: string }[] = [
+  { id: 'recientes', label: 'Más recientes' },
+  { id: 'precio_asc', label: 'Menor precio' },
+  { id: 'precio_desc', label: 'Mayor precio' },
+  { id: 'km_asc', label: 'Menor kilometraje' },
+  { id: 'anio_desc', label: 'Modelo más nuevo' },
+];
+
+const COMPARATORS: Record<SortKey, (a: VehicleListing, b: VehicleListing) => number> = {
+  recientes: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+  precio_asc: (a, b) => a.price - b.price,
+  precio_desc: (a, b) => b.price - a.price,
+  km_asc: (a, b) => a.mileage - b.mileage,
+  anio_desc: (a, b) => b.year - a.year,
+};
+
 export const isSold = (car: VehicleListing) => car.status === 'vendido';
 
 // The price slider's top position means "no limit".
@@ -124,6 +142,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [pubDescription, setPubDescription] = useState('');
   const [pubImages, setPubImages] = useState<string[]>([]);
   const [showSold, setShowSold] = useState(true);
+  const [sortBy, setSortBy] = useState<SortKey>('recientes');
   const [pubIsUniqueOwner, setPubIsUniqueOwner] = useState(true);
   const [pubSoatValid, setPubSoatValid] = useState(true);
   const [pubTecnoValid, setPubTecnoValid] = useState(true);
@@ -204,7 +223,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       }
     }
     return true;
-  }).sort((a, b) => Number(isSold(a)) - Number(isSold(b)));
+  }).sort((a, b) => Number(isSold(a)) - Number(isSold(b)) || COMPARATORS[sortBy](a, b));
 
   const soldCount = carListings.filter(isSold).length;
 
@@ -415,17 +434,32 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           />
         </div>
 
-        {soldCount > 0 && (
-          <label className="flex items-center gap-2 text-xs text-slate-600 font-semibold cursor-pointer pt-1">
-            <input
-              type="checkbox"
-              checked={showSold}
-              onChange={(e) => setShowSold(e.target.checked)}
-              className="w-4 h-4 accent-slate-950 cursor-pointer"
-            />
-            Mostrar vehículos vendidos ({soldCount})
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <label className="flex items-center gap-2 text-xs text-slate-600 font-bold">
+            Ordenar por:
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortKey)}
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-semibold focus:outline-none focus:border-slate-400"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
           </label>
-        )}
+
+          {soldCount > 0 && (
+            <label className="flex items-center gap-2 text-xs text-slate-600 font-semibold cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showSold}
+                onChange={(e) => setShowSold(e.target.checked)}
+                className="w-4 h-4 accent-slate-950 cursor-pointer"
+              />
+              Mostrar vendidos ({soldCount})
+            </label>
+          )}
+        </div>
       </div>
 
       {isLoading && (

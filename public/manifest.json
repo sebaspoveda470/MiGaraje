@@ -1,7 +1,7 @@
 {
   "name": "MiGaraje - Ecosistema Automotriz",
   "short_name": "MiGaraje",
-  "description": "Plataforma integral para propietarios de vehículos: repuestos certificados, compra y venta garantizada, clásicos y asistente mecánico IA.",
+  "description": "MiGaraje: compra y venta de vehículos entre propietarios, productos de cuidado MiGaraje por WhatsApp, recordatorios para tu carro y comunidades por marca en Colombia.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020617",
