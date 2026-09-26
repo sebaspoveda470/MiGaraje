@@ -22,6 +22,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Vehicle, CareProduct } from '../types';
+import { VehicleDocsCard } from './VehicleDocsCard';
+import { getDocStatus, describeDoc } from '../utils/vehicleDocs';
 
 interface SmartRecommendationsProps {
   activeVehicle: Vehicle | null;
@@ -96,6 +98,9 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
   };
 
   const maintenanceList = getPreventiveChecklist(activeVehicle.mileage);
+  const tecnoStatus = getDocStatus(activeVehicle, 'tecno');
+  const tecnoColor =
+    tecnoStatus.state === 'vencido' ? 'text-red-600' : tecnoStatus.state === 'por_vencer' ? 'text-amber-600' : tecnoStatus.state === 'vigente' ? 'text-emerald-600' : 'text-slate-400';
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -198,8 +203,10 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
 
           <div className="p-4 sm:p-5">
             <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Revisión Técnico-Mecánica</div>
-            <div className="text-base sm:text-lg font-black text-blue-600 mt-0.5">Al Día</div>
-            <div className="text-[11px] text-slate-500">RUNT Colombia</div>
+            <div className={`text-base sm:text-lg font-black mt-0.5 ${tecnoColor}`}>
+              {tecnoStatus.state === 'sin_fecha' ? 'Sin fecha' : tecnoStatus.state === 'vigente' ? 'Al Día' : tecnoStatus.state === 'vencido' ? 'Vencida' : 'Por vencer'}
+            </div>
+            <div className="text-[11px] text-slate-500">{describeDoc(tecnoStatus)}</div>
           </div>
 
           <div className="p-4 sm:p-5">
@@ -227,6 +234,8 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
         </div>
 
       </div>
+
+      <VehicleDocsCard vehicle={activeVehicle} onEdit={onEditVehicle ? () => onEditVehicle(activeVehicle) : undefined} />
 
       {/* Mileage Maintenance Plan: Clean White Card */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">

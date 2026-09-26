@@ -43,7 +43,8 @@ import {
   UserProfile,
   CheckoutOrder,
 } from './types';
-import { Sparkles, AlertCircle } from 'lucide-react';
+import { Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
+import { getDocAlerts, describeDoc } from './utils/vehicleDocs';
 
 // Keys written by the previous localStorage-only version of the app.
 const LEGACY_STORAGE_KEYS = [
@@ -435,6 +436,25 @@ export function App() {
         {/* TAB 1: MI GARAJE (BITÁCORA, MANTENIMIENTO PREVENTIVO Y CONTROL) */}
         {activeTab === 'garaje' && (
           <div className="space-y-8">
+            {getDocAlerts(vehicles).length > 0 && (
+              <div role="alert" className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1.5 text-xs">
+                  <div className="font-black text-amber-900">Tienes documentos por renovar</div>
+                  {getDocAlerts(vehicles).map(({ vehicle, doc }) => (
+                    <button
+                      key={`${vehicle.id}-${doc.kind}`}
+                      onClick={() => setActiveVehicleId(vehicle.id)}
+                      className="block text-left text-amber-900 hover:underline cursor-pointer"
+                    >
+                      <strong>{doc.label}</strong> de tu {vehicle.brand} {vehicle.model}
+                      {vehicle.plate ? ` (${vehicle.plate})` : ''}: {describeDoc(doc).toLowerCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <WebHero
               listingsCount={listingsLoading ? null : carListings.filter((l) => l.status !== 'vendido').length}
               onExploreVehicles={() => setActiveTab('vehiculos')}

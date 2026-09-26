@@ -75,6 +75,8 @@ export const GarageModal: React.FC<GarageModalProps> = ({
   const [customUserPhoto, setCustomUserPhoto] = useState<string | null>(null);
   const [selectedVariantUrl, setSelectedVariantUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [soatExpiry, setSoatExpiry] = useState('');
+  const [tecnoExpiry, setTecnoExpiry] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Sync states whenever vehicleToEdit changes or modal opens
@@ -96,6 +98,8 @@ export const GarageModal: React.FC<GarageModalProps> = ({
         setCustomUserPhoto(vehicleToEdit.image || null);
         setSelectedVariantUrl('');
         setNotes(vehicleToEdit.notes || '');
+        setSoatExpiry(vehicleToEdit.soatExpiry || '');
+        setTecnoExpiry(vehicleToEdit.tecnoExpiry || '');
         setShowDeleteConfirm(false);
       } else {
         setBrand('Toyota');
@@ -113,6 +117,8 @@ export const GarageModal: React.FC<GarageModalProps> = ({
         setCustomUserPhoto(null);
         setSelectedVariantUrl('');
         setNotes('');
+        setSoatExpiry('');
+        setTecnoExpiry('');
         setShowDeleteConfirm(false);
       }
     }
@@ -178,6 +184,8 @@ export const GarageModal: React.FC<GarageModalProps> = ({
         hasClassicPlates,
         image: activePreviewImage,
         notes: notes.trim() || undefined,
+        soatExpiry: soatExpiry || undefined,
+        tecnoExpiry: tecnoExpiry || undefined,
       };
 
       if (onUpdateVehicle) {
@@ -200,6 +208,8 @@ export const GarageModal: React.FC<GarageModalProps> = ({
         hasClassicPlates,
         image: activePreviewImage,
         notes: notes.trim() || undefined,
+        soatExpiry: soatExpiry || undefined,
+        tecnoExpiry: tecnoExpiry || undefined,
         dateAdded: new Date().toISOString(),
       };
 
@@ -488,6 +498,32 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                   className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none uppercase font-mono shadow-xs"
                 />
               </div>
+            </div>
+
+            {/* Document expiry dates for reminders */}
+            <div className="bg-blue-50/60 border border-blue-200 rounded-2xl p-3.5 space-y-3">
+              <div className="text-xs font-bold text-slate-800">Recordatorios de documentos (opcional)</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Vencimiento del SOAT</label>
+                  <input
+                    type="date"
+                    value={soatExpiry}
+                    onChange={(e) => setSoatExpiry(e.target.value)}
+                    className="w-full bg-white border border-slate-300 focus:border-blue-600 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none shadow-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Vencimiento de la Revisión Técnico-Mecánica</label>
+                  <input
+                    type="date"
+                    value={tecnoExpiry}
+                    onChange={(e) => setTecnoExpiry(e.target.value)}
+                    className="w-full bg-white border border-slate-300 focus:border-blue-600 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none shadow-xs"
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500">Las encuentras en tu póliza del SOAT, en el certificado de la revisión o en el RUNT.</p>
             </div>
 
             {/* Type / Category */}

@@ -17,6 +17,9 @@ export interface Vehicle {
   hasClassicPlates?: boolean;
   notes?: string;
   dateAdded: string;
+  /** Expiry dates as YYYY-MM-DD */
+  soatExpiry?: string;
+  tecnoExpiry?: string;
 }
 
 export type PartCategory = 
