@@ -1,7 +1,23 @@
 // Serves index.html with item-specific <title> and Open Graph tags, so links shared on
 // WhatsApp/Facebook show the car or product photo, and Google can index each item.
 // vercel.json routes "/?vehiculo=…", "/?producto=…" and "/?comunidad=…" here.
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { getDocument, COLLECTION_FOR, ShareType, mainImage } from './_lib/firestore.js';
+
+/**
+ * The built index.html (bundled with this function via vercel.json → includeFiles).
+ * Falls back to the public production site, never to a protected preview URL.
+ */
+async function loadIndexHtml(origin: string): Promise<string> {
+  try {
+    return await readFile(join(process.cwd(), 'dist', 'index.html'), 'utf-8');
+  } catch {
+    const production = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    const res = await fetch(`${production ? `https://${production}` : origin}/index.html`);
+    return res.text();
+  }
+}
 
 const TYPES: ShareType[] = ['vehiculo', 'producto', 'comunidad'];
 
@@ -36,8 +52,7 @@ function describe(type: ShareType, data: Record<string, any>): { title: string; 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const origin = url.origin;
-  const indexRes = await fetch(`${origin}/index.html`);
-  let html = await indexRes.text();
+  let html = await loadIndexHtml(origin);
 
   const type = TYPES.find((t) => url.searchParams.get(t));
   const id = type ? url.searchParams.get(type)! : null;

@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/share.ts": {
+      "includeFiles": "dist/index.html"
+    }
+  },
   "routes": [
     {
       "src": "/sitemap.xml",
