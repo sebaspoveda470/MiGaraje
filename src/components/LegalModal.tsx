@@ -84,7 +84,8 @@ const PrivacyPolicy: React.FC = () => (
       <p>
         Los datos se almacenan en servicios de Google Firebase y la página se aloja en Vercel, proveedores que pueden guardar la
         información fuera de Colombia con medidas de seguridad adecuadas. Aplicamos reglas de acceso para que cada usuario solo
-        pueda modificar su propia información.
+        pueda modificar su propia información. Para medir el uso de la página usamos estadísticas anónimas de visitas de
+        Vercel, que no utilizan cookies ni identifican a las personas.
       </p>
     </Section>
 
