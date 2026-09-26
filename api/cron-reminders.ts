@@ -16,7 +16,6 @@ const LABELS: Record<DocKind, string> = { soat: 'SOAT', tecno: 'Revisión Técni
 /** Days before expiry when a reminder goes out (a missed day is caught up the next run). */
 const THRESHOLDS = [30, 7, 0];
 
-const SITE_URL = 'https://migaraje-one.vercel.app';
 
 function daysUntil(isoDate: string, today: Date): number {
   const [y, m, d] = isoDate.split('-').map(Number);
@@ -34,8 +33,6 @@ function describe(days: number): string {
   if (days === 0) return 'vence HOY';
   return `vence en ${days} ${days === 1 ? 'día' : 'días'}`;
 }
-
-const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
@@ -90,22 +87,34 @@ export async function GET(request: Request): Promise<Response> {
 
     if (due.length === 0) continue;
 
-    const firstName = String(user.fullName || '').split(' ')[0] || 'hola';
-    const lines = due.map((d) => `• ${d.label} de tu ${d.vehicleName}: ${describe(d.days)} (${d.expiry})`);
+    const firstName = String(user.fullName || '').split(' ')[0] || '';
+    const lines = due.map((d) => `- ${d.label} de tu ${d.vehicleName}: ${describe(d.days)} (fecha: ${d.expiry})`);
     const subject =
-      due.length === 1 ? `Recordatorio: el ${due[0].label} de tu ${due[0].vehicleName} ${describe(due[0].days)}` : 'Recordatorio: tienes documentos por renovar';
+      due.length === 1
+        ? `Tu ${due[0].label} ${describe(due[0].days)} - MiGaraje`
+        : `Tienes ${due.length} documentos por renovar - MiGaraje`;
 
     try {
+      // Plain text and no links: automated emails with *.vercel.app links tend to be filtered by Gmail
       await mailer.sendMail({
         from: `MiGaraje <${GMAIL_USER}>`,
+        replyTo: GMAIL_USER,
         to: user.email,
         subject,
-        text: `Hola ${firstName},\n\n${lines.join('\n')}\n\nRenueva a tiempo para evitar multas e inmovilización.\nVer mi garaje: ${SITE_URL}\n\nPuedes desactivar estos recordatorios en tu perfil de MiGaraje.`,
-        html: `<p>Hola ${escapeHtml(firstName)},</p>
-<ul>${due.map((d) => `<li><strong>${d.label}</strong> de tu ${escapeHtml(d.vehicleName)}: <strong>${describe(d.days)}</strong> (${d.expiry})</li>`).join('')}</ul>
-<p>Renueva a tiempo para evitar multas e inmovilización.</p>
-<p><a href="${SITE_URL}">Ver mi garaje en MiGaraje</a></p>
-<p style="color:#64748b;font-size:12px">Puedes desactivar estos recordatorios en tu perfil de MiGaraje.</p>`,
+        text: [
+          `Hola${firstName ? ` ${firstName}` : ''},`,
+          '',
+          'Te escribimos de MiGaraje para recordarte:',
+          '',
+          ...lines,
+          '',
+          'Renueva a tiempo para evitar multas e inmovilización del vehículo.',
+          'Puedes ver el detalle en Mi Garaje, dentro de tu cuenta de MiGaraje.',
+          '',
+          'Si no quieres recibir estos recordatorios, desactívalos en tu perfil (Editar perfil) o responde a este correo.',
+          '',
+          'Equipo MiGaraje',
+        ].join('\n'),
       });
       await Promise.all(markSent.map((fn) => fn()));
       emailsSent++;
