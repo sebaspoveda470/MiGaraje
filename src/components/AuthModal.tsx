@@ -12,6 +12,7 @@ import {
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenLegal: (doc: 'privacidad' | 'terminos') => void;
 }
 
 type Mode = 'login' | 'signup' | 'reset';
@@ -28,7 +29,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLegal }) => {
   const [mode, setMode] = useState<Mode>('login');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -221,6 +222,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </button>
             )}
           </div>
+
+          <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+            Consulta nuestros{' '}
+            <button type="button" onClick={() => onOpenLegal('terminos')} className="underline hover:text-slate-600 cursor-pointer">
+              Términos y Condiciones
+            </button>{' '}
+            y la{' '}
+            <button type="button" onClick={() => onOpenLegal('privacidad')} className="underline hover:text-slate-600 cursor-pointer">
+              Política de Privacidad
+            </button>
+            .
+          </p>
         </div>
       </div>
     </div>

@@ -269,6 +269,8 @@ export interface UserProfile {
   avatar?: string;
   role?: 'propietario' | 'entusiasta' | 'coleccionista' | 'mecanico' | 'tienda_aliada';
   joinedDate: string;
+  /** When the user authorized data processing and accepted the terms (Ley 1581) */
+  acceptedTermsAt?: string;
 }
 
 export interface CheckoutOrder {

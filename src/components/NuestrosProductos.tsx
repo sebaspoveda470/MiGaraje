@@ -333,7 +333,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-            Fórmulas profesionales de estética, detailing y mantenimiento desarrolladas especialmente para el cuidado de tu carro. Atención personalizada y despacho inmediato vía WhatsApp.
+            Fórmulas profesionales de estética, detailing y mantenimiento desarrolladas especialmente para el cuidado de tu carro. Atención personalizada y pedidos vía WhatsApp.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 font-semibold pt-1">

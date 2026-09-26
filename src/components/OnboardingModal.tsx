@@ -36,6 +36,7 @@ export interface OnboardingAccount {
 interface OnboardingModalProps {
   isOpen: boolean;
   account: OnboardingAccount | null;
+  onOpenLegal: (doc: 'privacidad' | 'terminos') => void;
   onClose?: () => void;
   onComplete: (user: UserProfile, vehicle: Vehicle | null) => Promise<void>;
 }
@@ -65,6 +66,7 @@ const POPULAR_MODELS_BY_BRAND: Record<string, string[]> = {
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   isOpen,
   account,
+  onOpenLegal,
   onClose,
   onComplete,
 }) => {
@@ -78,7 +80,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('Bogotá, Colombia');
   const [role, setRole] = useState<'propietario' | 'entusiasta' | 'coleccionista' | 'mecanico'>('propietario');
-  const [userErrors, setUserErrors] = useState<{ fullName?: string }>({});
+  const [userErrors, setUserErrors] = useState<{ fullName?: string; consent?: string }>({});
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Vehicle form state
   const [brand, setBrand] = useState('Mazda');
@@ -140,9 +143,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   const validateUserStep = () => {
-    const errors: { fullName?: string } = {};
+    const errors: { fullName?: string; consent?: string } = {};
     if (!fullName.trim()) {
       errors.fullName = 'Por favor ingresa tu nombre completo';
+    }
+    if (!acceptedTerms) {
+      errors.consent = 'Debes autorizar el tratamiento de tus datos para crear tu cuenta.';
     }
     setUserErrors(errors);
     return Object.keys(errors).length === 0;
@@ -163,6 +169,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     city: city.trim() || undefined,
     role,
     joinedDate: new Date().toISOString(),
+    acceptedTermsAt: new Date().toISOString(),
   });
 
   const save = async (vehicle: Vehicle | null) => {
@@ -371,6 +378,30 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Data processing authorization (Ley 1581 de 2012) */}
+              <div>
+                <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer bg-white border border-slate-200 rounded-xl p-3">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 accent-blue-600 shrink-0 cursor-pointer"
+                  />
+                  <span>
+                    Autorizo el tratamiento de mis datos personales según la{' '}
+                    <button type="button" onClick={() => onOpenLegal('privacidad')} className="text-blue-600 font-bold underline cursor-pointer">
+                      Política de Privacidad
+                    </button>{' '}
+                    y acepto los{' '}
+                    <button type="button" onClick={() => onOpenLegal('terminos')} className="text-blue-600 font-bold underline cursor-pointer">
+                      Términos y Condiciones
+                    </button>
+                    .
+                  </span>
+                </label>
+                {userErrors.consent && <p className="text-[11px] text-red-600 font-semibold mt-1">{userErrors.consent}</p>}
               </div>
 
               {/* Submit Step 1 */}

@@ -94,7 +94,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             )}
             <div className="flex items-center gap-2 text-blue-700 font-bold min-w-0">
               <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-              <span>Cuenta Verificada</span>
+              <span>Cuenta MiGaraje</span>
             </div>
           </div>
 

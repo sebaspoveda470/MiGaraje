@@ -64,7 +64,7 @@ export const WebHero: React.FC<WebHeroProps> = ({
           </h1>
 
           <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-slate-600 max-w-md leading-relaxed font-normal">
-            La plataforma automotriz para comprar, vender y consentir tu vehículo con peritaje, productos oficiales MiGaraje y la comunidad de propietarios más activa.
+            La plataforma automotriz para comprar, vender y consentir tu vehículo: trato directo entre propietarios, productos oficiales MiGaraje y comunidades por marca.
           </p>
         </div>
 

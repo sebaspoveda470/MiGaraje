@@ -73,7 +73,7 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
               <Car className="w-10 h-10 text-slate-400 mx-auto mb-2" />
               <div className="text-sm font-bold text-slate-900">Aún no has registrado ningún auto</div>
               <p className="text-xs text-slate-500 mt-1">
-                Agrega tu vehículo para consultar repuestos y peritajes exactos.
+                Agrega tu vehículo para ver su plan de mantenimiento y recordatorios.
               </p>
             </div>
           ) : (

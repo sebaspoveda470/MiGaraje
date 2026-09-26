@@ -76,7 +76,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 </div>
                 <div className="text-[10px] text-slate-400 truncate flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3 text-blue-400" />
-                  <span>Garantía & Custodia MiGaraje</span>
+                  <span>Pedido por WhatsApp</span>
                 </div>
               </div>
             </div>

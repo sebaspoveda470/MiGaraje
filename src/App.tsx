@@ -9,6 +9,7 @@ import { GarageModal } from './components/GarageModal';
 import { CartDrawer } from './components/CartDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
+import { LegalModal, LegalDoc } from './components/LegalModal';
 import { ProfileModal } from './components/ProfileModal';
 import { WebHero } from './components/WebHero';
 import { WebFooter } from './components/WebFooter';
@@ -89,6 +90,7 @@ export function App() {
   const [isGarageModalOpen, setIsGarageModalOpen] = useState<boolean>(false);
   const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
 
   // Shared catalog data (Firestore, realtime)
   const [carListings, setCarListings] = useState<VehicleListing[]>([]);
@@ -491,13 +493,14 @@ export function App() {
       />
 
       {/* Sign in / Sign up */}
-      <AuthModal isOpen={isAuthOpen && !authUser} onClose={() => setIsAuthOpen(false)} />
+      <AuthModal isOpen={isAuthOpen && !authUser} onClose={() => setIsAuthOpen(false)} onOpenLegal={setLegalDoc} />
 
       {/* Profile completion & first vehicle (after first sign-in) */}
       <OnboardingModal
         key={authUser?.uid || 'anon'}
         isOpen={isOnboardingOpen && !!authUser && !user}
         account={authUser ? { uid: authUser.uid, email: authUser.email || '', displayName: authUser.displayName } : null}
+        onOpenLegal={setLegalDoc}
         onClose={() => setIsOnboardingOpen(false)}
         onComplete={handleCompleteOnboarding}
       />
@@ -554,12 +557,15 @@ export function App() {
       {/* Rich Web Ecosystem Footer */}
       <WebFooter
         salesWhatsApp={salesWhatsApp}
+        onOpenLegal={setLegalDoc}
         onNavigateTab={setActiveTab}
         onOpenStoreModal={() => {
           if (!requireAuth()) return;
           setIsStoreRegisterOpen(true);
         }}
       />
+
+      <LegalModal doc={legalDoc} onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
 
     </div>
   );
