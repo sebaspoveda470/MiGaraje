@@ -150,8 +150,13 @@ const summary = summarizeRatings(reviews);
                 <p className="mt-2 text-xs text-slate-500">Aún sin reseñas</p>
               )}
 
-              <div className="text-2xl font-black text-slate-950 mt-2">
-                ${product.price.toLocaleString('es-CO')} <span className="text-sm font-normal text-slate-500">COP</span>
+              <div className="text-2xl font-black text-slate-950 mt-2 flex items-center gap-2 flex-wrap">
+                <span>
+                  ${product.price.toLocaleString('es-CO')} <span className="text-sm font-normal text-slate-500">COP</span>
+                </span>
+                {product.inStock === false && (
+                  <span className="text-[10px] font-black bg-slate-900 text-white px-2 py-0.5 rounded-full tracking-wider">AGOTADO</span>
+                )}
               </div>
 
               {product.description && <p className="text-xs text-slate-600 mt-3 leading-relaxed whitespace-pre-line">{product.description}</p>}
@@ -184,10 +189,11 @@ const summary = summarizeRatings(reviews);
               {whatsAppButton}
               <button
                 onClick={onAddToCart}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 border border-slate-200 transition-all cursor-pointer"
+                disabled={product.inStock === false}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 border border-slate-200 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>Agregar al carrito</span>
+                <span>{product.inStock === false ? 'Producto agotado' : 'Agregar al carrito'}</span>
               </button>
             </div>
           </div>

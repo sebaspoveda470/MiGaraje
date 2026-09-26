@@ -22,7 +22,9 @@ import {
   ShoppingCart,
   Loader2,
   Images,
-  ClipboardList
+  ClipboardList,
+  PackageX,
+  PackageCheck
 } from 'lucide-react';
 import { CareProduct, CareCategory, CartItem, ProductReview, UserProfile } from '../types';
 import { toWhatsAppNumber } from '../utils/media';
@@ -116,6 +118,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   const [benefitsText, setBenefitsText] = useState('');
   const [imageList, setImageList] = useState<string[]>([]);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [inStock, setInStock] = useState(true);
 
   // Filter products
   const filteredProducts = products.filter((p) => {
@@ -134,7 +137,9 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
 
   const generateWhatsAppUrl = (prod: CareProduct) => {
     if (!salesWhatsApp) return undefined;
-    const message= `Hola MiGaraje! 👋 Estoy interesado en comprar el producto oficial *${prod.name}* por valor de $${prod.price.toLocaleString()} COP. ¿Tienen disponibilidad y hacen envíos a mi ciudad?`;
+    const message = prod.inStock === false
+      ? `Hola MiGaraje! 👋 Vi que el producto *${prod.name}* está agotado. ¿Me avisan cuando vuelva a estar disponible?`
+      : `Hola MiGaraje! 👋 Estoy interesado en comprar el producto oficial *${prod.name}* por valor de $${prod.price.toLocaleString('es-CO')} COP. ¿Tienen disponibilidad y hacen envíos a mi ciudad?`;
     return `https://wa.me/${salesWhatsApp}?text=${encodeURIComponent(message)}`;
   };
 
@@ -162,6 +167,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     setSubcategory('Detailing');
     setPrice(35000);
     setVolume('500 ml');
+    setInStock(true);
     setDescription('');
     setBenefitsText('');
     setImageList([]);
@@ -181,6 +187,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     setSubcategory(prod.subcategory);
     setPrice(prod.price);
     setVolume(prod.volume);
+    setInStock(prod.inStock !== false);
     setDescription(prod.description);
     setBenefitsText((prod.benefits || []).join('\n'));
     setImageList(getProductImages(prod));
@@ -253,6 +260,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
       benefits: benefitsArray,
       image: imageList[0] || 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=600&q=80',
       images: imageList,
+      inStock,
     };
 
     setIsSavingProduct(true);
@@ -270,7 +278,15 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     }
   };
 
+  const handleToggleStock = (prod: CareProduct) => {
+    const nowInStock = prod.inStock === false;
+    onSaveProduct({ ...prod, inStock: nowInStock }).catch((err) =>
+      onError('No se pudo actualizar la disponibilidad del producto.', err)
+    );
+  };
+
   const renderWhatsAppButton = (prod: CareProduct, label: string, className: string) => {
+    if (prod.inStock === false) label = 'Preguntar disponibilidad';
     const href = generateWhatsAppUrl(prod);
     if (!href) {
       return (
@@ -442,12 +458,30 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   MiGaraje Oficial
                 </div>
 
+                {prod.inStock === false && (
+                  <div className="absolute inset-0 bg-white/50 flex items-center justify-center pointer-events-none">
+                    <span className="bg-slate-900 text-white font-black text-sm tracking-widest px-5 py-1.5 rounded-lg -rotate-6 shadow-lg">
+                      AGOTADO
+                    </span>
+                  </div>
+                )}
+
                 <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-xs text-slate-900 text-xs font-bold px-2.5 py-0.5 rounded-lg border border-slate-200 shadow-xs">
                   {prod.volume}
                 </div>
 
                 {isAdmin && (
                   <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleStock(prod);
+                      }}
+                      title={prod.inStock === false ? 'Marcar como disponible' : 'Marcar como agotado'}
+                      className="w-8 h-8 rounded-full bg-white/90 hover:bg-amber-50 text-slate-500 hover:text-amber-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                    >
+                      {prod.inStock === false ? <PackageCheck className="w-4 h-4" /> : <PackageX className="w-4 h-4" />}
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -549,9 +583,10 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 </div>
                 <button
                   onClick={() => handleAddToCart(prod)}
-                  title="Agregar al carrito"
+                  disabled={prod.inStock === false}
+                  title={prod.inStock === false ? 'Producto agotado' : 'Agregar al carrito'}
                   aria-label={`Agregar ${prod.name} al carrito`}
-                  className="shrink-0 w-11 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+                  className="shrink-0 w-11 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ShoppingCart className="w-4 h-4" />
                 </button>
@@ -799,6 +834,16 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white resize-none"
                 />
               </div>
+
+              <label className="flex items-center gap-2 font-bold text-slate-800 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={inStock}
+                  onChange={(e) => setInStock(e.target.checked)}
+                  className="w-4 h-4 accent-slate-950 cursor-pointer"
+                />
+                Hay unidades disponibles (desmárcalo si está agotado)
+              </label>
 
               <PhotoPicker
                 label="Fotos del Producto"
