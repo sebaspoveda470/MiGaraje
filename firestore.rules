@@ -194,6 +194,23 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Reports (users flag content, only the admin reviews them) ----------
+
+    // One report per user and item: id is "{type}_{targetId}_{uid}"
+    match /reports/{reportId} {
+      allow create: if signedIn()
+        && incoming().reporterId == request.auth.uid
+        && reportId == incoming().targetType + '_' + incoming().targetId + '_' + request.auth.uid
+        && incoming().targetType in ['listing', 'post', 'comment', 'review']
+        && incoming().reason in ['estafa', 'ofensivo', 'spam', 'falso', 'otro']
+        && incoming().status == 'pendiente'
+        && incoming().notified == false
+        && incoming().createdAt == request.time
+        && isShortString(incoming().targetTitle, 300)
+        && (!('details' in incoming()) || (incoming().details is string && incoming().details.size() <= 500));
+      allow read, update, delete: if isAdmin();
+    }
+
     // ---------- Orders & partner stores ----------
 
     match /orders/{orderId} {

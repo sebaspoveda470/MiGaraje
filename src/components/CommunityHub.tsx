@@ -15,6 +15,7 @@ import {
   Check,
   UserPlus,
   LogOut,
+  Flag,
 } from 'lucide-react';
 import { CommunityClub, CommunityPost, PostComment, PostCategory, UserProfile, Vehicle } from '../types';
 import {
@@ -34,6 +35,7 @@ import { timeAgo } from '../utils/media';
 import { CreateCommunityModal } from './CreateCommunityModal';
 import { ShareButtons } from './ShareButtons';
 import { useConfirm } from './ConfirmDialog';
+import { useReport } from './ReportDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 
 interface CommunityHubProps {
@@ -76,6 +78,7 @@ const PostComments: React.FC<{
   requireAuth: () => boolean;
   onError: (message: string, err: unknown) => void;
 }> = ({ post, currentUserId, currentUser, activeVehicle, requireAuth, onError }) => {
+  const report = useReport();
   const [comments, setComments] = useState<PostComment[] | null>(null);
   const [text, setText] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -125,7 +128,19 @@ const PostComments: React.FC<{
                     {comment.authorCar && <span className="text-[10px] text-slate-500 block truncate">{comment.authorCar}</span>}
                   </div>
                 </div>
-                <span className="text-[10px] text-slate-400 shrink-0">{timeAgo(comment.createdAt)}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-[10px] text-slate-400">{timeAgo(comment.createdAt)}</span>
+                  {comment.authorId !== currentUserId && (
+                    <button
+                                onClick={() => report({ type: 'comment', id: comment.id, parentId: post.id, title: comment.content.slice(0, 120), ownerId: comment.authorId })}
+                                title="Reportar"
+                                aria-label="Reportar"
+                                className="w-7 h-7 rounded-full text-slate-300 hover:text-red-600 hover:bg-red-50 flex items-center justify-center cursor-pointer"
+                              >
+                                <Flag className="w-3.5 h-3.5" />
+                              </button>
+                  )}
+                </div>
               </div>
               <p className="leading-relaxed font-normal whitespace-pre-line">{comment.content}</p>
             </div>
@@ -172,6 +187,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   initialCommunityId,
 }) => {
   const confirmAction = useConfirm();
+  const report = useReport();
   const [communities, setCommunities] = useState<CommunityClub[]>([]);
   const [communitiesLoading, setCommunitiesLoading] = useState(true);
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
@@ -674,6 +690,16 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                                 className="w-7 h-7 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            {!canDelete && (
+                              <button
+                                onClick={() => report({ type: 'post', id: post.id, parentId: post.clubId, title: post.title, ownerId: post.authorId })}
+                                title="Reportar"
+                                aria-label="Reportar"
+                                className="w-7 h-7 rounded-full text-slate-300 hover:text-red-600 hover:bg-red-50 flex items-center justify-center cursor-pointer"
+                              >
+                                <Flag className="w-3.5 h-3.5" />
                               </button>
                             )}
                           </div>

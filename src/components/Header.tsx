@@ -15,7 +15,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Edit,
-  Crown
+  Crown,
+  Flag
 } from 'lucide-react';
 import { Vehicle, UserProfile, CartItem } from '../types';
 import { Logo } from './Logo';
@@ -36,6 +37,9 @@ interface HeaderProps {
   onOpenAddVehicleModal?: () => void;
   onEditVehicle?: (vehicle: Vehicle) => void;
   cartItemCount?: number;
+  /** Admin only: pending reports and a way to open the panel */
+  pendingReportsCount?: number;
+  onOpenReports?: () => void;
   cart?: CartItem[];
   onOpenCart?: () => void;
   onOpenCartModal?: () => void;
@@ -59,7 +63,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAddVehicleModal,
   onEditVehicle,
   cartItemCount,
-  cart,
+  pendingReportsCount,
+  onOpenReports,
+cart,
   onOpenCart,
   onOpenCartModal,
   onOpenAdvisorModal,
@@ -339,6 +345,23 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Admin: reports */}
+            {onOpenReports && (
+              <button
+                onClick={onOpenReports}
+                aria-label="Reportes de contenido"
+                title="Reportes de contenido"
+                className="relative p-2 sm:p-2.5 rounded-xl bg-white hover:bg-red-50 border border-slate-200 text-slate-600 hover:text-red-600 transition-all cursor-pointer shrink-0"
+              >
+                <Flag className="w-4 h-4" />
+                {!!pendingReportsCount && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white font-black text-[10px] min-w-4 h-4 px-1 rounded-full flex items-center justify-center">
+                    {pendingReportsCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Shopping Cart Button */}
             <button

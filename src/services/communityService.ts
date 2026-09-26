@@ -186,3 +186,8 @@ export async function addComment(
   batch.update(doc(postsRef, postId), { commentsCount: increment(1) });
   await batch.commit();
 }
+
+/** Deletes one comment (author or admin). The post's counter is left as is. */
+export async function deleteComment(postId: string, commentId: string): Promise<void> {
+  await deleteDoc(doc(collection(postsRef, postId, 'comments'), commentId));
+}

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart, Pencil } from 'lucide-react';
+import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart, Pencil, Flag } from 'lucide-react';
 import { VehicleListing } from '../types';
 import { PhotoGallery } from './PhotoPicker';
 import { ShareButtons } from './ShareButtons';
 import { getListingPhotos } from '../services/listingService';
 import { timeAgo } from '../utils/media';
+import { useReport } from './ReportDialog';
 
 interface VehicleDetailModalProps {
   car: VehicleListing;
@@ -46,6 +47,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   onClose,
 }) => {
   const [photos, setPhotos] = useState<string[]>(car.images);
+  const report = useReport();
 
   // Extra photos live in their own documents; load them when the listing opens
   useEffect(() => {
@@ -190,6 +192,20 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <div className="text-[11px] text-slate-500">Vendedor particular</div>
               </div>
             </section>
+
+            {!canManage && (
+              <div className="space-y-2">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  🔒 Nunca envíes dinero ni anticipos antes de ver el vehículo en persona y verificarlo en el RUNT.
+                </p>
+                <button
+                  onClick={() => report({ type: 'listing', id: car.id, title: car.title, ownerId: car.ownerId })}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-red-600 cursor-pointer"
+                >
+                  <Flag className="w-3.5 h-3.5" /> Reportar este anuncio
+                </button>
+              </div>
+            )}
 
             {canManage && (
               <section className="p-4 rounded-2xl border border-dashed border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

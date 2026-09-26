@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { X, Check, ShoppingCart, BadgeCheck, Loader2, Pencil, Trash2, MessageSquare } from 'lucide-react';
+import { X, Check, ShoppingCart, BadgeCheck, Loader2, Pencil, Trash2, MessageSquare, Flag } from 'lucide-react';
 import { CareProduct, ProductReview, UserProfile } from '../types';
 import { StarRating } from './StarRating';
 import { PhotoGallery } from './PhotoPicker';
 import { ShareButtons } from './ShareButtons';
 import { useConfirm } from './ConfirmDialog';
+import { useReport } from './ReportDialog';
 import { saveReview, deleteReview, findOrderWithProduct, summarizeRatings } from '../services/reviewService';
 import { timeAgo } from '../utils/media';
 
@@ -39,6 +40,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
   const images = getProductImages(product);
   const confirmAction = useConfirm();
+  const report = useReport();
 const summary = summarizeRatings(reviews);
   const myReview = currentUserId ? reviews.find((r) => r.userId === currentUserId) : undefined;
 
@@ -324,7 +326,7 @@ const summary = summarizeRatings(reviews);
                           <BadgeCheck className="w-3 h-3" /> Compra por MiGaraje
                         </span>
                       )}
-                      {canDelete && (
+                      {canDelete ? (
                         <button
                           onClick={() => handleDelete(review)}
                           title="Eliminar reseña"
@@ -332,6 +334,15 @@ const summary = summarizeRatings(reviews);
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
+                      ) : (
+                        <button
+                                onClick={() => report({ type: 'review', id: review.id, parentId: product.id, title: `${review.userName}: ${review.comment || `${review.rating} estrellas`}`.slice(0, 120), ownerId: review.userId })}
+                                title="Reportar"
+                                aria-label="Reportar"
+                                className="w-7 h-7 rounded-full text-slate-300 hover:text-red-600 hover:bg-red-50 flex items-center justify-center cursor-pointer"
+                              >
+                                <Flag className="w-3.5 h-3.5" />
+                              </button>
                       )}
                     </div>
                   </div>

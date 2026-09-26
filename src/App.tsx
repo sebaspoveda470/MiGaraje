@@ -11,6 +11,9 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { LegalModal, LegalDoc } from './components/LegalModal';
 import { OrdersPanel } from './components/OrdersPanel';
+import { ReportsPanel } from './components/ReportsPanel';
+import { ReportProvider } from './components/ReportDialog';
+import { subscribeToReports } from './services/reportService';
 import { subscribeToAllOrders } from './services/storeService';
 import { ProfileModal } from './components/ProfileModal';
 import { WebHero } from './components/WebHero';
@@ -45,6 +48,7 @@ import {
   CartItem,
   UserProfile,
   CheckoutOrder,
+  ContentReport,
 } from './types';
 import { Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
 import { getDocAlerts, describeDoc } from './utils/vehicleDocs';
@@ -103,6 +107,8 @@ export function App() {
   const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [orders, setOrders] = useState<CheckoutOrder[]>([]);
+  const [reports, setReports] = useState<ContentReport[]>([]);
+  const [isReportsOpen, setIsReportsOpen] = useState(false);
 
   // Shared catalog data (Firestore, realtime)
   const [carListings, setCarListings] = useState<VehicleListing[]>([]);
@@ -210,6 +216,15 @@ export function App() {
       return;
     }
     return subscribeToAllOrders(setOrders, showError('No se pudieron cargar los pedidos.'));
+  }, [isAdmin]);
+
+  // Content reports (admin only)
+  useEffect(() => {
+    if (!isAdmin) {
+      setReports([]);
+      return;
+    }
+    return subscribeToReports(setReports, showError('No se pudieron cargar los reportes.'));
   }, [isAdmin]);
 
   // Leaving a tab clears the item link from the address bar; the shared link is used only once
@@ -453,6 +468,7 @@ export function App() {
   const totalCartPrice = cartItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
 
   return (
+    <ReportProvider currentUserId={authUser?.uid || null} requireAuth={requireAuth} onDone={showToast}>
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans relative overflow-x-hidden selection:bg-slate-900 selection:text-white">
 
       {/* Toast Banner */}
@@ -489,6 +505,8 @@ export function App() {
           onEditVehicle={handleOpenEditVehicle}
           cartItemCount={totalCartCount}
           onOpenCart={() => setIsCartOpen(true)}
+          pendingReportsCount={reports.filter((r) => r.status === 'pendiente').length}
+          onOpenReports={isAdmin ? () => setIsReportsOpen(true) : undefined}
         />
       </div>
 
@@ -691,9 +709,18 @@ initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
         onError={(message, err) => showError(message)(err)}
       />
 
-      <LegalModal doc={legalDoc}onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
+      <ReportsPanel
+        isOpen={isReportsOpen && isAdmin}
+        reports={reports}
+        onClose={() => setIsReportsOpen(false)}
+        onNotify={(message) => showToast(message)}
+        onError={(message, err) => showError(message)(err)}
+      />
+
+      <LegalModal doc={legalDoc} onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
 
     </div>
+    </ReportProvider>
   );
 }
 

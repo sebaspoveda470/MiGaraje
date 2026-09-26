@@ -316,3 +316,24 @@ export interface ServiceRecord {
   cost: number;
   workshop?: string;
 }
+
+export type ReportTargetType = 'listing' | 'post' | 'comment' | 'review';
+export type ReportReason = 'estafa' | 'ofensivo' | 'spam' | 'falso' | 'otro';
+
+/** Something a user flagged for the admin to review */
+export interface ContentReport {
+  id: string;
+  targetType: ReportTargetType;
+  targetId: string;
+  /** Post id for comments, product id for reviews, club id for posts */
+  parentId?: string;
+  /** Short text so the admin knows what was reported */
+  targetTitle: string;
+  targetOwnerId?: string;
+  reason: ReportReason;
+  details?: string;
+  reporterId: string;
+  status: 'pendiente' | 'resuelto' | 'descartado';
+  notified: boolean;
+  createdAt: number;
+}
