@@ -4,6 +4,6 @@ export const SITE = {
   name: 'MiGaraje',
   responsible: 'Sebastián Poveda (MiGaraje)',
   city: 'Bogotá D.C., Colombia',
-  contactEmail: 'sebaspoveda317@gmail.com',
+  contactEmail: 'migaraje.co@gmail.com',
   legalLastUpdated: '25 de septiembre de 2026',
 };
