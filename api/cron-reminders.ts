@@ -110,9 +110,12 @@ export async function GET(request: Request): Promise<Response> {
       await Promise.all(markSent.map((fn) => fn()));
       emailsSent++;
     } catch (err) {
+      console.error(`No se pudo enviar el recordatorio a ${userDoc.id}`, err);
       errors.push(`${userDoc.id}: ${(err as Error).message}`);
     }
   }
 
+  // Visible in Vercel → Logs
+  console.log(`Recordatorios: ${emailsSent} correo(s) enviado(s), ${errors.length} error(es)`, errors);
   return Response.json({ ok: errors.length === 0, emailsSent, errors });
 }
