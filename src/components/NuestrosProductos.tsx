@@ -22,7 +22,8 @@ import {
   ShoppingCart,
   Loader2,
   Images,
-  Link as LinkIcon
+  Link as LinkIcon,
+  ClipboardList
 } from 'lucide-react';
 import { CareProduct, CareCategory, CartItem, ProductReview, UserProfile } from '../types';
 import { compressImageFile, toWhatsAppNumber } from '../utils/media';
@@ -46,6 +47,8 @@ interface NuestrosProductosProps {
   currentUser: UserProfile | null;
   requireAuth: () => boolean;
   onError: (message: string, err: unknown) => void;
+  pendingOrdersCount: number;
+  onOpenOrders: () => void;
 }
 
 const CATEGORIES: { id: CareCategory | 'todos'; label: string; icon: any }[] = [
@@ -70,8 +73,10 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   currentUser,
   requireAuth,
   onError,
+  pendingOrdersCount,
+  onOpenOrders,
 }) => {
-  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const [reviews, setReviews]= useState<ProductReview[]>([]);
 
   useEffect(() => {
     return subscribeToReviews(setReviews, (err) => onError('No se pudieron cargar las reseñas.', err));
@@ -370,6 +375,17 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
           >
             <Phone className="w-3.5 h-3.5 text-blue-600" />
             <span>{salesWhatsApp ? 'Configurar WhatsApp de Ventas' : 'Configurar WhatsApp de Ventas (pendiente)'}</span>
+          </button>
+
+          <button
+            onClick={onOpenOrders}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all"
+          >
+            <ClipboardList className="w-3.5 h-3.5" />
+            <span>Ver Pedidos</span>
+            {pendingOrdersCount > 0 && (
+              <span className="bg-white text-blue-700 text-[10px] font-black rounded-full px-1.5 py-0.5">{pendingOrdersCount} nuevos</span>
+            )}
           </button>
         </div>
         )}

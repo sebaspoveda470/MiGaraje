@@ -10,6 +10,8 @@ import { CartDrawer } from './components/CartDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { LegalModal, LegalDoc } from './components/LegalModal';
+import { OrdersPanel } from './components/OrdersPanel';
+import { subscribeToAllOrders } from './services/storeService';
 import { ProfileModal } from './components/ProfileModal';
 import { WebHero } from './components/WebHero';
 import { WebFooter } from './components/WebFooter';
@@ -39,6 +41,7 @@ import {
   CareProduct,
   CartItem,
   UserProfile,
+  CheckoutOrder,
 } from './types';
 import { Sparkles, AlertCircle } from 'lucide-react';
 
@@ -91,6 +94,8 @@ export function App() {
   const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [orders, setOrders] = useState<CheckoutOrder[]>([]);
 
   // Shared catalog data (Firestore, realtime)
   const [carListings, setCarListings] = useState<VehicleListing[]>([]);
@@ -190,6 +195,15 @@ export function App() {
       console.error('No se pudo cargar la configuración de la tienda', err)
     );
   }, []);
+
+  // Orders (admin only)
+  useEffect(() => {
+    if (!isAdmin) {
+      setOrders([]);
+      return;
+    }
+    return subscribeToAllOrders(setOrders, showError('No se pudieron cargar los pedidos.'));
+  }, [isAdmin]);
 
   // Keep a valid active vehicle selected
   useEffect(() => {
@@ -464,6 +478,8 @@ export function App() {
             currentUser={user}
             requireAuth={requireAuth}
             onError={(message, err) => showError(message)(err)}
+            pendingOrdersCount={orders.filter((o) => o.status === 'pendiente').length}
+            onOpenOrders={() => setIsOrdersOpen(true)}
           />
         )}
 
@@ -565,7 +581,14 @@ export function App() {
         }}
       />
 
-      <LegalModal doc={legalDoc} onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
+      <OrdersPanel
+        isOpen={isOrdersOpen && isAdmin}
+        orders={orders}
+        onClose={() => setIsOrdersOpen(false)}
+        onError={(message, err) => showError(message)(err)}
+      />
+
+      <LegalModal doc={legalDoc}onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
 
     </div>
   );

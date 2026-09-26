@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { PartnerStore, CheckoutOrder } from '../types';
 
@@ -44,4 +44,22 @@ export async function createOrder(
   };
   await setDoc(ref, { ...order, serverTime: serverTimestamp() });
   return order;
+}
+
+/**
+ * Streams every order, newest first. Admin only (enforced by firestore.rules).
+ */
+export function subscribeToAllOrders(
+  onChange: (orders: CheckoutOrder[]) => void,
+  onError?: (err: Error) => void
+): () => void {
+  return onSnapshot(
+    query(collection(db, 'orders'), orderBy('createdAt', 'desc')),
+    (snapshot) => onChange(snapshot.docs.map((d) => ({ ...(d.data() as CheckoutOrder), id: d.id }))),
+    onError
+  );
+}
+
+export async function updateOrderStatus(orderId: string, status: CheckoutOrder['status']): Promise<void> {
+  await updateDoc(doc(db, 'orders', orderId), { status, statusUpdatedAt: serverTimestamp() });
 }
