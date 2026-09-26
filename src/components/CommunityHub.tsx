@@ -32,6 +32,8 @@ import {
 } from '../services/communityService';
 import { timeAgo } from '../utils/media';
 import { CreateCommunityModal } from './CreateCommunityModal';
+import { ShareButtons } from './ShareButtons';
+import { syncDeepLink } from '../utils/shareLinks';
 
 interface CommunityHubProps {
   activeVehicle: Vehicle | null;
@@ -41,6 +43,7 @@ interface CommunityHubProps {
   requireAuth: () => boolean;
   onError: (message: string, err: unknown) => void;
   onNotify: (message: string) => void;
+  initialCommunityId?: string | null;
 }
 
 const CATEGORY_LABELS: Record<PostCategory, string> = {
@@ -165,6 +168,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   requireAuth,
   onError,
   onNotify,
+  initialCommunityId,
 }) => {
   const [communities, setCommunities] = useState<CommunityClub[]>([]);
   const [communitiesLoading, setCommunitiesLoading] = useState(true);
@@ -202,15 +206,27 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     );
   }, []);
 
-  // Pick a default club: the one matching the active vehicle's brand, else the first one
+  // Pick a default club: a shared link, else the one matching the active vehicle's brand, else the first one
   useEffect(() => {
     if (communities.length === 0) return;
     if (selectedClubId && communities.some((c) => c.id === selectedClubId)) return;
+    if (!selectedClubId && initialCommunityId) {
+      if (communities.some((c) => c.id === initialCommunityId)) {
+        setSelectedClubId(initialCommunityId);
+        return;
+      }
+      syncDeepLink(null);
+    }
     const brandMatch = activeVehicle
       ? communities.find((c) => c.brand.toLowerCase() === activeVehicle.brand.toLowerCase())
       : undefined;
     setSelectedClubId((brandMatch || communities[0]).id);
-  }, [communities, activeVehicle, selectedClubId]);
+  }, [communities, activeVehicle, selectedClubId, initialCommunityId]);
+
+  const selectClub = (id: string) => {
+    setSelectedClubId(id);
+    syncDeepLink({ type: 'comunidad', id });
+  };
 
   useEffect(() => {
     if (!selectedClubId) return;
@@ -259,7 +275,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const handleCreateCommunity = async (data: Omit<CommunityClub, 'id' | 'memberIds' | 'createdBy' | 'createdAt'>) => {
     if (!currentUserId) return;
     const id = await createCommunity(currentUserId, data);
-    setSelectedClubId(id);
+    selectClub(id);
     onNotify(`¡Comunidad "${data.name}" creada! Invita a otros propietarios a unirse.`);
   };
 
@@ -465,7 +481,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                 return (
                   <button
                     key={comm.id}
-                    onClick={() => setSelectedClubId(comm.id)}
+                    onClick={() => selectClub(comm.id)}
                     className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer ${
                       isSelected
                         ? 'bg-slate-950 text-white border-slate-950 shadow-md'
@@ -522,6 +538,14 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                         <span>{memberLabel(currentCommunity.memberIds.length)}</span>
                         <span>•</span>
                         <span>{postsLoading ? 'Cargando…' : `${posts.length} ${posts.length === 1 ? 'publicación' : 'publicaciones'}`}</span>
+                      </div>
+                      <div className="mt-2.5">
+                        <ShareButtons
+                          type="comunidad"
+                          id={currentCommunity.id}
+                          text={`Únete a ${currentCommunity.name} en MiGaraje:`}
+                          compact
+                        />
                       </div>
                     </div>
                   </div>

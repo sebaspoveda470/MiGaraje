@@ -243,7 +243,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
               <p className="text-[11px] sm:text-xs text-slate-300 truncate">
                 {isEditing 
                   ? 'Actualiza kilometraje, placas, motor, foto o especificaciones' 
-                  : 'Diagnósticos IA, repuestos compatibles y bitácora'}
+                  : 'Plan de mantenimiento y recordatorios de SOAT y tecnomecánica'}
               </p>
             </div>
           </div>

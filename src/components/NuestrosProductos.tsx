@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { 
   Sparkles, 
   Search, 
@@ -31,6 +31,7 @@ import { toWhatsAppNumber } from '../utils/media';
 import { subscribeToReviews, summarizeRatings } from '../services/reviewService';
 import { ProductDetailModal, getProductImages } from './ProductDetailModal';
 import { PhotoPicker } from './PhotoPicker';
+import { syncDeepLink } from '../utils/shareLinks';
 
 // Photos live inside the product document (1 MB max), so keep a few small ones.
 const MAX_PRODUCT_PHOTOS = 4;
@@ -51,6 +52,7 @@ interface NuestrosProductosProps {
   onError: (message: string, err: unknown) => void;
   pendingOrdersCount: number;
   onOpenOrders: () => void;
+  initialProductId?: string | null;
 }
 
 const CATEGORIES: { id: CareCategory | 'todos'; label: string; icon: any }[] = [
@@ -77,6 +79,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   onError,
   pendingOrdersCount,
   onOpenOrders,
+  initialProductId,
 }) => {
   const [reviews, setReviews]= useState<ProductReview[]>([]);
 
@@ -95,6 +98,22 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<CareCategory | 'todos'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<CareProduct | null>(null);
+
+  // Open the product from a shared link once the catalog arrives
+  const deepLinkHandled = useRef(!initialProductId);
+  useEffect(() => {
+    if (deepLinkHandled.current || isLoading) return;
+    deepLinkHandled.current = true;
+    const product = products.find((p) => p.id === initialProductId);
+    if (product) setSelectedProduct(product);
+    else syncDeepLink(null);
+  }, [isLoading, products, initialProductId]);
+
+  // Keep the address bar pointing at the open product
+  useEffect(() => {
+    if (!deepLinkHandled.current) return;
+    syncDeepLink(selectedProduct ? { type: 'producto', id: selectedProduct.id } : null);
+  }, [selectedProduct]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   Car, 
   Search, 
@@ -32,6 +32,8 @@ import {
 import { VehicleListing, UserProfile } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { PhotoPicker, PhotoGallery } from './PhotoPicker';
+import { ShareButtons } from './ShareButtons';
+import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
 
 interface CarMarketplaceProps {
@@ -44,6 +46,7 @@ interface CarMarketplaceProps {
   onPublishListing: (listing: Omit<VehicleListing, 'id'>) => Promise<void>;
   onDeleteListing: (listingId: string) => void;
   onToggleSold: (listing: VehicleListing, sold: boolean) => void;
+  initialListingId?: string | null;
 }
 
 // Listing documents also hold the photos (1 MB max per document)
@@ -77,6 +80,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   onPublishListing,
   onDeleteListing,
   onToggleSold,
+  initialListingId,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('todas');
@@ -85,6 +89,22 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [maxPrice, setMaxPrice] = useState<number>(PRICE_CAP);
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
   const [selectedCar, setSelectedCar] = useState<VehicleListing | null>(null);
+
+  // Open the listing from a shared link once the listings arrive
+  const deepLinkHandled = useRef(!initialListingId);
+  useEffect(() => {
+    if (deepLinkHandled.current || isLoading) return;
+    deepLinkHandled.current = true;
+    const car = carListings.find((c) => c.id === initialListingId);
+    if (car) setSelectedCar(car);
+    else syncDeepLink(null);
+  }, [isLoading, carListings, initialListingId]);
+
+  // Keep the address bar pointing at the open listing
+  useEffect(() => {
+    if (!deepLinkHandled.current) return;
+    syncDeepLink(selectedCar ? { type: 'vehiculo', id: selectedCar.id } : null);
+  }, [selectedCar]);
 
   // Form State for "Vender mi Vehículo" Publishing Modal
   const [pubBrand, setPubBrand] = useState('Mazda');
@@ -663,6 +683,14 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                       <span>Año {selectedCar.year}</span>
                       <span>•</span>
                       <span>{selectedCar.mileage.toLocaleString()} km</span>
+                    </div>
+                    <div className="mt-3">
+                      <ShareButtons
+                        type="vehiculo"
+                        id={selectedCar.id}
+                        text={`Mira este ${selectedCar.title} en venta por $${selectedCar.price.toLocaleString('es-CO')} en MiGaraje:`}
+                        compact
+                      />
                     </div>
                   </div>
 

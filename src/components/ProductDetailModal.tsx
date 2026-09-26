@@ -3,6 +3,7 @@ import { X, Check, ShoppingCart, BadgeCheck, Loader2, Pencil, Trash2, MessageSqu
 import { CareProduct, ProductReview, UserProfile } from '../types';
 import { StarRating } from './StarRating';
 import { PhotoGallery } from './PhotoPicker';
+import { ShareButtons } from './ShareButtons';
 import { saveReview, deleteReview, findOrderWithProduct, summarizeRatings } from '../services/reviewService';
 import { timeAgo } from '../utils/media';
 
@@ -139,6 +140,14 @@ const summary = summarizeRatings(reviews);
             <div>
               <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">{product.subcategory}</span>
               <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-1 pr-6">{product.name}</h2>
+              <div className="mt-2">
+                <ShareButtons
+                  type="producto"
+                  id={product.id}
+                  text={`Mira ${product.name} de MiGaraje:`}
+                  compact
+                />
+              </div>
 
               {summary.count > 0 ? (
                 <a href="#resenas" className="flex items-center gap-2 mt-2 text-xs text-slate-600 hover:underline">
@@ -231,7 +240,7 @@ const summary = summarizeRatings(reviews);
               <div className="sm:col-span-2 space-y-1">
                 {distribution.map((row) => (
                   <div key={row.stars} className="flex items-center gap-2 text-[11px] text-slate-600">
-                    <span className="w-12 shrink-0">{row.stars} estrellas</span>
+                    <span className="w-8 shrink-0 whitespace-nowrap">{row.stars} ★</span>
                     <div className="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
                       <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(row.count / summary.count) * 100}%` }} />
                     </div>

@@ -1,0 +1,64 @@
+import React, { useState } from 'react';
+import { Share2, Link as LinkIcon, Check, MessageCircle } from 'lucide-react';
+import { DeepLinkType, buildShareUrl } from '../utils/shareLinks';
+
+interface ShareButtonsProps {
+  type: DeepLinkType;
+  id: string;
+  /** Message that goes before the link when sharing */
+  text: string;
+  compact?: boolean;
+}
+
+/**
+ * "Share on WhatsApp" + "Copy link" (or the phone's native share sheet when available).
+ */
+export const ShareButtons: React.FC<ShareButtonsProps> = ({ type, id, text, compact }) => {
+  const [copied, setCopied] = useState(false);
+  const url = buildShareUrl(type, id);
+  const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      window.prompt('Copia este enlace:', url);
+      return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const nativeShare = () => {
+    navigator.share({ title: 'MiGaraje', text, url }).catch(() => {
+      // User closed the share sheet
+    });
+  };
+
+  const buttonClass =
+    'flex items-center justify-center gap-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 cursor-pointer transition-colors';
+  const size = compact ? 'px-2.5 py-1.5' : 'px-3.5 py-2';
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <a
+        href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${buttonClass} ${size}`}
+      >
+        <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+        Compartir
+      </a>
+      <button type="button" onClick={copyLink} className={`${buttonClass} ${size}`}>
+        {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <LinkIcon className="w-3.5 h-3.5 text-blue-600" />}
+        {copied ? '¡Copiado!' : 'Copiar enlace'}
+      </button>
+      {canNativeShare && (
+        <button type="button" onClick={nativeShare} aria-label="Más opciones para compartir" className={`${buttonClass} ${size}`}>
+          <Share2 className="w-3.5 h-3.5 text-slate-600" />
+        </button>
+      )}
+    </div>
+  );
+};

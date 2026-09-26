@@ -45,6 +45,7 @@ import {
 } from './types';
 import { Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
 import { getDocAlerts, describeDoc } from './utils/vehicleDocs';
+import { readDeepLink, syncDeepLink, TAB_FOR_LINK } from './utils/shareLinks';
 
 // Keys written by the previous localStorage-only version of the app.
 const LEGACY_STORAGE_KEYS = [
@@ -86,7 +87,9 @@ export function App() {
   const [activeVehicleId, setActiveVehicleId] = useState<string | null>(() => readStorage('migaraje_active_vehicle'));
 
   // Navigation & UI Modals State
-  const [activeTab, setActiveTab] = useState<string>('garaje');
+  // A shared link (?vehiculo=, ?producto=, ?comunidad=) opens that item directly
+  const [deepLink, setDeepLink] = useState(() => readDeepLink());
+  const [activeTab, setActiveTab] = useState<string>(() => (deepLink ? TAB_FOR_LINK[deepLink.type] : 'garaje'));
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
   const [isStoreRegisterOpen, setIsStoreRegisterOpen] = useState<boolean>(false);
@@ -205,6 +208,13 @@ export function App() {
     }
     return subscribeToAllOrders(setOrders, showError('No se pudieron cargar los pedidos.'));
   }, [isAdmin]);
+
+  // Leaving a tab clears the item link from the address bar; the shared link is used only once
+  useEffect(() => {
+    const link = readDeepLink();
+    if (link && TAB_FOR_LINK[link.type] !== activeTab) syncDeepLink(null);
+    if (deepLink && TAB_FOR_LINK[deepLink.type] !== activeTab) setDeepLink(null);
+  }, [activeTab]);
 
   // Keep a valid active vehicle selected
   useEffect(() => {
@@ -486,6 +496,7 @@ export function App() {
             onPublishListing={handlePublishListing}
             onDeleteListing={handleDeleteListing}
             onToggleSold={handleToggleSold}
+            initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
 />
         )}
 
@@ -506,6 +517,7 @@ export function App() {
             requireAuth={requireAuth}
             onError={(message, err) => showError(message)(err)}
             pendingOrdersCount={orders.filter((o) => o.status === 'pendiente').length}
+            initialProductId={deepLink?.type === 'producto' ? deepLink.id : null}
             onOpenOrders={() => setIsOrdersOpen(true)}
           />
         )}
@@ -520,6 +532,7 @@ export function App() {
             requireAuth={requireAuth}
             onError={(message, err) => showError(message)(err)}
             onNotify={(message) => showToast(message)}
+            initialCommunityId={deepLink?.type === 'comunidad' ? deepLink.id : null}
           />
         )}
 
