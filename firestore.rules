@@ -90,6 +90,17 @@ service cloud.firestore {
         && incoming().images is list && incoming().images.size() <= 5;
 
       allow delete: if isUser(resource.data.ownerId) || isAdmin();
+
+      // Extra photos, one per document (the listing keeps only its cover)
+      match /photos/{photoId} {
+        allow read: if true;
+        allow create, update: if signedIn()
+          && get(/databases/$(database)/documents/vehicleListings/$(listingId)).data.ownerId == request.auth.uid
+          && incoming().url is string && incoming().url.size() < 1000000
+          && incoming().index is int && incoming().index >= 1 && incoming().index <= 20;
+        allow delete: if signedIn()
+          && (get(/databases/$(database)/documents/vehicleListings/$(listingId)).data.ownerId == request.auth.uid || isAdmin());
+      }
     }
 
     // ---------- Nuestros Productos (admin only) ----------

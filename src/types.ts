@@ -106,6 +106,8 @@ export interface VehicleListing {
   createdAt?: number;
   /** Missing on older listings, which count as available */
   status?: 'disponible' | 'vendido';
+  /** Total photos: `images` holds the cover, the rest live in vehicleListings/{id}/photos */
+  photoCount?: number;
 }
 
 export type CareCategory = 'exterior' | 'interior' | 'motor_aditivos' | 'herramientas';

@@ -26,7 +26,7 @@ import {
   saveVehicle,
   deleteVehicle,
 } from './services/userService';
-import { subscribeToListings, publishListing, deleteListing, setListingSold } from './services/listingService';
+import { subscribeToListings, publishListing, deleteListing, setListingSold, ExtraPhotosError } from './services/listingService';
 import {
   subscribeToProducts,
   saveProduct,
@@ -355,9 +355,17 @@ export function App() {
   };
 
   // Listing Management (Compra & Venta de Vehículos)
-  const handlePublishListing = async (newListing: Omit<VehicleListing, 'id'>) => {
+  const handlePublishListing = async (newListing: Omit<VehicleListing, 'id'>, photos: string[]) => {
     if (!authUser) return;
-    await publishListing(authUser.uid, newListing);
+    try {
+      await publishListing(authUser.uid, newListing, photos);
+    } catch (err) {
+      if (err instanceof ExtraPhotosError) {
+        showToast('Tu vehículo se publicó, pero solo con la foto principal. Inténtalo de nuevo más tarde para agregar las demás.', true);
+        return;
+      }
+      throw err;
+    }
     showToast(`¡Tu ${newListing.title} ha sido publicado exitosamente en Compra & Venta!`);
   };
 

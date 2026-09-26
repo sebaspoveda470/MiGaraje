@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Camera, Loader2, X, Link as LinkIcon } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Camera, Loader2, X, Link as LinkIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { compressImageFile } from '../utils/media';
 
 interface PhotoPickerProps {
@@ -126,43 +126,90 @@ export const PhotoPicker: React.FC<PhotoPickerProps> = ({ label, images, onChang
 };
 
 /**
- * Main photo with clickable thumbnails.
+ * Main photo with thumbnails. Swipe on phones, arrows on desktop.
  */
 export const PhotoGallery: React.FC<{
   images: string[];
   alt: string;
   aspectClass?: string;
   overlay?: React.ReactNode;
-  /** "contain" shows the whole photo (no cropping) */
+  /** "contain" shows the whole photo (no cropping) over a blurred copy of itself */
   fit?: 'cover' | 'contain';
 }> = ({ images, alt, aspectClass = 'aspect-square', overlay, fit = 'cover' }) => {
   const [active, setActive] = useState(0);
-  const current = images[active] || images[0];
+  const touchStartX = useRef<number | null>(null);
+  const count = images.length;
+  const index = Math.min(active, Math.max(0, count - 1));
+  const current = images[index];
+
+  const go = (delta: number) => setActive((i) => (i + delta + count) % count);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || count < 2) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+    touchStartX.current = null;
+  };
 
   return (
     <div className="space-y-2">
-      <div className={`${aspectClass} rounded-2xl ${fit === 'contain' ? 'bg-white' : 'bg-slate-100'} overflow-hidden relative border border-slate-200`}>
-        <img src={current} alt={alt} className={`w-full h-full ${fit === 'contain' ? 'object-contain' : 'object-cover'}`} />
+      <div
+        className={`${aspectClass} rounded-2xl bg-slate-100 overflow-hidden relative border border-slate-200 select-none group/gallery`}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {fit === 'contain' && (
+          <img src={current} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-50" />
+        )}
+        <img
+          src={current}
+          alt={alt}
+          draggable={false}
+          className={`relative w-full h-full ${fit === 'contain' ? 'object-contain' : 'object-cover'}`}
+        />
         {overlay}
-        {images.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-            {active + 1} / {images.length}
-          </div>
+
+        {count > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label="Foto anterior"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 hover:bg-white text-slate-800 shadow-md flex items-center justify-center cursor-pointer sm:opacity-0 sm:group-hover/gallery:opacity-100 transition-opacity"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label="Foto siguiente"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 hover:bg-white text-slate-800 shadow-md flex items-center justify-center cursor-pointer sm:opacity-0 sm:group-hover/gallery:opacity-100 transition-opacity"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+              {index + 1} / {count}
+            </div>
+          </>
         )}
       </div>
-      {images.length > 1 && (
-        <div className="grid grid-cols-5 gap-2">
+
+      {count > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
           {images.map((src, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => setActive(idx)}
               aria-label={`Ver foto ${idx + 1}`}
-              className={`aspect-square rounded-xl overflow-hidden border-2 bg-white cursor-pointer transition-all ${
-                idx === active ? 'border-blue-600' : 'border-slate-200 opacity-70 hover:opacity-100'
+              className={`w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden border-2 bg-white cursor-pointer transition-all ${
+                idx === index ? 'border-blue-600' : 'border-slate-200 opacity-70 hover:opacity-100'
               }`}
             >
-              <img src={src} alt="" className="w-full h-full object-contain" />
+              <img src={src} alt="" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

@@ -31,8 +31,8 @@ import {
 } from 'lucide-react';
 import { VehicleListing, UserProfile } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
-import { PhotoPicker, PhotoGallery } from './PhotoPicker';
-import { ShareButtons } from './ShareButtons';
+import { PhotoPicker } from './PhotoPicker';
+import { VehicleDetailModal } from './VehicleDetailModal';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
@@ -44,14 +44,14 @@ interface CarMarketplaceProps {
   currentUser: UserProfile | null;
   isAdmin: boolean;
   requireAuth: () => boolean;
-  onPublishListing: (listing: Omit<VehicleListing, 'id'>) => Promise<void>;
+  onPublishListing: (listing: Omit<VehicleListing, 'id'>, photos: string[]) => Promise<void>;
   onDeleteListing: (listingId: string) => void;
   onToggleSold: (listing: VehicleListing, sold: boolean) => void;
   initialListingId?: string | null;
 }
 
-// Listing documents also hold the photos (1 MB max per document)
-const MAX_LISTING_PHOTOS = 4;
+// The cover lives in the listing and each extra photo in its own document
+const MAX_LISTING_PHOTOS = 10;
 
 export const isSold = (car: VehicleListing) => car.status === 'vendido';
 
@@ -210,7 +210,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
   const getWhatsAppLink= (car: VehicleListing) => {
     const phoneWithCountry = toWhatsAppNumber(car.whatsappNumber || car.sellerPhone);
-    const text = `Hola ${car.sellerName}! 👋 Vi tu vehículo publicado en MiGaraje: *${car.title}* por $${car.price.toLocaleString()} COP en ${car.location}. ¿Aún está disponible para agendar una cita o peritaje?`;
+    const text = `Hola ${car.sellerName}! 👋 Vi tu vehículo publicado en MiGaraje: *${car.title}* por $${car.price.toLocaleString('es-CO')} COP en ${car.location}. ¿Aún está disponible para agendar una cita o peritaje?`;
     return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`;
   };
 
@@ -266,7 +266,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     setIsPublishing(true);
     setPublishError(null);
     try {
-      await onPublishListing(newListing);
+      await onPublishListing(newListing, pubImages);
       setShowPublishModal(false);
       // Reset form
       setPubModel('');
@@ -463,9 +463,9 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     </div>
                   )}
 
-                  {car.images.length > 1 && (
+                  {(car.photoCount || car.images.length) > 1 && (
                     <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
-                      <Images className="w-3 h-3" /> {car.images.length}
+                      <Images className="w-3 h-3" /> {car.photoCount || car.images.length}
                     </div>
                   )}
 
@@ -523,7 +523,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     </span>
                     <div className="flex items-center gap-1 text-slate-600 font-medium">
                       <Gauge className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{car.mileage.toLocaleString()} km</span>
+                      <span>{car.mileage.toLocaleString('es-CO')} km</span>
                     </div>
                   </div>
 
@@ -561,14 +561,14 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase font-bold">Precio de Venta</span>
                     <div className="text-xl font-black text-slate-950 tracking-tight">
-                      ${car.price.toLocaleString()} <span className="text-xs text-slate-500 font-normal">COP</span>
+                      ${car.price.toLocaleString('es-CO')} <span className="text-xs text-slate-500 font-normal">COP</span>
                     </div>
                   </div>
 
                   <div className="text-right">
                     <span className="text-[10px] text-slate-500 uppercase font-bold">Cuota Estimada</span>
                     <div className="text-xs font-mono font-bold text-blue-600">
-                      Desde ${monthlyEstimate.toLocaleString()}/m
+                      Desde ${monthlyEstimate.toLocaleString('es-CO')}/m
                     </div>
                   </div>
                 </div>
@@ -646,239 +646,16 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
       {/* Vehicle Details Modal */}
       {selectedCar && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden relative max-h-[92dvh] flex flex-col">
-            
-            <button
-              onClick={() => setSelectedCar(null)}
-              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white/80 hover:bg-white text-slate-600 hover:text-slate-950 border border-slate-200 cursor-pointer shadow-xs"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="overflow-y-auto flex-1">
-              
-              {/* Photo Showcase */}
-              <div className="p-3 sm:p-4 pb-0 sm:pb-0">
-                <PhotoGallery
-                  key={selectedCar.id}
-                  images={selectedCar.images}
-                  alt={selectedCar.title}
-                  aspectClass="aspect-16/9"
-                  fit="contain"
-                  overlay={
-                    <div className="absolute top-3 left-3 flex flex-wrap gap-2 pr-12">
-                      <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-md">
-                        {selectedCar.brand} {selectedCar.model}
-                      </span>
-                      {isSold(selectedCar) && (
-                        <span className="bg-red-600 text-white text-xs font-black px-3 py-1 rounded-md">VENDIDO</span>
-                      )}
-                      {selectedCar.plateEnding && (
-                        <span className="bg-blue-600 text-white text-xs font-mono font-bold px-2.5 py-1 rounded-md">
-                          Placa terminada en {selectedCar.plateEnding} ({selectedCar.plateCity || selectedCar.city})
-                        </span>
-                      )}
-                    </div>
-                  }
-                />
-              </div>
-
-              <div className="p-6 sm:p-8 space-y-6">
-                
-                {/* Title & Price Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-                      {selectedCar.title}
-                    </h2>
-                    <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                      <MapPin className="w-3.5 h-3.5 text-blue-600" />
-                      <span>{selectedCar.location}</span>
-                      <span>•</span>
-                      <span>Año {selectedCar.year}</span>
-                      <span>•</span>
-                      <span>{selectedCar.mileage.toLocaleString()} km</span>
-                    </div>
-                    <div className="mt-3">
-                      <ShareButtons
-                        type="vehiculo"
-                        id={selectedCar.id}
-                        text={`Mira este ${selectedCar.title} en venta por $${selectedCar.price.toLocaleString('es-CO')} en MiGaraje:`}
-                        compact
-                      />
-                    </div>
-                  </div>
-
-                  <div className="text-left sm:text-right">
-                    <span className="text-xs text-slate-500 uppercase font-bold">Precio de Contado</span>
-                    <div className="text-2xl sm:text-3xl font-black text-slate-950">
-                      ${selectedCar.price.toLocaleString()} <span className="text-xs text-slate-500 font-normal">COP</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Colombian Legal & Document Status */}
-                <div className="bg-blue-50/60 border border-blue-200 rounded-2xl p-4 sm:p-5 space-y-3">
-                  <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileCheck className="w-4 h-4 text-blue-600" />
-                    <span>Documentos (declarados por el vendedor)</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div className="p-2.5 rounded-xl bg-white border border-blue-100">
-                      <div className="text-[10px] text-slate-500 font-bold uppercase">SOAT</div>
-                      <div className={`font-bold mt-0.5 ${selectedCar.soatValid ? 'text-blue-700' : 'text-slate-500'}`}>{selectedCar.soatValid ? 'Vigente' : 'No declarado'}</div>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-white border border-blue-100">
-                      <div className="text-[10px] text-slate-500 font-bold uppercase">Tecno-Mecánica</div>
-                      <div className={`font-bold mt-0.5 ${selectedCar.tecnoValid ? 'text-blue-700' : 'text-slate-500'}`}>{selectedCar.tecnoValid ? 'Al Día' : 'No declarada'}</div>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-white border border-blue-100">
-                      <div className="text-[10px] text-slate-500 font-bold uppercase">Único Dueño</div>
-                      <div className="font-bold text-slate-900 mt-0.5">{selectedCar.isUniqueOwner ? 'Sí' : 'No'}</div>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-white border border-blue-100">
-                      <div className="text-[10px] text-slate-500 font-bold uppercase">Pico y Placa</div>
-                      <div className="font-bold text-slate-900 mt-0.5">Dígito {selectedCar.plateEnding || 'N/A'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    Detalles y Comentarios del Vendedor
-                  </h4>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200 whitespace-pre-line">
-                    {selectedCar.description || 'El vendedor no agregó una descripción. Escríbele por WhatsApp para más detalles.'}
-                  </p>
-                </div>
-
-                {/* Specifications Grid */}
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    Ficha Técnica
-                  </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Motor</div>
-                      <div className="font-bold text-slate-900">{selectedCar.specs?.engine || 'No indicado'}</div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Transmisión</div>
-                      <div className="font-bold text-slate-900">{selectedCar.specs?.transmission || 'Automática'}</div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Combustible</div>
-                      <div className="font-bold text-slate-900">{selectedCar.specs?.fuel || 'Gasolina'}</div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Color</div>
-                      <div className="font-bold text-slate-900">{selectedCar.specs?.color || 'No indicado'}</div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Kilometraje</div>
-                      <div className="font-bold text-slate-900">{selectedCar.mileage.toLocaleString()} km</div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Publicado</div>
-                      <div className="font-bold text-slate-900">{timeAgo(selectedCar.createdAt)}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Seller Profile Card */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-950 text-white font-bold text-sm flex items-center justify-center">
-                      {selectedCar.sellerName.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-950">{selectedCar.sellerName}</div>
-                      <div className="text-[11px] text-slate-500">Vendedor particular</div>
-                    </div>
-                  </div>
-
-                  {!isSold(selectedCar) && (
-                    <a
-                      href={getWhatsAppLink(selectedCar)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5 text-blue-400" />
-                      <span>WhatsApp</span>
-                    </a>
-                  )}
-                </div>
-
-                {canDelete(selectedCar) && (
-                  <div className="p-4 rounded-2xl border border-dashed border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="text-xs text-slate-600">
-                      <span className="font-bold text-slate-900">Este anuncio es tuyo.</span>{' '}
-                      {isSold(selectedCar) ? 'Está marcado como vendido.' : '¿Ya lo vendiste? Márcalo para que no te sigan escribiendo.'}
-                    </div>
-                    <button
-                      onClick={() => {
-                        handleToggleSold(selectedCar);
-                        setSelectedCar(null);
-                      }}
-                      className={`shrink-0 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer ${
-                        isSold(selectedCar)
-                          ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
-                          : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                      }`}
-                    >
-                      {isSold(selectedCar) ? <RotateCcw className="w-4 h-4" /> : <CircleCheck className="w-4 h-4" />}
-                      {isSold(selectedCar) ? 'Volver a publicar' : 'Marcar como vendido'}
-                    </button>
-                  </div>
-                )}
-
-              </div>
-
-            </div>
-
-            {/* Modal Bottom CTA Bar */}
-            <div className="p-4 sm:p-5 border-t border-slate-200 bg-white flex items-center justify-between gap-3 shrink-0">
-              <div>
-                <span className="text-[10px] text-slate-500 uppercase font-bold">Total</span>
-                <div className="text-xl sm:text-2xl font-black text-slate-950">
-                  ${selectedCar.price.toLocaleString()} <span className="text-xs text-slate-500 font-normal">COP</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {isSold(selectedCar) ? (
-                  <span className="bg-slate-100 text-slate-500 font-bold text-xs sm:text-sm px-5 py-3 rounded-xl border border-slate-200">
-                    Vehículo vendido
-                  </span>
-                ) : (
-                  <a
-                    href={getWhatsAppLink(selectedCar)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-2"
-                  >
-                    <MessageCircle className="w-4 h-4 text-blue-400" />
-                    <span>Contactar por WhatsApp</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                  </a>
-                )}
-              </div>
-            </div>
-
-          </div>
-        </div>
+        <VehicleDetailModal
+          car={carListings.find((c) => c.id === selectedCar.id) || selectedCar}
+          isSold={isSold(carListings.find((c) => c.id === selectedCar.id) || selectedCar)}
+          canManage={canDelete(selectedCar)}
+          whatsAppLink={getWhatsAppLink(selectedCar)}
+          onToggleSold={() => {
+            handleToggleSold(carListings.find((c) => c.id === selectedCar.id) || selectedCar);
+          }}
+          onClose={() => setSelectedCar(null)}
+        />
       )}
 
       {/* "Vender mi Vehículo" Publishing Modal */}
