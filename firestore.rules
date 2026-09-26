@@ -66,6 +66,11 @@ service cloud.firestore {
 
       match /vehicles/{vehicleId} {
         allow read, write: if isUser(userId);
+
+        // Maintenance log (bitácora)
+        match /services/{serviceId} {
+          allow read, write: if isUser(userId);
+        }
       }
     }
 

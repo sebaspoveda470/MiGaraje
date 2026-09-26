@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { deleteUser, User as AuthUser } from 'firebase/auth';
 import { db } from '../firebase';
-import { UserProfile, Vehicle } from '../types';
+import { UserProfile, Vehicle, ServiceRecord } from '../types';
 import { deleteListing } from './listingService';
 
 /**
@@ -102,4 +102,34 @@ export async function deleteAccount(authUser: AuthUser): Promise<void> {
 
   // Firebase requires a recent sign-in to delete the login; the caller handles that error.
   await deleteUser(authUser);
+}
+
+// ---------- Maintenance log: users/{uid}/vehicles/{vehicleId}/services ----------
+
+const servicesRef = (uid: string, vehicleId: string) => collection(db, 'users', uid, 'vehicles', vehicleId, 'services');
+
+export function subscribeToServices(
+  uid: string,
+  vehicleId: string,
+  onChange: (services: ServiceRecord[]) => void,
+  onError?: (err: Error) => void
+): () => void {
+  return onSnapshot(
+    servicesRef(uid, vehicleId),
+    (snapshot) => {
+      const services = snapshot.docs.map((d) => ({ ...(d.data() as ServiceRecord), id: d.id }));
+      services.sort((a, b) => b.date.localeCompare(a.date) || b.mileage - a.mileage);
+      onChange(services);
+    },
+    onError
+  );
+}
+
+export async function saveService(uid: string, vehicleId: string, service: ServiceRecord): Promise<void> {
+  const { id, ...data } = service;
+  await setDoc(doc(servicesRef(uid, vehicleId), id), data);
+}
+
+export async function deleteService(uid: string, vehicleId: string, serviceId: string): Promise<void> {
+  await deleteDoc(doc(servicesRef(uid, vehicleId), serviceId));
 }

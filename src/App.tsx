@@ -532,6 +532,9 @@ export function App() {
                 onEditVehicle={handleOpenEditVehicle}
                 careProducts={careProducts}
                 onNavigateToTab={setActiveTab}
+                userId={authUser?.uid || null}
+                onUpdateVehicle={handleUpdateVehicle}
+                onError={(message, err) => showError(message)(err)}
               />
             )}
           </div>

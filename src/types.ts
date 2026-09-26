@@ -302,3 +302,17 @@ export interface CheckoutOrder {
   status: 'pendiente' | 'confirmada' | 'despachada' | 'entregada' | 'cancelada';
   createdAt: number;
 }
+
+export type ServiceCategory = 'aceite' | 'frenos' | 'llantas' | 'suspension' | 'bateria' | 'revision' | 'lavado' | 'reparacion' | 'otro';
+
+/** One entry of a vehicle's maintenance log */
+export interface ServiceRecord {
+  id: string;
+  /** YYYY-MM-DD */
+  date: string;
+  mileage: number;
+  category: ServiceCategory;
+  description?: string;
+  cost: number;
+  workshop?: string;
+}

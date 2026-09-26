@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Wrench, 
   ShieldCheck, 
@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Vehicle, CareProduct } from '../types';
 import { VehicleDocsCard } from './VehicleDocsCard';
+import { MaintenanceLog } from './MaintenanceLog';
 import { getDocStatus, describeDoc } from '../utils/vehicleDocs';
 
 interface SmartRecommendationsProps {
@@ -31,6 +32,9 @@ interface SmartRecommendationsProps {
   onEditVehicle?: (vehicle: Vehicle) => void;
   careProducts: CareProduct[];
   onNavigateToTab: (tab: string) => void;
+  userId: string | null;
+  onUpdateVehicle: (vehicle: Vehicle) => void;
+  onError: (message: string, err: unknown) => void;
 }
 
 export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
@@ -39,7 +43,13 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
   onEditVehicle,
   careProducts,
   onNavigateToTab,
+  userId,
+  onUpdateVehicle,
+  onError,
 }) => {
+  const [isEditingKm, setIsEditingKm] = useState(false);
+  const [kmInput, setKmInput] = useState('');
+
   if (!activeVehicle) {
     return (
       <div className="bg-white border border-slate-200 rounded-3xl p-10 sm:p-14 text-center max-w-xl mx-auto shadow-xs">
@@ -98,6 +108,14 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
   };
 
   const maintenanceList = getPreventiveChecklist(activeVehicle.mileage);
+
+  const saveMileage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const km = Number(kmInput.replace(/\D/g, ''));
+    if (!km) return;
+    onUpdateVehicle({ ...activeVehicle, mileage: km });
+    setIsEditingKm(false);
+  };
   const tecnoStatus = getDocStatus(activeVehicle, 'tecno');
   const tecnoColor =
     tecnoStatus.state === 'vencido' ? 'text-red-600' : tecnoStatus.state === 'por_vencer' ? 'text-amber-600' : tecnoStatus.state === 'vigente' ? 'text-emerald-600' : 'text-slate-400';
@@ -198,7 +216,31 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
             <div className="text-base sm:text-lg font-black text-slate-950 mt-0.5">
               {nextOilChangeKm.toLocaleString()} km
             </div>
-            <div className="text-[11px] text-slate-500">Faltan aprox. {kmToOilChange.toLocaleString()} km</div>
+            <div className="text-[11px] text-slate-500">Faltan aprox. {kmToOilChange.toLocaleString('es-CO')} km</div>
+            {isEditingKm ? (
+              <form onSubmit={saveMileage} className="mt-2 flex items-center gap-1.5">
+                <input
+                  autoFocus
+                  inputMode="numeric"
+                  value={kmInput}
+                  onChange={(e) => setKmInput(e.target.value)}
+                  placeholder="Km actuales"
+                  className="w-24 bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:outline-none focus:border-blue-600"
+                />
+                <button type="submit" className="text-[11px] font-bold bg-blue-600 text-white px-2 py-1 rounded-lg cursor-pointer">OK</button>
+                <button type="button" onClick={() => setIsEditingKm(false)} className="text-[11px] font-bold text-slate-500 cursor-pointer">✕</button>
+              </form>
+            ) : (
+              <button
+                onClick={() => {
+                  setKmInput(String(activeVehicle.mileage));
+                  setIsEditingKm(true);
+                }}
+                className="mt-1.5 text-[11px] font-bold text-blue-600 hover:underline cursor-pointer"
+              >
+                Actualizar kilometraje ({activeVehicle.mileage.toLocaleString('es-CO')} km)
+              </button>
+            )}
           </div>
 
           <div className="p-4 sm:p-5">
@@ -237,13 +279,22 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
 
       <VehicleDocsCard vehicle={activeVehicle} onEdit={onEditVehicle ? () => onEditVehicle(activeVehicle) : undefined} />
 
+      {userId && (
+        <MaintenanceLog
+          uid={userId}
+          vehicle={activeVehicle}
+          onMileageUpdate={(km) => onUpdateVehicle({ ...activeVehicle, mileage: km })}
+          onError={onError}
+        />
+      )}
+
       {/* Mileage Maintenance Plan: Clean White Card */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold tracking-wider uppercase mb-1">
               <FileCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span>Bitácora de Servicio Técnico</span>
+              <span>Plan de Mantenimiento</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
               Plan Preventivo Sugerido para los {activeVehicle.mileage.toLocaleString()} km
