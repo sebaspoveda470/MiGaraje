@@ -26,7 +26,7 @@ import {
   saveVehicle,
   deleteVehicle,
 } from './services/userService';
-import { subscribeToListings, publishListing, deleteListing } from './services/listingService';
+import { subscribeToListings, publishListing, deleteListing, setListingSold } from './services/listingService';
 import {
   subscribeToProducts,
   saveProduct,
@@ -350,6 +350,12 @@ export function App() {
     showToast(`¡Tu ${newListing.title} ha sido publicado exitosamente en Compra & Venta!`);
   };
 
+  const handleToggleSold = (listing: VehicleListing, sold: boolean) => {
+    setListingSold(listing.id, sold)
+      .then(() => showToast(sold ? `¡Felicitaciones por la venta de tu ${listing.title}! 🎉` : 'Tu anuncio vuelve a estar disponible'))
+      .catch(showError('No se pudo actualizar el anuncio.'));
+  };
+
   const handleDeleteListing = (listingId: string) => {
     deleteListing(listingId)
       .then(() => showToast('Publicación eliminada'))
@@ -430,7 +436,7 @@ export function App() {
         {activeTab === 'garaje' && (
           <div className="space-y-8">
             <WebHero
-              listingsCount={listingsLoading ? null : carListings.length}
+              listingsCount={listingsLoading ? null : carListings.filter((l) => l.status !== 'vendido').length}
               onExploreVehicles={() => setActiveTab('vehiculos')}
               onExploreProducts={() => setActiveTab('productos')}
               onRegisterCar={handleOpenAddVehicle}
@@ -459,7 +465,8 @@ export function App() {
             requireAuth={requireAuth}
             onPublishListing={handlePublishListing}
             onDeleteListing={handleDeleteListing}
-          />
+            onToggleSold={handleToggleSold}
+/>
         )}
 
         {/* TAB 3: NUESTROS PRODUCTOS MIGARAJE (VENTA DIRECTA POR WHATSAPP) */}

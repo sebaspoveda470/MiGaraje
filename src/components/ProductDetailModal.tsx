@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Check, ShoppingCart, BadgeCheck, Loader2, Pencil, Trash2, MessageSquare } from 'lucide-react';
 import { CareProduct, ProductReview, UserProfile } from '../types';
 import { StarRating } from './StarRating';
+import { PhotoGallery } from './PhotoPicker';
 import { saveReview, deleteReview, findOrderWithProduct, summarizeRatings } from '../services/reviewService';
 import { timeAgo } from '../utils/media';
 
@@ -35,8 +36,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onError,
 }) => {
   const images = getProductImages(product);
-  const [activeImage, setActiveImage] = useState(0);
-  const summary = summarizeRatings(reviews);
+const summary = summarizeRatings(reviews);
   const myReview = currentUserId ? reviews.find((r) => r.userId === currentUserId) : undefined;
 
   // Review form
@@ -47,7 +47,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
-    setActiveImage(0);
     setIsEditing(false);
   }, [product.id]);
 
@@ -118,34 +117,16 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Gallery */}
           <div className="space-y-3">
-            <div className="aspect-square rounded-2xl bg-slate-100 overflow-hidden relative border border-slate-200">
-              <img src={images[activeImage] || images[0]} alt={product.name} className="w-full h-full object-cover" />
-              <div className="absolute top-3 left-3 bg-slate-950 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
-                MiGaraje
-              </div>
-              {images.length > 1 && (
-                <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  {activeImage + 1} / {images.length}
+            <PhotoGallery
+              key={product.id}
+              images={images}
+              alt={product.name}
+              overlay={
+                <div className="absolute top-3 left-3 bg-slate-950 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
+                  MiGaraje
                 </div>
-              )}
-            </div>
-
-            {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {images.map((src, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImage(idx)}
-                    aria-label={`Ver foto ${idx + 1}`}
-                    className={`aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
-                      idx === activeImage ? 'border-blue-600' : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={src} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+              }
+            />
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
               <div className="font-bold text-slate-900">Presentación</div>

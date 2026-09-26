@@ -24,10 +24,14 @@ import {
   Camera,
   Trash2,
   Loader2,
-  Clock
+  Clock,
+  Images,
+  CircleCheck,
+  RotateCcw
 } from 'lucide-react';
 import { VehicleListing, UserProfile } from '../types';
-import { compressImageFile, timeAgo, toWhatsAppNumber } from '../utils/media';
+import { timeAgo, toWhatsAppNumber } from '../utils/media';
+import { PhotoPicker, PhotoGallery } from './PhotoPicker';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
 
 interface CarMarketplaceProps {
@@ -39,7 +43,13 @@ interface CarMarketplaceProps {
   requireAuth: () => boolean;
   onPublishListing: (listing: Omit<VehicleListing, 'id'>) => Promise<void>;
   onDeleteListing: (listingId: string) => void;
+  onToggleSold: (listing: VehicleListing, sold: boolean) => void;
 }
+
+// Listing documents also hold the photos (1 MB max per document)
+const MAX_LISTING_PHOTOS = 4;
+
+export const isSold = (car: VehicleListing) => car.status === 'vendido';
 
 // The price slider's top position means "no limit".
 const PRICE_CAP = 500000000;
@@ -66,6 +76,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   requireAuth,
   onPublishListing,
   onDeleteListing,
+  onToggleSold,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('todas');
@@ -89,7 +100,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [pubSellerName, setPubSellerName] = useState('');
   const [pubSellerPhone, setPubSellerPhone] = useState('');
   const [pubDescription, setPubDescription] = useState('');
-  const [pubImageUrl, setPubImageUrl] = useState('');
+  const [pubImages, setPubImages] = useState<string[]>([]);
+  const [showSold, setShowSold] = useState(true);
   const [pubIsUniqueOwner, setPubIsUniqueOwner] = useState(true);
   const [pubSoatValid, setPubSoatValid] = useState(true);
   const [pubTecnoValid, setPubTecnoValid] = useState(true);
@@ -109,25 +121,22 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     setShowPublishModal(true);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      setIsProcessingImage(true);
-      const dataUrl = await compressImageFile(file);
-      setPubImageUrl(dataUrl);
-    } catch (err) {
-      console.error('Error procesando foto', err);
-    } finally {
-      setIsProcessingImage(false);
-    }
-  };
-
   // Extract unique brands
   const brands = ['todas', ...Array.from(new Set(carListings.map((c) => c.brand)))];
 
-  // Filter listings
+  const handleToggleSold = (car: VehicleListing) => {
+    const sold = !isSold(car);
+    const question = sold
+      ? `¿Marcar "${car.title}" como VENDIDO? Los compradores ya no podrán escribirte por este anuncio.`
+      : `¿Volver a poner "${car.title}" como disponible?`;
+    if (confirm(question)) onToggleSold(car, sold);
+  };
+
+  // Filter listings (available first, sold at the end)
   const filteredListings = carListings.filter((car) => {
+    if (!showSold && isSold(car)) {
+      return false;
+    }
     if (selectedBrand !== 'todas' && car.brand.toLowerCase() !== selectedBrand.toLowerCase()) {
       return false;
     }
@@ -158,9 +167,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       }
     }
     return true;
-  });
+  }).sort((a, b) => Number(isSold(a)) - Number(isSold(b)));
 
-  const getWhatsAppLink = (car: VehicleListing) => {
+  const soldCount = carListings.filter(isSold).length;
+
+  const getWhatsAppLink= (car: VehicleListing) => {
     const phoneWithCountry = toWhatsAppNumber(car.whatsappNumber || car.sellerPhone);
     const text = `Hola ${car.sellerName}! 👋 Vi tu vehículo publicado en MiGaraje: *${car.title}* por $${car.price.toLocaleString()} COP en ${car.location}. ¿Aún está disponible para agendar una cita o peritaje?`;
     return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`;
@@ -198,9 +209,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       sellerPhone: pubSellerPhone.trim(),
       whatsappNumber: toWhatsAppNumber(pubSellerPhone),
       sellerVerified: false,
-      images: [
-        pubImageUrl.trim() || getVehicleReferenceImage(pubBrand, pubModel.trim(), Number(pubYear), 'diario'),
-      ],
+      images: pubImages.length > 0 ? pubImages : [getVehicleReferenceImage(pubBrand, pubModel.trim(), Number(pubYear), 'diario')],
+      status: 'disponible',
       specs: {
         engine: pubEngine.trim(),
         transmission: pubTransmission,
@@ -224,7 +234,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       // Reset form
       setPubModel('');
       setPubDescription('');
-      setPubImageUrl('');
+      setPubImages([]);
       setPubColor('');
       setPubEngine('');
     } catch (err) {
@@ -367,6 +377,18 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
             className="w-full sm:w-64 accent-slate-950 cursor-pointer"
           />
         </div>
+
+        {soldCount > 0 && (
+          <label className="flex items-center gap-2 text-xs text-slate-600 font-semibold cursor-pointer pt-1">
+            <input
+              type="checkbox"
+              checked={showSold}
+              onChange={(e) => setShowSold(e.target.checked)}
+              className="w-4 h-4 accent-slate-950 cursor-pointer"
+            />
+            Mostrar vehículos vendidos ({soldCount})
+          </label>
+        )}
       </div>
 
       {isLoading && (
@@ -393,8 +415,22 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   <img
                     src={car.images[0]}
                     alt={car.title}
-                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
+                    className={`w-full h-full object-cover group-hover:scale-103 transition-transform duration-300 ${isSold(car) ? 'grayscale-[60%]' : ''}`}
                   />
+
+                  {isSold(car) && (
+                    <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center pointer-events-none">
+                      <span className="bg-red-600 text-white font-black text-sm tracking-widest px-5 py-1.5 rounded-lg -rotate-6 shadow-lg">
+                        VENDIDO
+                      </span>
+                    </div>
+                  )}
+
+                  {car.images.length > 1 && (
+                    <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                      <Images className="w-3 h-3" /> {car.images.length}
+                    </div>
+                  )}
 
                   {/* Top Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
@@ -417,18 +453,30 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   </div>
 
                   {canDelete(car) && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`¿Eliminar la publicación de "${car.title}"?`)) {
-                          onDeleteListing(car.id);
-                        }
-                      }}
-                      title="Eliminar publicación"
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleSold(car);
+                        }}
+                        title={isSold(car) ? 'Volver a poner disponible' : 'Marcar como vendido'}
+                        className="w-8 h-8 rounded-full bg-white/90 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                      >
+                        {isSold(car) ? <RotateCcw className="w-4 h-4" /> : <CircleCheck className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`¿Eliminar la publicación de "${car.title}"?`)) {
+                            onDeleteListing(car.id);
+                          }
+                        }}
+                        title="Eliminar publicación"
+                        className="w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -492,15 +540,22 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
                 {/* Double Action: WhatsApp Direct + Ver Vehículo */}
                 <div className="flex items-center gap-2 pt-1">
-                  <a
-                    href={getWhatsAppLink(car)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs min-h-[42px]"
-                  >
-                    <MessageCircle className="w-4 h-4 text-blue-400 shrink-0" />
-                    <span>WhatsApp</span>
-                  </a>
+                  {isSold(car) ? (
+                    <div className="flex-1 bg-slate-100 text-slate-500 font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 min-h-[42px] border border-slate-200">
+                      <CircleCheck className="w-4 h-4 shrink-0" />
+                      <span>Vendido</span>
+                    </div>
+                  ) : (
+                    <a
+                      href={getWhatsAppLink(car)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs min-h-[42px]"
+                    >
+                      <MessageCircle className="w-4 h-4 text-blue-400 shrink-0" />
+                      <span>WhatsApp</span>
+                    </a>
+                  )}
 
                   <button
                     onClick={() => setSelectedCar(car)}
@@ -569,22 +624,28 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
             <div className="overflow-y-auto flex-1">
               
               {/* Photo Showcase */}
-              <div className="aspect-16/9 bg-slate-100 relative">
-                <img
-                  src={selectedCar.images[0]}
+              <div className="p-3 sm:p-4 pb-0 sm:pb-0">
+                <PhotoGallery
+                  key={selectedCar.id}
+                  images={selectedCar.images}
                   alt={selectedCar.title}
-                  className="w-full h-full object-cover"
+                  aspectClass="aspect-16/9"
+                  overlay={
+                    <div className="absolute top-3 left-3 flex flex-wrap gap-2 pr-12">
+                      <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-md">
+                        {selectedCar.brand} {selectedCar.model}
+                      </span>
+                      {isSold(selectedCar) && (
+                        <span className="bg-red-600 text-white text-xs font-black px-3 py-1 rounded-md">VENDIDO</span>
+                      )}
+                      {selectedCar.plateEnding && (
+                        <span className="bg-blue-600 text-white text-xs font-mono font-bold px-2.5 py-1 rounded-md">
+                          Placa terminada en {selectedCar.plateEnding} ({selectedCar.plateCity || selectedCar.city})
+                        </span>
+                      )}
+                    </div>
+                  }
                 />
-                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                  <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-md">
-                    {selectedCar.brand} {selectedCar.model}
-                  </span>
-                  {selectedCar.plateEnding && (
-                    <span className="bg-blue-600 text-white text-xs font-mono font-bold px-2.5 py-1 rounded-md">
-                      Placa terminada en {selectedCar.plateEnding} ({selectedCar.plateCity || selectedCar.city})
-                    </span>
-                  )}
-                </div>
               </div>
 
               <div className="p-6 sm:p-8 space-y-6">
@@ -703,16 +764,41 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     </div>
                   </div>
 
-                  <a
-                    href={getWhatsAppLink(selectedCar)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5 text-blue-400" />
-                    <span>WhatsApp</span>
-                  </a>
+                  {!isSold(selectedCar) && (
+                    <a
+                      href={getWhatsAppLink(selectedCar)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-blue-400" />
+                      <span>WhatsApp</span>
+                    </a>
+                  )}
                 </div>
+
+                {canDelete(selectedCar) && (
+                  <div className="p-4 rounded-2xl border border-dashed border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="text-xs text-slate-600">
+                      <span className="font-bold text-slate-900">Este anuncio es tuyo.</span>{' '}
+                      {isSold(selectedCar) ? 'Está marcado como vendido.' : '¿Ya lo vendiste? Márcalo para que no te sigan escribiendo.'}
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleToggleSold(selectedCar);
+                        setSelectedCar(null);
+                      }}
+                      className={`shrink-0 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer ${
+                        isSold(selectedCar)
+                          ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
+                          : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                      }`}
+                    >
+                      {isSold(selectedCar) ? <RotateCcw className="w-4 h-4" /> : <CircleCheck className="w-4 h-4" />}
+                      {isSold(selectedCar) ? 'Volver a publicar' : 'Marcar como vendido'}
+                    </button>
+                  </div>
+                )}
 
               </div>
 
@@ -728,16 +814,22 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <a
-                  href={getWhatsAppLink(selectedCar)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <MessageCircle className="w-4 h-4 text-blue-400" />
-                  <span>Contactar por WhatsApp</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                </a>
+                {isSold(selectedCar) ? (
+                  <span className="bg-slate-100 text-slate-500 font-bold text-xs sm:text-sm px-5 py-3 rounded-xl border border-slate-200">
+                    Vehículo vendido
+                  </span>
+                ) : (
+                  <a
+                    href={getWhatsAppLink(selectedCar)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4 text-blue-400" />
+                    <span>Contactar por WhatsApp</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                  </a>
+                )}
               </div>
             </div>
 
@@ -967,46 +1059,13 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 />
               </div>
 
-              {/* Photo Upload: File from Device/Camera OR URL */}
-              <div className="space-y-2 border border-slate-200 rounded-2xl p-3.5 bg-slate-50/60">
-                <label className="block font-bold text-slate-800">Foto del Vehículo</label>
-                
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <label className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold px-4 py-2 rounded-xl cursor-pointer shadow-xs">
-                    <Camera className="w-4 h-4 text-blue-600" />
-                    <span>{isProcessingImage ? 'Procesando...' : 'Tomar Foto o Subir Archivo'}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
-
-                  <span className="text-slate-400 text-xs">o ingresa una URL:</span>
-
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={pubImageUrl.startsWith('data:') ? '' : pubImageUrl}
-                    onChange={(e) => setPubImageUrl(e.target.value)}
-                    className="flex-1 w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                  />
-                </div>
-
-                {pubImageUrl && (
-                  <div className="mt-2 relative w-24 h-16 rounded-xl overflow-hidden border border-slate-300">
-                    <img src={pubImageUrl} alt="Vista previa" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setPubImageUrl('')}
-                      className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-0.5 text-[9px]"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-              </div>
+              <PhotoPicker
+                label="Fotos del Vehículo"
+                images={pubImages}
+                onChange={setPubImages}
+                max={MAX_LISTING_PHOTOS}
+                onProcessingChange={setIsProcessingImage}
+              />
 
               <div className="space-y-2 pt-1">
                 {[

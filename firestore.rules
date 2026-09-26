@@ -85,8 +85,9 @@ service cloud.firestore {
         && isShortString(incoming().sellerPhone, 30)
         && incoming().images is list && incoming().images.size() <= 5;
 
-      allow update: if isUser(resource.data.ownerId)
-        && !changedKeys().hasAny(['ownerId', 'createdAt']);
+      allow update: if (isUser(resource.data.ownerId) || isAdmin())
+        && !changedKeys().hasAny(['ownerId', 'createdAt'])
+        && incoming().images is list && incoming().images.size() <= 5;
 
       allow delete: if isUser(resource.data.ownerId) || isAdmin();
     }

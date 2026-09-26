@@ -3,6 +3,7 @@ import {
   doc,
   setDoc,
   deleteDoc,
+  updateDoc,
   onSnapshot,
   query,
   orderBy,
@@ -46,6 +47,13 @@ export async function publishListing(ownerId: string, listing: Omit<VehicleListi
   const ref = doc(listingsRef);
   await setDoc(ref, { ...listing, ownerId, createdAt: serverTimestamp() });
   return ref.id;
+}
+
+export async function setListingSold(listingId: string, sold: boolean): Promise<void> {
+  await updateDoc(doc(listingsRef, listingId), {
+    status: sold ? 'vendido' : 'disponible',
+    soldAt: sold ? serverTimestamp() : null,
+  });
 }
 
 export async function deleteListing(listingId: string): Promise<void> {

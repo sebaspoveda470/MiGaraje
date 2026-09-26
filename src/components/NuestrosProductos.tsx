@@ -22,13 +22,13 @@ import {
   ShoppingCart,
   Loader2,
   Images,
-  Link as LinkIcon,
   ClipboardList
 } from 'lucide-react';
 import { CareProduct, CareCategory, CartItem, ProductReview, UserProfile } from '../types';
-import { compressImageFile, toWhatsAppNumber } from '../utils/media';
+import { toWhatsAppNumber } from '../utils/media';
 import { subscribeToReviews, summarizeRatings } from '../services/reviewService';
 import { ProductDetailModal, getProductImages } from './ProductDetailModal';
+import { PhotoPicker } from './PhotoPicker';
 
 // Photos live inside the product document (1 MB max), so keep a few small ones.
 const MAX_PRODUCT_PHOTOS = 4;
@@ -115,7 +115,6 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   const [description, setDescription] = useState('');
   const [benefitsText, setBenefitsText] = useState('');
   const [imageList, setImageList] = useState<string[]>([]);
-  const [imageUrlInput, setImageUrlInput] = useState('');
   const [isProcessingImage, setIsProcessingImage] = useState(false);
 
   // Filter products
@@ -166,7 +165,6 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     setDescription('');
     setBenefitsText('');
     setImageList([]);
-    setImageUrlInput('');
   };
 
   const openAddModal = () => {
@@ -186,39 +184,10 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     setDescription(prod.description);
     setBenefitsText((prod.benefits || []).join('\n'));
     setImageList(getProductImages(prod));
-    setImageUrlInput('');
     setProductError(null);
     setSelectedProduct(null);
     setShowAddModal(true);
   };
-
-  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from<File>(e.target.files || []).slice(0, MAX_PRODUCT_PHOTOS - imageList.length);
-    e.target.value = '';
-    if (files.length === 0) return;
-
-    try {
-      setIsProcessingImage(true);
-      const compressed = await Promise.all(files.map((file) => compressImageFile(file, 800, 0.7)));
-      setImageList((prev) => [...prev, ...compressed].slice(0, MAX_PRODUCT_PHOTOS));
-    } catch (err) {
-      console.error('Error optimizando foto', err);
-    } finally {
-      setIsProcessingImage(false);
-    }
-  };
-
-  const handleAddImageUrl = () => {
-    const url = imageUrlInput.trim();
-    if (!/^https?:\/\//.test(url) || imageList.length >= MAX_PRODUCT_PHOTOS) return;
-    setImageList((prev) => [...prev, url]);
-    setImageUrlInput('');
-  };
-
-  const removeImage = (index: number) => setImageList((prev) => prev.filter((_, i) => i !== index));
-
-  const makeMainImage = (index: number) =>
-    setImageList((prev) => [prev[index], ...prev.filter((_, i) => i !== index)]);
 
   const handleSavePhone = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -831,80 +800,13 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 />
               </div>
 
-              {/* Photos: up to MAX_PRODUCT_PHOTOS, first one is the main photo */}
-              <div className="space-y-3 border border-slate-200 rounded-2xl p-3.5 bg-slate-50/60">
-                <div className="flex items-center justify-between">
-                  <label className="block font-bold text-slate-800">Fotos del Producto</label>
-                  <span className="text-[11px] text-slate-500">{imageList.length} de {MAX_PRODUCT_PHOTOS}</span>
-                </div>
-
-                {imageList.length > 0 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {imageList.map((src, idx) => (
-                      <div key={idx} className={`relative aspect-square rounded-xl overflow-hidden border-2 ${idx === 0 ? 'border-blue-600' : 'border-slate-200'}`}>
-                        <img src={src} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
-                        {idx === 0 ? (
-                          <span className="absolute bottom-0 inset-x-0 bg-blue-600 text-white text-[9px] font-black text-center py-0.5">Principal</span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => makeMainImage(idx)}
-                            className="absolute bottom-0 inset-x-0 bg-black/60 hover:bg-black/80 text-white text-[9px] font-bold text-center py-0.5 cursor-pointer"
-                          >
-                            Hacer principal
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => removeImage(idx)}
-                          aria-label={`Quitar foto ${idx + 1}`}
-                          className="absolute top-1 right-1 w-5 h-5 bg-black/70 hover:bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {imageList.length < MAX_PRODUCT_PHOTOS && (
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <label className="flex items-center justify-center gap-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold px-4 py-2 rounded-xl cursor-pointer shadow-xs shrink-0">
-                      {isProcessingImage ? <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> : <Camera className="w-4 h-4 text-blue-600" />}
-                      <span>{isProcessingImage ? 'Procesando...' : 'Subir Fotos'}</span>
-                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageFileUpload} />
-                    </label>
-
-                    <div className="flex flex-1 items-center gap-1.5">
-                      <input
-                        type="url"
-                        placeholder="o pega el enlace de una foto (https://...)"
-                        value={imageUrlInput}
-                        onChange={(e) => setImageUrlInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddImageUrl();
-                          }
-                        }}
-                        className="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddImageUrl}
-                        aria-label="Agregar foto desde enlace"
-                        className="shrink-0 w-9 h-9 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 flex items-center justify-center cursor-pointer"
-                      >
-                        <LinkIcon className="w-4 h-4 text-slate-600" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <p className="text-[11px] text-slate-500">
-                  Puedes elegir varias fotos a la vez. La foto marcada como "Principal" es la que se ve en el catálogo.
-                </p>
-              </div>
+              <PhotoPicker
+                label="Fotos del Producto"
+                images={imageList}
+                onChange={setImageList}
+                max={MAX_PRODUCT_PHOTOS}
+                onProcessingChange={setIsProcessingImage}
+              />
 
               {productError && (
                 <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold">{productError}</p>

@@ -101,6 +101,8 @@ export interface VehicleListing {
   publishedAt: string;
   ownerId?: string;
   createdAt?: number;
+  /** Missing on older listings, which count as available */
+  status?: 'disponible' | 'vendido';
 }
 
 export type CareCategory = 'exterior' | 'interior' | 'motor_aditivos' | 'herramientas';
