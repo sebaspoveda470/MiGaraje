@@ -33,6 +33,7 @@ import {
 import { timeAgo } from '../utils/media';
 import { CreateCommunityModal } from './CreateCommunityModal';
 import { ShareButtons } from './ShareButtons';
+import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 
 interface CommunityHubProps {
@@ -170,6 +171,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   onNotify,
   initialCommunityId,
 }) => {
+  const confirmAction = useConfirm();
   const [communities, setCommunities] = useState<CommunityClub[]>([]);
   const [communitiesLoading, setCommunitiesLoading] = useState(true);
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
@@ -255,7 +257,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const handleToggleMembership = async () => {
     if (!currentCommunity || !requireAuth() || !currentUserId) return;
     const joining = !isMember;
-    if (!joining && !confirm(`¿Salir de ${currentCommunity.name}?`)) return;
+    if (!joining && !(await confirmAction(`Dejarás de ser miembro de ${currentCommunity.name}.`, { title: '¿Salir de la comunidad?', confirmLabel: 'Salir' }))) return;
     setIsTogglingMembership(true);
     try {
       await setCommunityMembership(currentCommunity.id, currentUserId, joining);
@@ -279,9 +281,14 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     onNotify(`¡Comunidad "${data.name}" creada! Invita a otros propietarios a unirse.`);
   };
 
-  const handleDeleteCommunity = () => {
+  const handleDeleteCommunity = async () => {
     if (!currentCommunity) return;
-    if (!confirm(`¿Eliminar la comunidad "${currentCommunity.name}"? Esta acción no se puede deshacer.`)) return;
+    const ok = await confirmAction(`Se eliminará "${currentCommunity.name}". Esta acción no se puede deshacer.`, {
+      title: '¿Eliminar comunidad?',
+      confirmLabel: 'Eliminar',
+      danger: true,
+    });
+    if (!ok) return;
     deleteCommunity(currentCommunity.id)
       .then(() => {
         setSelectedClubId(null);
@@ -313,8 +320,9 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     setExpandedComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
-  const handleDeletePost = (post: CommunityPost) => {
-    if (!confirm(`¿Eliminar la publicación "${post.title}"?`)) return;
+  const handleDeletePost = async (post: CommunityPost) => {
+    const ok = await confirmAction(`Se eliminará "${post.title}".`, { title: '¿Eliminar publicación?', confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     deletePost(post.id).catch((err) => onError('No se pudo eliminar la publicación.', err));
   };
 

@@ -33,6 +33,7 @@ import { VehicleListing, UserProfile } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { PhotoPicker, PhotoGallery } from './PhotoPicker';
 import { ShareButtons } from './ShareButtons';
+import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
 
@@ -89,6 +90,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [maxPrice, setMaxPrice] = useState<number>(PRICE_CAP);
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
   const [selectedCar, setSelectedCar] = useState<VehicleListing | null>(null);
+  const confirmAction = useConfirm();
 
   // Open the listing from a shared link once the listings arrive
   const deepLinkHandled = useRef(!initialListingId);
@@ -144,12 +146,27 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   // Extract unique brands
   const brands = ['todas', ...Array.from(new Set(carListings.map((c) => c.brand)))];
 
-  const handleToggleSold = (car: VehicleListing) => {
+  const handleToggleSold = async (car: VehicleListing) => {
     const sold = !isSold(car);
-    const question = sold
-      ? `¿Marcar "${car.title}" como VENDIDO? Los compradores ya no podrán escribirte por este anuncio.`
-      : `¿Volver a poner "${car.title}" como disponible?`;
-    if (confirm(question)) onToggleSold(car, sold);
+    const ok = sold
+      ? await confirmAction(`"${car.title}" se mostrará como vendido y los compradores ya no podrán escribirte por este anuncio.`, {
+          title: '¿Marcar como vendido?',
+          confirmLabel: 'Sí, lo vendí',
+        })
+      : await confirmAction(`"${car.title}" volverá a aparecer como disponible.`, {
+          title: '¿Volver a publicar?',
+          confirmLabel: 'Sí, publicar',
+        });
+    if (ok) onToggleSold(car, sold);
+  };
+
+  const handleDeleteListing = async (car: VehicleListing) => {
+    const ok = await confirmAction(`Se eliminará la publicación de "${car.title}". Esta acción no se puede deshacer.`, {
+      title: '¿Eliminar publicación?',
+      confirmLabel: 'Eliminar',
+      danger: true,
+    });
+    if (ok) onDeleteListing(car.id);
   };
 
   // Filter listings (available first, sold at the end)
@@ -487,9 +504,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm(`¿Eliminar la publicación de "${car.title}"?`)) {
-                            onDeleteListing(car.id);
-                          }
+                          handleDeleteListing(car);
                         }}
                         title="Eliminar publicación"
                         className="w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"

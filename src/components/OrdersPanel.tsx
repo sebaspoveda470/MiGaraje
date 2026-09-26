@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, ClipboardList, MessageCircle, MapPin, Phone, Mail, StickyNote } from 'lucide-react';
 import { CheckoutOrder } from '../types';
 import { updateOrderStatus } from '../services/storeService';
+import { useConfirm } from './ConfirmDialog';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 
 interface OrdersPanelProps {
@@ -28,6 +29,7 @@ const formatCOP = (value: number) => `$${value.toLocaleString('es-CO')}`;
 export const OrdersPanel: React.FC<OrdersPanelProps> = ({ isOpen, orders, onClose, onError }) => {
   const [filter, setFilter] = useState<Status | 'todos'>('todos');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const confirmAction = useConfirm();
 
   if (!isOpen) return null;
 
@@ -36,7 +38,11 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ isOpen, orders, onClos
 
   const changeStatus = async (order: CheckoutOrder, status: Status) => {
     if (status === order.status) return;
-    if (status === 'cancelada' && !confirm(`¿Cancelar el pedido ${order.orderNumber}?`)) return;
+    if (
+      status === 'cancelada' &&
+      !(await confirmAction(`El pedido ${order.orderNumber} quedará como cancelado.`, { title: '¿Cancelar pedido?', confirmLabel: 'Cancelar pedido', cancelLabel: 'Volver', danger: true }))
+    )
+      return;
     setUpdatingId(order.id);
     try {
       await updateOrderStatus(order.id, status);

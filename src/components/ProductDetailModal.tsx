@@ -4,6 +4,7 @@ import { CareProduct, ProductReview, UserProfile } from '../types';
 import { StarRating } from './StarRating';
 import { PhotoGallery } from './PhotoPicker';
 import { ShareButtons } from './ShareButtons';
+import { useConfirm } from './ConfirmDialog';
 import { saveReview, deleteReview, findOrderWithProduct, summarizeRatings } from '../services/reviewService';
 import { timeAgo } from '../utils/media';
 
@@ -37,6 +38,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onError,
 }) => {
   const images = getProductImages(product);
+  const confirmAction = useConfirm();
 const summary = summarizeRatings(reviews);
   const myReview = currentUserId ? reviews.find((r) => r.userId === currentUserId) : undefined;
 
@@ -93,9 +95,14 @@ const summary = summarizeRatings(reviews);
     }
   };
 
-  const handleDelete = (review: ProductReview) => {
+  const handleDelete = async (review: ProductReview) => {
     const own = review.userId === currentUserId;
-    if (!confirm(own ? '¿Eliminar tu reseña?' : `¿Eliminar la reseña de ${review.userName}?`)) return;
+    const ok = await confirmAction(own ? 'Tu reseña dejará de aparecer en este producto.' : `Se eliminará la reseña de ${review.userName}.`, {
+      title: '¿Eliminar reseña?',
+      confirmLabel: 'Eliminar',
+      danger: true,
+    });
+    if (!ok) return;
     deleteReview(review.id).catch((err) => onError('No se pudo eliminar la reseña.', err));
   };
 

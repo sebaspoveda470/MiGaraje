@@ -31,6 +31,7 @@ import { toWhatsAppNumber } from '../utils/media';
 import { subscribeToReviews, summarizeRatings } from '../services/reviewService';
 import { ProductDetailModal, getProductImages } from './ProductDetailModal';
 import { PhotoPicker } from './PhotoPicker';
+import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 
 // Photos live inside the product document (1 MB max), so keep a few small ones.
@@ -81,7 +82,8 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   onOpenOrders,
   initialProductId,
 }) => {
-  const [reviews, setReviews]= useState<ProductReview[]>([]);
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const confirmAction = useConfirm();
 
   useEffect(() => {
     return subscribeToReviews(setReviews, (err) => onError('No se pudieron cargar las reseñas.', err));
@@ -514,9 +516,11 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (confirm(`¿Eliminar "${prod.name}" de la tienda?`)) {
-                          onDeleteProduct(prod.id);
-                        }
+                        confirmAction(`"${prod.name}" dejará de aparecer en la tienda. Esta acción no se puede deshacer.`, {
+                          title: '¿Eliminar producto?',
+                          confirmLabel: 'Eliminar',
+                          danger: true,
+                        }).then((ok) => ok && onDeleteProduct(prod.id));
                       }}
                       title="Eliminar producto"
                       className="w-8 h-8 rounded-full bg-white/90 hover:bg-red-50 text-slate-500 hover:text-red-600 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
