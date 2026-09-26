@@ -1,8 +1,8 @@
 // Minimal read-only Firestore access for Vercel functions, through the public REST API.
 // Only collections that firestore.rules marks as publicly readable work here.
-import firebaseConfig from '../../firebase-applet-config.json';
+import { FIREBASE_API_KEY, FIREBASE_PROJECT_ID } from './config.js';
 
-const BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+const BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
 
 type FirestoreValue = Record<string, any>;
 
@@ -23,7 +23,7 @@ function parseFields(fields: Record<string, FirestoreValue>): Record<string, any
 
 /** Reads one document, or returns null when it doesn't exist / isn't public. */
 export async function getDocument(path: string): Promise<Record<string, any> | null> {
-  const res = await fetch(`${BASE}/${path}?key=${firebaseConfig.apiKey}`);
+  const res = await fetch(`${BASE}/${path}?key=${FIREBASE_API_KEY}`);
   if (!res.ok) return null;
   const json = await res.json();
   return json.fields ? parseFields(json.fields) : null;
@@ -34,7 +34,7 @@ export async function listDocuments(collection: string, fields: string[]): Promi
   const out: Array<{ id: string } & Record<string, any>> = [];
   let pageToken = '';
   do {
-    const params = new URLSearchParams({ key: firebaseConfig.apiKey, pageSize: '300' });
+    const params = new URLSearchParams({ key: FIREBASE_API_KEY, pageSize: '300' });
     fields.forEach((f) => params.append('mask.fieldPaths', f));
     if (pageToken) params.set('pageToken', pageToken);
     const res = await fetch(`${BASE}/${collection}?${params}`);

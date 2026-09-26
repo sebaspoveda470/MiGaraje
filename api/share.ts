@@ -1,7 +1,7 @@
 // Serves index.html with item-specific <title> and Open Graph tags, so links shared on
 // WhatsApp/Facebook show the car or product photo, and Google can index each item.
 // vercel.json routes "/?vehiculo=…", "/?producto=…" and "/?comunidad=…" here.
-import { getDocument, COLLECTION_FOR, ShareType, mainImage } from './_lib/firestore';
+import { getDocument, COLLECTION_FOR, ShareType, mainImage } from './_lib/firestore.js';
 
 const TYPES: ShareType[] = ['vehiculo', 'producto', 'comunidad'];
 

@@ -1,5 +1,5 @@
 // sitemap.xml for Google: home plus every available car, product and community.
-import { listDocuments } from './_lib/firestore';
+import { listDocuments } from './_lib/firestore.js';
 
 export async function GET(request: Request): Promise<Response> {
   const origin = new URL(request.url).origin;

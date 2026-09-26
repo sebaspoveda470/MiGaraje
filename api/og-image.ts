@@ -1,6 +1,6 @@
 // Returns the main photo of a car, product or community as a real image file.
 // Photos are stored as data: URLs inside Firestore, which WhatsApp/Facebook can't read.
-import { getDocument, COLLECTION_FOR, ShareType, mainImage } from './_lib/firestore';
+import { getDocument, COLLECTION_FOR, ShareType, mainImage } from './_lib/firestore.js';
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
