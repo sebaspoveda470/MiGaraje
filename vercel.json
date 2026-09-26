@@ -1,8 +1,9 @@
 {
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/", "has": [{ "type": "query", "key": "vehiculo" }], "destination": "/api/share" },
+    { "source": "/", "has": [{ "type": "query", "key": "producto" }], "destination": "/api/share" },
+    { "source": "/", "has": [{ "type": "query", "key": "comunidad" }], "destination": "/api/share" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
