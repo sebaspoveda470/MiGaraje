@@ -44,7 +44,10 @@ const PrivacyPolicy: React.FC = () => (
     <Section title="3. Finalidades">
       <ul className="list-disc pl-5 space-y-1">
         <li>Crear y administrar tu cuenta y tu garaje digital.</li>
-        <li>Mostrar recordatorios de mantenimiento y de vencimiento de documentos de tus vehículos.</li>
+        <li>
+          Mostrar recordatorios de mantenimiento y de vencimiento de documentos de tus vehículos, y enviarlos a tu correo
+          (puedes desactivar los correos en tu perfil).
+        </li>
         <li>Publicar tus anuncios, publicaciones, comentarios y reseñas.</li>
         <li>Gestionar y entregar los pedidos de productos y contactarte sobre ellos.</li>
         <li>Atender solicitudes, quejas y reclamos, y mejorar el servicio.</li>
