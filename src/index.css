@@ -96,8 +96,8 @@ body {
 }
 /* Section headers: just a touch of softness */
 .photo-soft.photo-soft--light {
-  filter: blur(1px) saturate(0.92);
-  scale: 1.02;
+  filter: blur(0.4px) saturate(0.95);
+  scale: 1.01;
 }
 
 /* Home photo settles in when the page opens */

@@ -788,8 +788,8 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                     }`}
                   >
                     <button onClick={() => openCommunity(comm.id)} className="text-left cursor-pointer flex-1 flex flex-col">
-                      <div className="relative h-20 bg-gradient-to-br from-blue-600 to-blue-900 overflow-hidden">
-                        {comm.coverImage && <img src={comm.coverImage} alt="" loading="lazy" className="w-full h-full object-cover opacity-80" />}
+                      <div className="relative h-32 sm:h-36 bg-gradient-to-br from-blue-600 to-blue-900 overflow-hidden">
+                        {comm.coverImage && <img src={comm.coverImage} alt="" loading="lazy" className="w-full h-full object-cover" />}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                         {isMatch && (
                           <span className="absolute top-2.5 right-2.5 text-[10px] font-semibold bg-white/90 text-blue-800 px-2 py-0.5 rounded-full flex items-center gap-1">

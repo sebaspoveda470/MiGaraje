@@ -19,6 +19,7 @@ import {
 import { db } from '../firebase';
 import { CommunityClub, CommunityMember, CommunityPost, PostComment } from '../types';
 import { INITIAL_COMMUNITIES } from '../data/initialData';
+import { COMMUNITY_ART } from '../data/communityArt';
 
 const communitiesRef = collection(db, 'communities');
 const postsRef = collection(db, 'communityPosts');
@@ -37,8 +38,10 @@ export function subscribeToCommunities(
     (snapshot) => {
       const communities = snapshot.docs.map((d) => {
         const data = d.data({ serverTimestamps: 'estimate' });
+        const art = COMMUNITY_ART[d.id];
         return {
           ...(data as CommunityClub),
+          ...(art ? { coverImage: art.cover, logo: art.logo } : {}),
           id: d.id,
           memberIds: (data.memberIds as string[]) || [],
           createdAt: (data.createdAt as Timestamp | undefined)?.toMillis(),
