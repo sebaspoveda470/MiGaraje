@@ -57,7 +57,7 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
             ref={photoRef}
             src="/hero-fj.jpg"
             alt="Toyota Land Cruiser FJ40 clásico con placa colombiana en las montañas"
-            className="photo-soft photo-soft--light w-full h-auto lg:h-full object-cover object-[50%_62%] select-none will-change-transform"
+            className="w-full h-auto lg:h-full object-cover object-[50%_62%] select-none will-change-transform"
           />
         </div>
         {/* Soft shading so the white headline reads on the bright sky */}
