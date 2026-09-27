@@ -49,22 +49,23 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
 
   return (
     <section className="mb-8 space-y-3 sm:space-y-4">
-      <div className="relative overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem] bg-slate-900 min-h-[560px] sm:min-h-[600px] lg:min-h-[640px] flex flex-col">
-        {/* Photo (taller than the frame so the parallax never shows an edge) */}
-        <div className="absolute inset-x-0 -top-[4%] h-[128%] hero-settle pointer-events-none">
+      <div className="relative overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem] bg-[#161a17] lg:min-h-[640px] flex flex-col">
+        {/* Photo. It is vertical, so phones and tablets stack headline → photo → card, while computers
+            show it on the right with a soft left fade (taller than the frame so the parallax never shows an edge). */}
+        <div className="relative order-2 -mt-20 sm:-mt-28 lg:mt-0 lg:absolute lg:right-0 lg:-top-[4%] lg:h-[128%] lg:w-[60%] hero-settle pointer-events-none [mask-image:linear-gradient(to_bottom,transparent,black_24%,black_88%,transparent)] lg:[mask-image:linear-gradient(to_right,transparent,black_30%)]">
           <img
             ref={photoRef}
-            src="/hero-garaje.jpg"
-            alt="Carro con placa colombiana estacionado dentro de un garaje"
-            className="w-full h-full object-cover object-[50%_62%] select-none will-change-transform"
+            src="/hero-fj.jpg"
+            alt="Toyota Land Cruiser FJ40 clásico con placa colombiana en las montañas"
+            className="w-full h-auto lg:h-full object-cover object-[50%_62%] select-none will-change-transform"
           />
         </div>
-        {/* Soft shading so the white headline reads on the bright wall */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/45 pointer-events-none" />
+        {/* Soft shading so the white headline reads on the bright sky */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/45 lg:from-black/30 lg:via-transparent lg:to-black/30 pointer-events-none" />
 
         {/* Headline */}
-        <div ref={headlineRef} className="relative z-10 px-6 pt-10 sm:pt-16 lg:pt-20 text-center will-change-transform">
-          <h1 className="text-[34px] leading-[1.05] sm:text-6xl lg:text-7xl font-semibold text-white tracking-[-0.03em] drop-shadow-sm">
+        <div ref={headlineRef} className="relative z-10 order-1 px-6 pt-10 sm:pt-16 lg:pt-24 lg:px-14 text-center lg:text-left lg:max-w-[58%] will-change-transform">
+          <h1 className="text-[34px] leading-[1.05] sm:text-6xl xl:text-7xl font-semibold text-white tracking-[-0.03em] drop-shadow-sm">
             <span data-reveal className="inline-block" style={{ '--reveal-delay': '250ms' } as React.CSSProperties}>
               Todo para tu carro,
             </span>
@@ -76,7 +77,7 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
         </div>
 
         {/* Floating cards */}
-        <div className="relative z-10 mt-auto p-3 sm:p-6 lg:p-8 flex flex-col lg:flex-row-reverse items-stretch lg:items-end justify-between gap-3">
+        <div className="relative z-10 order-3 -mt-16 sm:-mt-24 lg:mt-auto p-3 sm:p-6 lg:p-8 flex flex-col lg:flex-row items-stretch lg:items-end justify-between gap-3 lg:px-14 lg:pb-12">
           <div
             data-reveal
             style={{ '--reveal-delay': '700ms' } as React.CSSProperties}
