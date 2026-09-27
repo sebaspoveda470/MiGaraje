@@ -76,7 +76,7 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
               <button
                 autoFocus
                 onClick={() => close(true)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold text-white cursor-pointer ${
+                className={`px-4 py-2.5 rounded-full text-xs font-bold text-white cursor-pointer ${
                   options.danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >

@@ -280,7 +280,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="flex-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isProcessing && <Loader2 className="w-4 h-4 animate-spin" />}
                   {isProcessing ? 'Registrando Pedido...' : 'Confirmar Pedido'}
@@ -314,7 +314,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   href={buildWhatsAppOrderUrl(completedOrder, salesWhatsApp)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-full shadow-xs cursor-pointer flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-4 h-4 text-white/90" />
                   <span>Enviar pedido por WhatsApp</span>
@@ -347,7 +347,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
             <button
               onClick={handleProceed}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Continuar con el Pedido</span>
               <ArrowRight className="w-4 h-4" />

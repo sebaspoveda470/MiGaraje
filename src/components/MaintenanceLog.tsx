@@ -119,7 +119,7 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
         {!showForm && (
           <button
             onClick={openForm}
-            className="shrink-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer"
+            className="shrink-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-full cursor-pointer"
           >
             <Plus className="w-4 h-4 text-white/90" />
             Registrar servicio
@@ -186,7 +186,7 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
             <button
               type="submit"
               disabled={isSaving}
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
             >
               {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Guardar registro

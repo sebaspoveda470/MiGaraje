@@ -180,7 +180,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
               <div className="pt-2">
                 <button
                   onClick={handleClose}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-xs transition-all cursor-pointer"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-3 rounded-full shadow-xs transition-all cursor-pointer"
                 >
                   Ver en el Marketplace
                 </button>
@@ -344,7 +344,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-full shadow-xs transition-all cursor-pointer"
                 >
                   {isSubmitting ? 'Enviando Solicitud...' : 'Enviar Solicitud'}
                 </button>

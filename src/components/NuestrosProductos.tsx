@@ -351,9 +351,9 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Header Banner */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+      <div className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-<h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
             Nuestros Productos MiGaraje
           </h1>
 
@@ -384,7 +384,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
         <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0">
           <button
             onClick={openAddModal}
-            className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
+            className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
           >
             <Plus className="w-4 h-4 text-white/90" />
             <span>+ Publicar Nuevo Producto</span>
@@ -401,7 +401,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
 
           <button
             onClick={onOpenOrders}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-full flex items-center justify-center gap-2 cursor-pointer transition-all"
           >
             <ClipboardList className="w-3.5 h-3.5" />
             <span>Ver Pedidos</span>
@@ -668,7 +668,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
               <button
                 onClick={onSeedCatalog}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-full cursor-pointer"
               >
                 Cargar catálogo inicial
               </button>
@@ -769,7 +769,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 <button
                   type="submit"
                   disabled={isSavingPhone}
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
                 >
                   {isSavingPhone && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Guardar Número
@@ -925,7 +925,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 <button
                   type="submit"
                   disabled={isSavingProduct || isProcessingImage}
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSavingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-white/90" />}
                   <span>{editingProduct ? 'Guardar Cambios' : 'Publicar en Nuestros Productos'}</span>

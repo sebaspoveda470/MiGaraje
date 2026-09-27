@@ -223,7 +223,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </button>
                 <button
                   onClick={onToggleSold}
-                  className={`shrink-0 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`shrink-0 font-bold text-xs px-4 py-2.5 rounded-full flex items-center justify-center gap-1.5 cursor-pointer ${
                     isSold ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                   }`}
                 >
@@ -251,7 +251,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               href={whatsAppLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 sm:flex-none sm:ml-auto bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-sm px-6 py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-none sm:ml-auto bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-sm px-6 py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-5 h-5" />
               Escribir al vendedor

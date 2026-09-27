@@ -397,11 +397,10 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
 
       {/* Community Hero: Clean Editorial Header */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
+      <div className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-<h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
-            <span className="sm:hidden">Clubes de propietarios y apasionados</span>
-            <span className="hidden sm:inline">Mi Comunidad de Propietarios & Apasionados</span>
+<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
+            Clubes de propietarios y apasionados.
           </h1>
 
           <p className="hidden sm:block text-sm text-slate-600 leading-relaxed font-normal">
@@ -412,7 +411,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
         <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={handleOpenCreate}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[46px]"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-xs transition-all cursor-pointer min-h-[46px]"
           >
             <PlusCircle className="w-4 h-4 text-white/90" />
             <span>Crear una Comunidad</span>
@@ -449,7 +448,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               <button
                 onClick={handleSeedCommunities}
                 disabled={isSeeding}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-full cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
               >
                 {isSeeding && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Cargar clubes iniciales
@@ -572,7 +571,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                     <button
                       onClick={handleToggleMembership}
                       disabled={isTogglingMembership}
-                      className={`flex-1 sm:flex-none font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 ${
+                      className={`flex-1 sm:flex-none font-bold text-xs py-2.5 px-4 rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 ${
                         isMember
                           ? 'bg-white text-slate-700 border border-slate-300 hover:border-red-300 hover:text-red-700'
                           : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
@@ -904,7 +903,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                 <button
                   type="submit"
                   disabled={isPosting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-full shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
                 >
                   {isPosting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   {isMember ? 'Publicar en la Comunidad' : 'Unirme y Publicar'}

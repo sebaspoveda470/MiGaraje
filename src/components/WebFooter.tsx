@@ -27,7 +27,7 @@ export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal
           <p className="text-sm font-bold text-slate-900 text-center sm:text-left">¿Vas a vender tu carro? Publícalo gratis en MiGaraje.</p>
           <button
             onClick={() => onNavigateTab('vehiculos')}
-            className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+            className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs px-5 py-2.5 rounded-full shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
           >
             <Car className="w-4 h-4" />
             Publicar mi vehículo

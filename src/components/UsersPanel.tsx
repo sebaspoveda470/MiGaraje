@@ -171,7 +171,7 @@ export const UsersPanel: React.FC<UsersPanelProps> = ({ isOpen, carListings, onC
           <button
             onClick={() => downloadCsv(filtered, listingsByOwner)}
             disabled={!filtered.length}
-            className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="px-3 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Descargar Excel</span>

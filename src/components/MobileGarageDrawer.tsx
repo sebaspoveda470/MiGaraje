@@ -189,7 +189,7 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
               onClose();
               onOpenAddVehicle();
             }}
-            className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer min-h-[48px]"
+            className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-full flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer min-h-[48px]"
           >
             <PlusCircle className="w-4 h-4 text-white/90" />
             <span>Registrar Nuevo Vehículo en mi Garaje</span>

@@ -157,7 +157,7 @@ cart,
   const itemCount = cartItemCount ?? (cart ? cart.reduce((sum, item) => sum + item.quantity, 0) : 0);
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 text-slate-900 shadow-xs w-full max-w-full overflow-x-clip sm:overflow-visible">
+    <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-2xl backdrop-saturate-150 border-b border-slate-200/70 text-slate-900 w-full max-w-full overflow-x-clip sm:overflow-visible">
       
       {/* Main Navigation Bar */}
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-3">
@@ -361,7 +361,7 @@ cart,
                         setGarageDropdownOpen(false);
                         handleOpenGarage();
                       }}
-                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-xl shadow-xs transition-all cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-full shadow-xs transition-all cursor-pointer"
                     >
                       <PlusCircle className="w-4 h-4" />
                       <span>Registrar Nuevo Vehículo</span>
@@ -404,7 +404,7 @@ cart,
             <button
               onClick={handleOpenCartDrawer}
               aria-label="Abrir Carrito de Compras"
-              className="relative p-2.5 sm:px-3.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+              className="relative p-2.5 sm:px-3.5 sm:py-2 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white transition-all shadow-xs flex items-center gap-2 cursor-pointer"
               title="Carrito de Compras / Repuestos"
             >
               <div className="relative">
@@ -424,7 +424,7 @@ cart,
       </div>
 
       {/* Module Navigation Tabs */}
-      <nav className="hidden sm:block border-t border-slate-200 px-2 sm:px-4 relative bg-slate-50/50">
+      <nav className="hidden sm:block px-2 sm:px-4 pb-2.5 relative">
         <div className="max-w-7xl mx-auto relative flex items-center">
           
           {/* Scroll Left Button */}
@@ -443,15 +443,15 @@ cart,
           <div 
             ref={tabsNavRef}
             onScroll={updateScrollMetrics}
-            className="w-full flex items-center gap-1 overflow-x-auto py-2 px-1 scroll-smooth scrollbar-thin"
+            className="mx-auto w-fit max-w-full flex items-center gap-0.5 overflow-x-auto p-1 rounded-full bg-slate-200/60 scroll-smooth scrollbar-none"
           >
             <button
               data-tab="garaje"
               onClick={() => handleTabChange('garaje')}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+              className={`flex items-center gap-2 px-4 sm:px-5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                 activeTab === 'garaje'
-                  ? 'bg-white text-slate-950 font-bold shadow-xs border border-slate-300'
-                  : 'text-slate-600 font-semibold hover:text-slate-950 hover:bg-slate-100'
+                  ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                  : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
               <Car className={`w-3.5 h-3.5 ${activeTab === 'garaje' ? 'text-blue-600' : 'text-slate-500'}`} />
@@ -464,43 +464,40 @@ cart,
             <button
               data-tab="vehiculos"
               onClick={() => handleTabChange('vehiculos')}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+              className={`flex items-center gap-2 px-4 sm:px-5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                 activeTab === 'vehiculos'
-                  ? 'bg-white text-slate-950 font-bold shadow-xs border border-slate-300'
-                  : 'text-slate-600 font-semibold hover:text-slate-950 hover:bg-slate-100'
+                  ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                  : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
               <ShoppingBag className={`w-3.5 h-3.5 ${activeTab === 'vehiculos' ? 'text-blue-600' : 'text-slate-500'}`} />
               <span>Compra & Venta</span>
-              <span className="text-[10px] px-2 py-0.2 rounded-full font-bold bg-slate-100 text-slate-700">Vehículos</span>
             </button>
 
             <button
               data-tab="productos"
               onClick={() => handleTabChange('productos')}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+              className={`flex items-center gap-2 px-4 sm:px-5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                 activeTab === 'productos'
-                  ? 'bg-white text-slate-950 font-bold shadow-xs border border-slate-300'
-                  : 'text-slate-600 font-semibold hover:text-slate-950 hover:bg-slate-100'
+                  ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                  : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
               <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'productos' ? 'text-blue-600' : 'text-slate-500'}`} />
               <span>Nuestros Productos</span>
-              <span className="text-[10px] bg-blue-50 text-blue-800 px-2 py-0.2 rounded-full font-bold border border-blue-200">MiGaraje</span>
             </button>
 
             <button
               data-tab="comunidades"
               onClick={() => handleTabChange('comunidades')}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+              className={`flex items-center gap-2 px-4 sm:px-5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                 activeTab === 'comunidades'
-                  ? 'bg-white text-slate-950 font-bold shadow-xs border border-slate-300'
-                  : 'text-slate-600 font-semibold hover:text-slate-950 hover:bg-slate-100'
+                  ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                  : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
               <Users className={`w-3.5 h-3.5 ${activeTab === 'comunidades' ? 'text-blue-600' : 'text-slate-500'}`} />
               <span>Mi Comunidad</span>
-              <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.2 rounded-full font-bold">Clubes</span>
             </button>
           </div>
 

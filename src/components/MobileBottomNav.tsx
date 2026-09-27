@@ -94,7 +94,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       {/* Main Bottom Nav Bar: 4 balanced thumb-friendly touch targets */}
       <nav 
         aria-label="Navegación Móvil"
-        className="bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="bg-white/75 backdrop-blur-2xl backdrop-saturate-150 border-t border-slate-200/70 px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <div className="grid grid-cols-4 gap-1 items-center max-w-md mx-auto">
           {tabs.map((tab) => {
@@ -119,10 +119,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 <span className="text-[10px] mt-1 leading-none tracking-tight">
                   {tab.label}
                 </span>
-                {isActive && (
-                  <span className="w-3 h-0.5 bg-blue-600 rounded-full mt-1 animate-in fade-in" />
-                )}
-              </button>
+</button>
             );
           })}
         </div>
