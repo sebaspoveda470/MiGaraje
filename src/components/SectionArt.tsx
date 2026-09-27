@@ -71,7 +71,7 @@ export const SectionHero: React.FC<SectionHeroProps> = ({ image, alt, focus = '5
           ref={photoRef}
           src={image}
           alt={alt}
-          className="photo-soft w-full h-full object-cover select-none will-change-transform"
+          className="photo-soft photo-soft--light w-full h-full object-cover select-none will-change-transform"
           style={{ objectPosition: focus }}
         />
       </div>

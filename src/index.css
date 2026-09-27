@@ -94,6 +94,11 @@ body {
   filter: blur(3px) saturate(0.85);
   scale: 1.04;
 }
+/* Section headers: just a touch of softness */
+.photo-soft.photo-soft--light {
+  filter: blur(1px) saturate(0.92);
+  scale: 1.02;
+}
 
 /* Home photo settles in when the page opens */
 @keyframes hero-settle {
