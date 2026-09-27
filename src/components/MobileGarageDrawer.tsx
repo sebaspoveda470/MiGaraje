@@ -9,6 +9,7 @@ import {
   Gauge, 
   ShieldCheck 
 } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import { Vehicle } from '../types';
 
 interface MobileGarageDrawerProps {
@@ -19,6 +20,7 @@ interface MobileGarageDrawerProps {
   onSelectVehicle: (vehicle: Vehicle) => void;
   onOpenAddVehicle: () => void;
   onEditVehicle?: (vehicle: Vehicle) => void;
+  onSellVehicle?: (vehicle: Vehicle) => void;
 }
 
 export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
@@ -29,6 +31,7 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
   onSelectVehicle,
   onOpenAddVehicle,
   onEditVehicle,
+  onSellVehicle,
 }) => {
   if (!isOpen) return null;
 
@@ -138,6 +141,20 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
 
                   {/* Actions */}
                   <div className="flex items-center gap-1.5 shrink-0">
+                    {onSellVehicle && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onClose();
+                          onSellVehicle(veh);
+                        }}
+                        className="px-2.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                        title="Vender este vehículo"
+                      >
+                        <Tag className="w-3.5 h-3.5" /> Vender
+                      </button>
+                    )}
                     {onEditVehicle && (
                       <button
                         type="button"

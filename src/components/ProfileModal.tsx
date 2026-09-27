@@ -17,6 +17,7 @@ import {
   Trash2,
   BellRing
 } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import { UserProfile, Vehicle } from '../types';
 import { useConfirm } from './ConfirmDialog';
 
@@ -39,6 +40,7 @@ interface ProfileModalProps {
   onSelectVehicle: (id: string) => void;
   onOpenAddVehicle: () => void;
   onEditVehicle?: (vehicle: Vehicle) => void;
+  onSellVehicle?: (vehicle: Vehicle) => void;
   onLogout: () => void;
   onSaveProfile: (profile: UserProfile) => Promise<void>;
   onDeleteAccount: () => Promise<void>;
@@ -53,7 +55,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onSelectVehicle,
   onOpenAddVehicle,
   onEditVehicle,
-  onLogout,
+  onSellVehicle,
+onLogout,
   onSaveProfile,
   onDeleteAccount,
 }) => {
@@ -328,6 +331,21 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       </div>
 
                       <div className="shrink-0 ml-2 flex items-center gap-1.5">
+                        {onSellVehicle && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onClose();
+                              onSellVehicle(v);
+                            }}
+                            className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 border border-emerald-200 transition-colors flex items-center gap-1 text-[11px] font-bold cursor-pointer"
+                            title="Publicar este vehículo en Compra & Venta"
+                          >
+                            <Tag className="w-3.5 h-3.5" />
+                            <span>Vender</span>
+                          </button>
+                        )}
                         {onEditVehicle && (
                           <button
                             type="button"

@@ -22,6 +22,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Vehicle, CareProduct } from '../types';
+import { Tag } from 'lucide-react';
 import { VehicleDocsCard } from './VehicleDocsCard';
 import { MaintenanceLog } from './MaintenanceLog';
 import { getDocStatus, describeDoc } from '../utils/vehicleDocs';
@@ -35,6 +36,9 @@ interface SmartRecommendationsProps {
   userId: string | null;
   onUpdateVehicle: (vehicle: Vehicle) => void;
   onError: (message: string, err: unknown) => void;
+  onSellVehicle?: (vehicle: Vehicle) => void;
+  /** The active vehicle already has an active listing */
+  isForSale?: boolean;
 }
 
 export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
@@ -46,6 +50,8 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
   userId,
   onUpdateVehicle,
   onError,
+  onSellVehicle,
+  isForSale,
 }) => {
   const [isEditingKm, setIsEditingKm] = useState(false);
   const [kmInput, setKmInput] = useState('');
@@ -195,6 +201,16 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>Modificar Kilometraje</span>
+              </button>
+            )}
+
+            {onSellVehicle && (
+              <button
+                onClick={() => onSellVehicle(activeVehicle)}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[42px]"
+              >
+                <Tag className="w-3.5 h-3.5 text-white/90" />
+                <span>{isForSale ? 'Ver mi anuncio de venta' : 'Vender este carro'}</span>
               </button>
             )}
 

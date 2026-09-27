@@ -108,6 +108,8 @@ export interface VehicleListing {
   status?: 'disponible' | 'vendido';
   /** Total photos: `images` holds the cover, the rest live in vehicleListings/{id}/photos */
   photoCount?: number;
+  /** Garage vehicle (users/{uid}/vehicles/{id}) this listing was published from */
+  garageVehicleId?: string;
 }
 
 export type CareCategory = 'exterior' | 'interior' | 'motor_aditivos' | 'herramientas';

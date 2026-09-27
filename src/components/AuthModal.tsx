@@ -17,6 +17,11 @@ interface AuthModalProps {
 
 type Mode = 'login' | 'signup' | 'reset';
 
+// Browsers inside WhatsApp, Instagram, Facebook, TikTok or QR apps forget the session when closed
+// and often block the Google window.
+const isInAppBrowser = () =>
+  typeof navigator !== 'undefined' && /FBAN|FBAV|Instagram|WhatsApp|Line\/|TikTok|musical_ly|; wv\)/i.test(navigator.userAgent);
+
 const inputClass =
   'w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs';
 
@@ -103,6 +108,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-7 bg-slate-50/70 space-y-4">
+          {isInAppBrowser() && (
+            <p className="text-xs text-amber-900 bg-amber-50 border border-amber-300 rounded-xl px-3 py-2.5 leading-relaxed">
+              <strong>Estás dentro de otra app</strong> (WhatsApp, Instagram, lector QR…). Para que tu sesión quede guardada,
+              toca <strong>⋮</strong> y elige <strong>“Abrir en Chrome”</strong> o <strong>“Abrir en Safari”</strong>.
+            </p>
+          )}
           {mode !== 'reset' && (
             <>
               <button

@@ -8,6 +8,8 @@ import { CommunityHub } from './components/CommunityHub';
 import { GarageModal } from './components/GarageModal';
 import { CartDrawer } from './components/CartDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
+import { UsersPanel } from './components/UsersPanel';
+import type { SellRequest } from './components/CarMarketplace';
 import { AuthModal } from './components/AuthModal';
 import { LegalModal, LegalDoc } from './components/LegalModal';
 import { OrdersPanel } from './components/OrdersPanel';
@@ -111,6 +113,9 @@ export function App() {
   const [orders, setOrders] = useState<CheckoutOrder[]>([]);
   const [reports, setReports] = useState<ContentReport[]>([]);
   const [isReportsOpen, setIsReportsOpen] = useState(false);
+  const [isUsersOpen, setIsUsersOpen] = useState(false);
+  // "Vender" pressed on a garage vehicle, handed to Compra & Venta
+  const [sellRequest, setSellRequest] = useState<SellRequest | null>(null);
 
   // Shared catalog data (Firestore, realtime)
   const [carListings, setCarListings] = useState<VehicleListing[]>([]);
@@ -433,6 +438,16 @@ export function App() {
       .catch(showError('No se pudo eliminar el vehículo.'));
   };
 
+  // Active listing already published from a garage vehicle (if any)
+  const listingForVehicle = (vehicleId: string) =>
+    carListings.find((l) => l.ownerId === authUser?.uid && l.garageVehicleId === vehicleId && l.status !== 'vendido') || null;
+
+  const handleSellVehicle = (veh: Vehicle) => {
+    if (!requireAuth()) return;
+    setSellRequest({ vehicle: veh, listingId: listingForVehicle(veh.id)?.id || null });
+    setActiveTab('vehiculos');
+  };
+
   // Listing Management (Compra & Venta de Vehículos)
   const handlePublishListing = async (newListing: Omit<VehicleListing, 'id'>, photos: string[]) => {
     if (!authUser) return;
@@ -531,6 +546,9 @@ export function App() {
           onOpenCart={() => setIsCartOpen(true)}
           pendingReportsCount={reports.filter((r) => r.status === 'pendiente').length}
           onOpenReports={isAdmin ? () => setIsReportsOpen(true) : undefined}
+          onOpenUsers={isAdmin ? () => setIsUsersOpen(true) : undefined}
+          onSellVehicle={handleSellVehicle}
+          authReady={authReady}
         />
       </div>
 
@@ -577,6 +595,8 @@ export function App() {
                 userId={authUser?.uid || null}
                 onUpdateVehicle={handleUpdateVehicle}
                 onError={(message, err) => showError(message)(err)}
+                onSellVehicle={authUser ? handleSellVehicle : undefined}
+                isForSale={!!activeVehicle && !!listingForVehicle(activeVehicle.id)}
               />
             )}
           </div>
@@ -597,8 +617,10 @@ export function App() {
 onToggleSold={handleToggleSold}
             favoriteIds={user?.favoriteListings || []}
             onToggleFavorite={(id) => handleToggleFavorite('favoriteListings', id)}
-initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
-/>
+            initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
+            sellRequest={sellRequest}
+            onSellRequestHandled={() => setSellRequest(null)}
+          />
         )}
 
         {/* TAB 3: NUESTROS PRODUCTOS MIGARAJE (VENTA DIRECTA POR WHATSAPP) */}
@@ -684,6 +706,7 @@ initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
         onSelectVehicle={(id) => setActiveVehicleId(id)}
         onOpenAddVehicle={handleOpenAddVehicle}
         onEditVehicle={handleOpenEditVehicle}
+        onSellVehicle={handleSellVehicle}
         onLogout={handleLogout}
         onSaveProfile={handleSaveProfile}
         onDeleteAccount={handleDeleteAccount}
@@ -741,7 +764,14 @@ initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
         onError={(message, err) => showError(message)(err)}
       />
 
-      <LegalModal doc={legalDoc} onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
+      <UsersPanel
+        isOpen={isUsersOpen && isAdmin}
+        carListings={carListings}
+        onClose={() => setIsUsersOpen(false)}
+        onError={(message, err) => showError(message)(err)}
+      />
+
+      <LegalModal doc={legalDoc}onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
 
     </div>
     </ReportProvider>

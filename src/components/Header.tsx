@@ -16,7 +16,8 @@ import {
   ChevronRight,
   Edit,
   Crown,
-  Flag
+  Flag,
+  Tag
 } from 'lucide-react';
 import { Vehicle, UserProfile, CartItem } from '../types';
 import { Logo } from './Logo';
@@ -40,6 +41,11 @@ interface HeaderProps {
   /** Admin only: pending reports and a way to open the panel */
   pendingReportsCount?: number;
   onOpenReports?: () => void;
+  /** Admin only: registered users panel */
+  onOpenUsers?: () => void;
+  onSellVehicle?: (vehicle: Vehicle) => void;
+  /** False while the session and profile are still loading */
+  authReady?: boolean;
   cart?: CartItem[];
   onOpenCart?: () => void;
   onOpenCartModal?: () => void;
@@ -65,6 +71,9 @@ export const Header: React.FC<HeaderProps> = ({
   cartItemCount,
   pendingReportsCount,
   onOpenReports,
+  onOpenUsers,
+  onSellVehicle,
+  authReady,
 cart,
   onOpenCart,
   onOpenCartModal,
@@ -188,7 +197,10 @@ cart,
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             
             {/* User Profile / Login Button */}
-            {user ? (
+            {authReady === false ? (
+              // Session still loading: don't flash "Ingresar" to people who are already signed in
+              <div className="w-9 h-9 sm:w-24 rounded-xl bg-slate-100 border border-slate-200 animate-pulse shrink-0" aria-hidden="true" />
+            ) : user ? (
               <button
                 onClick={onOpenProfile}
                 aria-label="Abrir Perfil de Usuario"
@@ -209,8 +221,7 @@ cart,
                 className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs shrink-0"
               >
                 <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                <span className="hidden sm:inline">Crear Cuenta</span>
-                <span className="sm:hidden text-[11px]">Ingresar</span>
+                <span className="text-[11px] sm:text-xs">Ingresar</span>
               </button>
             )}
 
@@ -307,6 +318,20 @@ cart,
                           </div>
 
                           <div className="flex items-center gap-1.5 shrink-0">
+                            {onSellVehicle && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setGarageDropdownOpen(false);
+                                  onSellVehicle(veh);
+                                }}
+                                className="p-1 rounded-lg hover:bg-emerald-50 text-slate-400 hover:text-emerald-700 transition-colors"
+                                title="Vender este vehículo"
+                              >
+                                <Tag className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                             {onEditVehicle && (
                               <button
                                 type="button"
@@ -345,6 +370,18 @@ cart,
                 </div>
               )}
             </div>
+
+            {/* Admin: registered users */}
+            {onOpenUsers && (
+              <button
+                onClick={onOpenUsers}
+                aria-label="Usuarios registrados"
+                title="Usuarios registrados"
+                className="relative p-2 sm:p-2.5 rounded-xl bg-white hover:bg-blue-50 border border-slate-200 text-slate-600 hover:text-blue-700 transition-all cursor-pointer shrink-0"
+              >
+                <Users className="w-4 h-4" />
+              </button>
+            )}
 
             {/* Admin: reports */}
             {onOpenReports && (
@@ -494,6 +531,7 @@ cart,
         }}
         onOpenAddVehicle={handleOpenGarage}
         onEditVehicle={onEditVehicle}
+        onSellVehicle={onSellVehicle}
       />
 
     </header>

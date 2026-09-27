@@ -61,17 +61,25 @@ service cloud.firestore {
 
     // ---------- Users & their garage (private) ----------
 
+    // The admin can read (never change) profiles and garages for the "Usuarios" panel
     match /users/{userId} {
-      allow read, write: if isUser(userId);
+      allow read: if isUser(userId) || isAdmin();
+      allow write: if isUser(userId);
 
       match /vehicles/{vehicleId} {
-        allow read, write: if isUser(userId);
+        allow read: if isUser(userId) || isAdmin();
+        allow write: if isUser(userId);
 
         // Maintenance log (bitácora)
         match /services/{serviceId} {
           allow read, write: if isUser(userId);
         }
       }
+    }
+
+    // All garages at once (collection group query), admin only
+    match /{path=**}/vehicles/{vehicleId} {
+      allow read: if isAdmin();
     }
 
     // ---------- Compra & Venta ----------

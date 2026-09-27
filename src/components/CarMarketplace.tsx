@@ -31,7 +31,7 @@ import {
   Heart,
   Pencil
 } from 'lucide-react';
-import { VehicleListing, UserProfile } from '../types';
+import { VehicleListing, UserProfile, Vehicle } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { PhotoPicker } from './PhotoPicker';
 import { VehicleDetailModal } from './VehicleDetailModal';
@@ -54,7 +54,18 @@ interface CarMarketplaceProps {
   initialListingId?: string | null;
   favoriteIds: string[];
   onToggleFavorite: (listingId: string) => void;
+  /** "Vender" pressed on a garage vehicle: open its listing, or the form filled with its data */
+  sellRequest?: SellRequest | null;
+  onSellRequestHandled?: () => void;
 }
+
+export interface SellRequest {
+  vehicle: Vehicle;
+  /** Active listing already published from this vehicle */
+  listingId: string | null;
+}
+
+const BRAND_OPTIONS = ['Mazda', 'Toyota', 'Renault', 'Chevrolet', 'Kia', 'Ford', 'Volkswagen', 'Nissan', 'Hyundai', 'BMW', 'Mercedes-Benz', 'Suzuki'];
 
 // The cover lives in the listing and each extra photo in its own document
 const MAX_LISTING_PHOTOS = 10;
@@ -109,6 +120,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   initialListingId,
   favoriteIds,
   onToggleFavorite,
+  sellRequest,
+  onSellRequestHandled,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('todas');
@@ -165,6 +178,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [publishError, setPublishError] = useState<string | null>(null);
   // Listing being edited (null = publishing a new one)
   const [editingListing, setEditingListing] = useState<VehicleListing | null>(null);
+  // Garage vehicle the new listing comes from
+  const [pubGarageVehicleId, setPubGarageVehicleId] = useState<string | null>(null);
 
   const canDelete = (car: VehicleListing) => isAdmin || (!!currentUserId && car.ownerId === currentUserId);
 
@@ -175,11 +190,12 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     setPubColor('');
     setPubEngine('');
     setEditingListing(null);
+    setPubGarageVehicleId(null);
   };
 
   const openPublishModal = () => {
     if (!requireAuth()) return;
-    if (editingListing) resetPublishForm();
+    if (editingListing || pubGarageVehicleId) resetPublishForm();
     if (!pubSellerName && currentUser?.fullName) setPubSellerName(currentUser.fullName);
     if (!pubSellerPhone && currentUser?.phone) setPubSellerPhone(currentUser.phone);
     setPublishError(null);
@@ -188,8 +204,42 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
   const closePublishModal = () => {
     setShowPublishModal(false);
-    if (editingListing) resetPublishForm();
+    if (editingListing || pubGarageVehicleId) resetPublishForm();
   };
+
+  // Fill the form with what the owner already saved in Mi Garaje
+  const openPublishFromGarage = (v: Vehicle) => {
+    resetPublishForm();
+    const today = new Date().toISOString().slice(0, 10);
+    setPubGarageVehicleId(v.id);
+    setPubBrand(v.brand);
+    setPubModel([v.model, v.version].filter(Boolean).join(' '));
+    setPubYear(v.year);
+    setPubMileage(v.mileage);
+    setPubPrice(0);
+    setPubTransmission(v.transmission === 'Manual' ? 'Manual' : 'Automática');
+    setPubFuel(v.fuelType || 'Gasolina');
+    setPubEngine(v.engine || '');
+    setPubPlateEnding((v.plate || '').replace(/\D/g, '').slice(-1));
+    if (v.soatExpiry) setPubSoatValid(v.soatExpiry >= today);
+    if (v.tecnoExpiry) setPubTecnoValid(v.tecnoExpiry >= today);
+    if (currentUser?.city && COLOMBIAN_CITIES.includes(currentUser.city)) setPubCity(currentUser.city);
+    // Only the owner's own photo, not the automatic reference picture
+    setPubImages(v.image?.startsWith('data:') ? [v.image] : []);
+    setPubSellerName(currentUser?.fullName || '');
+    setPubSellerPhone(currentUser?.phone || '');
+    setPublishError(null);
+    setSelectedCar(null);
+    setShowPublishModal(true);
+  };
+
+  useEffect(() => {
+    if (!sellRequest) return;
+    const existing = sellRequest.listingId ? carListings.find((c) => c.id === sellRequest.listingId) : null;
+    if (existing) setSelectedCar(existing);
+    else openPublishFromGarage(sellRequest.vehicle);
+    onSellRequestHandled?.();
+  }, [sellRequest]);
 
   const openEditModal = async (car: VehicleListing) => {
     setEditingListing(car);
@@ -308,7 +358,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
   const handlePublishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pubModel.trim() || !pubPrice) return;
+    if (!pubModel.trim()) return;
+    if (!pubPrice) {
+      setPublishError('Escribe el precio de venta.');
+      return;
+    }
     if (!toWhatsAppNumber(pubSellerPhone)) {
       setPublishError('Ingresa un número de WhatsApp válido para que los compradores te contacten.');
       return;
@@ -353,6 +407,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       tags,
       intermediationProtected: false,
       publishedAt: new Date().toISOString(),
+      ...(pubGarageVehicleId ? { garageVehicleId: pubGarageVehicleId } : {}),
     };
 
     setIsPublishing(true);
@@ -831,6 +886,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               <p className="text-xs text-slate-500 mt-0.5">
                 Los compradores te escribirán directamente a tu WhatsApp personal.
               </p>
+              {pubGarageVehicleId && !editingListing && (
+                <p className="mt-2 text-[11px] text-blue-900 bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 font-semibold">
+                  Llenamos los datos con tu vehículo de Mi Garaje. Solo escribe el precio, revisa lo demás y agrega fotos.
+                </p>
+              )}
             </div>
 
             <form onSubmit={handlePublishSubmit} className="space-y-4 text-xs">
@@ -843,18 +903,9 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     onChange={(e) => setPubBrand(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                   >
-                    <option value="Mazda">Mazda</option>
-                    <option value="Toyota">Toyota</option>
-                    <option value="Renault">Renault</option>
-                    <option value="Chevrolet">Chevrolet</option>
-                    <option value="Kia">Kia</option>
-                    <option value="Ford">Ford</option>
-                    <option value="Volkswagen">Volkswagen</option>
-                    <option value="Nissan">Nissan</option>
-                    <option value="Hyundai">Hyundai</option>
-                    <option value="BMW">BMW</option>
-                    <option value="Mercedes-Benz">Mercedes-Benz</option>
-                    <option value="Suzuki">Suzuki</option>
+                    {(BRAND_OPTIONS.includes(pubBrand) ? BRAND_OPTIONS : [pubBrand, ...BRAND_OPTIONS]).map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -893,7 +944,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     step={500000}
                     min={5000000}
                     placeholder="75000000"
-                    value={pubPrice}
+                    value={pubPrice || ''}
                     onChange={(e) => setPubPrice(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white font-mono font-bold"
                   />
