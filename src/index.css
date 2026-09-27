@@ -3,6 +3,8 @@
 /* MiGaraje brand: the blue scale follows the logo (#0084FF) and headings/body use Plus Jakarta Sans */
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Wordmark, matching the official logo */
+  --font-logo: "Montserrat", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
   --color-blue-50: #eef6ff;
   --color-blue-100: #d9ebff;

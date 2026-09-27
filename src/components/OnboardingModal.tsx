@@ -234,7 +234,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
           <div className="relative z-10">
             <div className="flex justify-center mb-2">
-              <Logo size="md" variant="icon-only" />
+              <Logo size="md" theme="dark" />
             </div>
             
             <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">

@@ -95,7 +95,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
           </button>
           <div className="relative z-10">
             <div className="flex justify-center mb-2">
-              <Logo size="md" variant="icon-only" />
+              <Logo size="md" theme="dark" />
             </div>
             <h2 className="text-lg sm:text-2xl font-black tracking-tight">{title}</h2>
             <p className="text-[11px] sm:text-sm text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">{subtitle}</p>

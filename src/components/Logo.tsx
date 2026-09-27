@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -6,138 +6,110 @@ interface LogoProps {
   showBadge?: boolean;
   badgeText?: string;
   variant?: 'default' | 'icon-only' | 'horizontal' | 'compact' | 'badge-only';
+  /** "dark" = placed on a dark background (white "Mi" and tagline) */
+  theme?: 'light' | 'dark';
   className?: string;
   onClick?: () => void;
 }
 
 /**
- * Logotipo oficial MiGaraje - Ecosistema Automotriz
- * Basado fielmente en el diseño de casa/garaje hexagonal con silueta de automóvil
- * en tonalidades azul neón (#0095FF / #38BDF8 / #2563EB) y texto de alto contraste.
+ * The garage + car mark, traced from the official logo ("Logo MIGaraje (1).png").
+ * Drawn on its own navy tile so the white roof and neon glow read on any background.
+ * Coordinates are the official PNG's pixels (1254 × 1254).
  */
+export const LogoMark: React.FC<{ className?: string; glow?: boolean }> = ({ className = '', glow = true }) => {
+  const uid = useId().replace(/:/g, '');
+  const tile = `tile-${uid}`;
+  const house = `house-${uid}`;
+  const neon = `neon-${uid}`;
+
+  return (
+    <svg viewBox="278 120 700 700" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+      <defs>
+        <linearGradient id={tile} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#06214f" />
+          <stop offset="100%" stopColor="#020a1d" />
+        </linearGradient>
+        <linearGradient id={house} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#2BB3FD" />
+          <stop offset="100%" stopColor="#1E8BFB" />
+        </linearGradient>
+        <filter id={neon} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="9" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <rect x="278" y="120" width="700" height="700" rx="150" fill={`url(#${tile})`} />
+
+      <g filter={glow ? `url(#${neon})` : undefined} strokeLinecap="round" strokeLinejoin="round" fill="none">
+        {/* Garage */}
+        <path
+          d="M 372 405 L 628 262 L 879 405 L 879 650 Q 879 688 841 688 L 410 688 Q 372 688 372 650 Z"
+          stroke={`url(#${house})`}
+          strokeWidth="38"
+        />
+        {/* Roof of the car */}
+        <path d="M 495 515 C 500 478, 522 434, 628 434 C 734 434, 756 478, 761 515" stroke="#F8FAFC" strokeWidth="21" />
+        {/* Body / hood */}
+        <path
+          d="M 441 632 C 424 600, 424 562, 468 546 C 520 531, 580 531, 628 531 C 676 531, 736 531, 788 546 C 832 562, 832 600, 815 632"
+          stroke="#228EFB"
+          strokeWidth="31"
+        />
+        {/* Headlights */}
+        <path d="M 448 589 L 526 599" stroke="#3CCBFE" strokeWidth="25" />
+        <path d="M 808 589 L 730 599" stroke="#3CCBFE" strokeWidth="25" />
+      </g>
+    </svg>
+  );
+};
+
 export const Logo: React.FC<LogoProps> = ({
   size = 'md',
   showTagline = true,
   showBadge = false,
   badgeText = 'COLOMBIA',
   variant = 'default',
+  theme = 'light',
   className = '',
   onClick,
 }) => {
-  // Dimensions based on size
-  const iconDimensions = {
-    sm: { container: 'w-7 h-7', text: 'text-base', sub: 'text-[9px]' },
-    md: { container: 'w-9 h-9', text: 'text-xl', sub: 'text-[10px]' },
-    lg: { container: 'w-12 h-12', text: 'text-2xl sm:text-3xl', sub: 'text-xs' },
-    xl: { container: 'w-16 h-16', text: 'text-3xl sm:text-4xl', sub: 'text-sm' },
-    '2xl': { container: 'w-24 h-24', text: 'text-4xl sm:text-5xl', sub: 'text-base' },
+  const dims = {
+    sm: { icon: 'w-8 h-8', text: 'text-lg', sub: 'text-[9px]' },
+    md: { icon: 'w-10 h-10', text: 'text-xl', sub: 'text-[10px]' },
+    lg: { icon: 'w-12 h-12', text: 'text-2xl sm:text-3xl', sub: 'text-xs' },
+    xl: { icon: 'w-16 h-16', text: 'text-3xl sm:text-4xl', sub: 'text-sm' },
+    '2xl': { icon: 'w-24 h-24', text: 'text-4xl sm:text-5xl', sub: 'text-base' },
   }[size];
+
+  const dark = theme === 'dark';
 
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center gap-2.5 select-none group transition-all duration-300 ${
-        onClick ? 'cursor-pointer' : ''
-      } ${className}`}
+      className={`inline-flex items-center gap-2.5 select-none group ${onClick ? 'cursor-pointer' : ''} ${className}`}
     >
-      {/* Icon Graphic: House/Garage outline with car silhouette inside */}
-      <div className={`relative ${iconDimensions.container} shrink-0 flex items-center justify-center`}>
-        <svg
-          viewBox="0 0 200 200"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full transition-transform duration-300 group-hover:scale-105"
-        >
-          <defs>
-            {/* Bright Neon Gradient for the House/Garage Roof & Frame */}
-            <linearGradient id="garageNeonOutline" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#00A6FF" />
-              <stop offset="50%" stopColor="#0072FF" />
-              <stop offset="100%" stopColor="#0051FF" />
-            </linearGradient>
+      <LogoMark className={`${dims.icon} shrink-0 drop-shadow-sm transition-transform duration-300 group-hover:scale-105`} />
 
-            {/* Cyan LED Headlights Gradient */}
-            <linearGradient id="headlightsCyan" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#38BDF8" />
-              <stop offset="100%" stopColor="#67E8F9" />
-            </linearGradient>
-          </defs>
-
-          {/* --- HOUSE / GARAGE CONTOUR (Hexagonal House Silhouette) --- */}
-          <path
-            d="M 100 28 
-               L 165 70 
-               Q 170 73 170 80 
-               L 170 156 
-               Q 170 168 158 168 
-               L 42 168 
-               Q 30 168 30 156 
-               L 30 80 
-               Q 30 73 35 70 
-               Z"
-            stroke="url(#garageNeonOutline)"
-            strokeWidth="14"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-
-          {/* --- CAR CABIN / UPPER ROOF ARC --- */}
-          <path
-            d="M 68 116 
-               C 74 88, 86 78, 100 78 
-               C 114 78, 126 88, 132 116"
-            stroke="#0f172a"
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
-
-          {/* --- CAR HOOD / MAIN HORIZONTAL BUMPER ARC --- */}
-          <path
-            d="M 52 148 
-               C 50 134, 58 124, 76 120 
-               C 88 118, 112 118, 124 120 
-               C 142 124, 150 134, 148 148
-               C 146 154, 140 154, 138 148
-               C 134 136, 122 130, 100 130
-               C 78 130, 66 136, 62 148
-               C 60 154, 54 154, 52 148 Z"
-            fill="#0091FF"
-          />
-
-          {/* --- LEFT LED HEADLIGHT --- */}
-          <path
-            d="M 58 146 Q 74 142 86 148 Q 74 152 58 146 Z"
-            fill="url(#headlightsCyan)"
-          />
-
-          {/* --- RIGHT LED HEADLIGHT --- */}
-          <path
-            d="M 142 146 Q 126 142 114 148 Q 126 152 142 146 Z"
-            fill="url(#headlightsCyan)"
-          />
-        </svg>
-      </div>
-
-      {/* Typography / Wordmark with High Contrast for Light/Friendly Theme */}
       {variant !== 'icon-only' && (
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-1.5">
-            <span className={`${iconDimensions.text} font-black tracking-tight flex items-center leading-none font-sans`}>
-              <span className="text-slate-950">Mi</span>
-              <span className="text-[#0084FF]">
-                Garaje
-              </span>
+            <span className={`${dims.text} font-logo font-bold tracking-tight leading-none`}>
+              <span className={dark ? 'text-white' : 'text-slate-950'}>Mi</span>
+              <span className="text-[#1E8BFB]">Garaje</span>
             </span>
-
             {showBadge && (
               <span className="text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                 {badgeText}
               </span>
             )}
           </div>
-
           {showTagline && (
-            <p className={`${iconDimensions.sub} text-slate-600 font-bold tracking-[0.18em] uppercase mt-0.5 leading-none`}>
+            <p className={`${dims.sub} font-logo font-medium tracking-[0.14em] mt-1 leading-none ${dark ? 'text-slate-200' : 'text-slate-500'}`}>
               Ecosistema Automotriz
             </p>
           )}
