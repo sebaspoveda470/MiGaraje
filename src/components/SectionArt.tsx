@@ -64,8 +64,9 @@ export const SectionHero: React.FC<SectionHeroProps> = ({ image, alt, focus = '5
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem] bg-slate-900 min-h-[360px] sm:min-h-[440px] lg:min-h-[480px] flex flex-col justify-end">
-      <div className="absolute inset-x-0 -top-[6%] h-[125%] hero-settle pointer-events-none">
+    <div className="relative overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem] bg-slate-900 sm:min-h-[440px] lg:min-h-[480px] flex flex-col justify-end">
+      {/* Phones: photo on top and the title below it (like the home page); larger screens: photo behind everything */}
+      <div className="relative aspect-[16/11] sm:aspect-auto sm:absolute sm:inset-x-0 sm:-top-[6%] sm:h-[125%] hero-settle pointer-events-none [mask-image:linear-gradient(to_bottom,black_60%,transparent)] sm:[mask-image:none]">
         <img
           ref={photoRef}
           src={image}
@@ -75,9 +76,9 @@ export const SectionHero: React.FC<SectionHeroProps> = ({ image, alt, focus = '5
         />
       </div>
       {/* Dark fade from the bottom-left so the white title reads on any photo */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 lg:bg-gradient-to-tr lg:from-black/90 lg:via-black/55 lg:to-transparent pointer-events-none" />
+      <div className="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 lg:bg-gradient-to-tr lg:from-black/90 lg:via-black/55 lg:to-transparent pointer-events-none" />
 
-      <div className="relative z-10 p-4 sm:p-8 lg:p-12 flex flex-col items-stretch sm:items-start gap-4 sm:gap-5 lg:max-w-[62%] text-white">
+      <div className="relative z-10 -mt-14 sm:mt-0 p-4 sm:p-8 lg:p-12 flex flex-col items-stretch sm:items-start gap-4 sm:gap-5 lg:max-w-[62%] text-white">
         {children}
       </div>
     </div>
