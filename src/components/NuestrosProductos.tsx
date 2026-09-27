@@ -34,6 +34,7 @@ import { ProductDetailModal, getProductImages } from './ProductDetailModal';
 import { PhotoPicker } from './PhotoPicker';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
+import { SectionGlow, SectionPhoto, sectionHeaderClass } from './SectionArt';
 
 // Photos live inside the product document (1 MB max), so keep a few small ones.
 const MAX_PRODUCT_PHOTOS = 4;
@@ -348,10 +349,12 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="relative isolate space-y-8 animate-in fade-in duration-300">
+      <SectionGlow tone="productos" />
       
       {/* Header Banner */}
-      <div data-reveal className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 sm:gap-6">
+      <div data-reveal className={sectionHeaderClass}>
+        <SectionPhoto src="/section-productos.jpg" alt="Persona lavando a mano un carro negro" />
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
             Nuestros Productos MiGaraje
@@ -381,7 +384,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
         </div>
 
         {isAdmin && (
-        <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={openAddModal}
             className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"

@@ -37,6 +37,7 @@ import { ShareButtons } from './ShareButtons';
 import { useConfirm } from './ConfirmDialog';
 import { useReport } from './ReportDialog';
 import { syncDeepLink } from '../utils/shareLinks';
+import { SectionGlow, SectionPhoto, sectionHeaderClass } from './SectionArt';
 
 interface CommunityHubProps {
   activeVehicle: Vehicle | null;
@@ -394,10 +395,12 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   const memberLabel = (count: number) => `${count} ${count === 1 ? 'miembro' : 'miembros'}`;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="relative isolate space-y-8 animate-in fade-in duration-300">
+      <SectionGlow tone="comunidad" />
 
       {/* Community Hero: Clean Editorial Header */}
-      <div data-reveal className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 sm:gap-6">
+      <div data-reveal className={sectionHeaderClass}>
+        <SectionPhoto src="/section-comunidad.jpg" alt="Encuentro de carros con personas reunidas" />
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
             Clubes de propietarios y apasionados.
@@ -408,7 +411,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
+        <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={handleOpenCreate}
             className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-xs transition-all cursor-pointer min-h-[46px]"

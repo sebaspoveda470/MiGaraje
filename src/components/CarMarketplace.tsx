@@ -39,6 +39,7 @@ import { getListingPhotos } from '../services/listingService';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
+import { SectionGlow, SectionPhoto, sectionHeaderClass } from './SectionArt';
 
 interface CarMarketplaceProps {
   carListings: VehicleListing[];
@@ -435,10 +436,12 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="relative isolate space-y-8 animate-in fade-in duration-300">
+      <SectionGlow tone="vehiculos" />
       
       {/* Header Banner: Compra & Venta de Vehículos */}
-      <div data-reveal className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 sm:gap-6">
+      <div data-reveal className={sectionHeaderClass}>
+        <SectionPhoto src="/section-vehiculos.jpg" alt="Carro recorriendo una carretera entre montañas" />
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
             Compra y vende tu carro, directo con el dueño.
@@ -467,7 +470,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
         </div>
 
         {/* Action Button: Vender mi Vehículo */}
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={openPublishModal}
             className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-semibold text-sm px-6 py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
@@ -475,7 +478,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
             <Plus className="w-4 h-4 text-white/90" />
             <span>Vender mi vehículo</span>
           </button>
-          <span className="hidden sm:block text-[11px] text-slate-500 text-center">Publicación rápida y gratuita</span>
+          <span className="hidden sm:block text-[11px] text-slate-500">Publicación rápida y gratuita</span>
         </div>
       </div>
 
