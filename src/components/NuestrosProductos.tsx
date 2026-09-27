@@ -353,14 +353,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
       {/* Header Banner */}
       <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-blue-400" /> Línea Oficial MiGaraje
-            </span>
-            <span className="hidden sm:inline text-xs text-slate-500 font-medium">Venta Directa por WhatsApp • Envíos a Toda Colombia</span>
-          </div>
-
-          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+<h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
             Nuestros Productos MiGaraje
           </h1>
 

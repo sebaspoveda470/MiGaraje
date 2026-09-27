@@ -385,14 +385,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       {/* Header Banner: Compra & Venta de Vehículos */}
       <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-blue-400" /> Compra & Venta de Vehículos
-            </span>
-            <span className="hidden sm:inline text-xs text-slate-500 font-medium">Trato Directo y Seguro</span>
-          </div>
-
-          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+<h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
             <span className="sm:hidden">Compra y vende tu carro, directo con el dueño</span>
             <span className="hidden sm:inline">Compra y vende tu vehículo sin intermediarios abusivos ni estafas</span>
           </h1>

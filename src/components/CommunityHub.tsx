@@ -399,14 +399,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       {/* Community Hero: Clean Editorial Header */}
       <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-          <div className="flex items-center gap-2">
-            <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-blue-400" /> Mi Comunidad MiGaraje
-            </span>
-            <span className="hidden sm:inline text-xs text-slate-500 font-medium">Clubes • Colombia</span>
-          </div>
-
-          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+<h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
             <span className="sm:hidden">Clubes de propietarios y apasionados</span>
             <span className="hidden sm:inline">Mi Comunidad de Propietarios & Apasionados</span>
           </h1>
