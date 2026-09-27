@@ -117,7 +117,7 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
             className={`${glass} hidden lg:flex rounded-3xl p-5 sm:p-6 items-end justify-between gap-6 text-left lg:w-72 lg:shrink-0 cursor-pointer group hover:bg-white/80 transition-colors`}
           >
             <div>
-              <div className="text-5xl font-display italic font-semibold text-slate-900 leading-none">{listingsCount ?? '…'}</div>
+              <div className="text-5xl font-display font-semibold text-slate-900 leading-none">{listingsCount ?? '…'}</div>
               <div className="mt-2 text-sm font-semibold text-slate-900">Vehículos en venta</div>
               <div className="text-xs text-slate-500">Publicados por propietarios</div>
             </div>
@@ -131,19 +131,19 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
       {/* Highlights */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <button data-reveal onClick={onExploreVehicles} className="lg:hidden text-left bg-white rounded-3xl p-4 sm:p-6 shadow-xs cursor-pointer">
-          <div className="text-2xl font-display italic font-semibold text-slate-900">{listingsCount ?? '…'}</div>
+          <div className="text-2xl font-display font-semibold text-slate-900">{listingsCount ?? '…'}</div>
           <div className="text-xs font-semibold text-slate-900 mt-1">Vehículos en venta</div>
           <div className="text-[11px] text-slate-500 mt-0.5">Publicados por propietarios</div>
         </button>
         {HIGHLIGHTS.map((h) => (
           <div key={h.title} data-reveal className="bg-white rounded-3xl p-4 sm:p-6 shadow-xs">
-            <div className={`text-2xl sm:text-3xl font-display italic font-semibold ${h.accent ? 'text-blue-600' : 'text-slate-900'}`}>{h.value}</div>
+            <div className={`text-2xl sm:text-3xl font-display font-semibold ${h.accent ? 'text-blue-600' : 'text-slate-900'}`}>{h.value}</div>
             <div className="text-xs sm:text-sm font-semibold text-slate-900 mt-1">{h.title}</div>
             <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">{h.detail}</div>
           </div>
         ))}
         <div data-reveal className="hidden lg:block bg-white rounded-3xl p-6 shadow-xs">
-          <div className="text-3xl font-display italic font-semibold text-slate-900">Gratis</div>
+          <div className="text-3xl font-display font-semibold text-slate-900">Gratis</div>
           <div className="text-sm font-semibold text-slate-900 mt-1">Publicar tu carro</div>
           <div className="text-xs text-slate-500 mt-0.5">Sin costo y en minutos</div>
         </div>

@@ -579,7 +579,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
 
                 <h3 
                   onClick={() => setSelectedProduct(prod)}
-                  className="text-base font-black text-slate-950 tracking-tight cursor-pointer hover:text-blue-600 transition-colors line-clamp-2"
+                  className="font-sans text-base font-black text-slate-950 tracking-tight cursor-pointer hover:text-blue-600 transition-colors line-clamp-2"
                 >
                   {prod.name}
                 </h3>

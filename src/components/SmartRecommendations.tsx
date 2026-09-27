@@ -172,7 +172,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+              <h1 className="font-sans text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
                 {activeVehicle.brand} {activeVehicle.model}
               </h1>
 
@@ -393,7 +393,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
 
                 <div>
                   <div className="text-[10px] text-blue-600 font-bold uppercase">{prod.subcategory}</div>
-                  <h3 className="text-xs font-bold text-slate-900 line-clamp-1 mt-0.5">
+                  <h3 className="font-sans text-xs font-bold text-slate-900 line-clamp-1 mt-0.5">
                     {prod.name}
                   </h3>
                   <div className="text-sm font-black text-slate-950 mt-1">

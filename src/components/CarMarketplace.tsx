@@ -728,7 +728,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
                   <h3 
                     onClick={() => setSelectedCar(car)}
-                    className="text-base font-black text-slate-950 tracking-tight cursor-pointer hover:text-blue-600 transition-colors line-clamp-2"
+                    className="font-sans text-base font-black text-slate-950 tracking-tight cursor-pointer hover:text-blue-600 transition-colors line-clamp-2"
                   >
                     {car.title}
                   </h3>

@@ -105,7 +105,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </div>
               )}
 
-              <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-tight">{car.title}</h2>
+              <h2 className="font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-tight">{car.title}</h2>
 
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
                 <span className="inline-flex items-center gap-1">

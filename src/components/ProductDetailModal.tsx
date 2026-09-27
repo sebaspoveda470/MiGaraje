@@ -149,7 +149,7 @@ const summary = summarizeRatings(reviews);
           <div className="space-y-4 flex flex-col justify-between">
             <div>
               <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">{product.subcategory}</span>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-1 pr-6">{product.name}</h2>
+              <h2 className="font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-1 pr-6">{product.name}</h2>
               <div className="mt-2">
                 <ShareButtons
                   type="producto"
