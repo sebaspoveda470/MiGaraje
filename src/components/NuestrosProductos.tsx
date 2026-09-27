@@ -34,7 +34,7 @@ import { ProductDetailModal, getProductImages } from './ProductDetailModal';
 import { PhotoPicker } from './PhotoPicker';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
-import { SectionGlow, SectionPhoto, sectionHeaderClass } from './SectionArt';
+import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
 
 // Photos live inside the product document (1 MB max), so keep a few small ones.
 const MAX_PRODUCT_PHOTOS = 4;
@@ -353,29 +353,28 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
       <SectionGlow tone="productos" />
       
       {/* Header Banner */}
-      <div data-reveal className={sectionHeaderClass}>
-        <SectionPhoto src="/section-productos.jpg" alt="Persona lavando a mano un carro negro" />
+      <SectionHero image="/section-productos.jpg" alt="Persona lavando a mano un carro negro" focus="50% 50%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
+<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
             Nuestros Productos MiGaraje
           </h1>
 
-          <p className="hidden sm:block text-sm text-slate-600 leading-relaxed font-normal">
+          <p className="hidden sm:block text-sm text-white/80 leading-relaxed font-normal">
             Fórmulas profesionales de estética, detailing y mantenimiento desarrolladas especialmente para el cuidado de tu carro. Atención personalizada y pedidos vía WhatsApp.
           </p>
 
-          <p className="sm:hidden text-xs text-slate-600">Cuidado profesional para tu carro, con pedidos por WhatsApp.</p>
+          <p className="sm:hidden text-xs text-white/80">Cuidado profesional para tu carro, con pedidos por WhatsApp.</p>
 
-          <div className="hidden sm:flex flex-wrap items-center gap-4 text-xs text-slate-600 font-semibold pt-1">
+          <div className="hidden sm:flex flex-wrap items-center gap-4 text-xs text-white/85 font-semibold pt-1">
             <div className="flex items-center gap-1.5">
-              <Truck className="w-4 h-4 text-blue-600" />
+              <Truck className="w-4 h-4 text-blue-300" />
               <span>Envíos a nivel nacional</span>
             </div>
             {salesWhatsApp && (
               <>
                 <span className="hidden sm:inline">•</span>
                 <div className="flex items-center gap-1.5">
-                  <MessageCircle className="w-4 h-4 text-blue-600" />
+                  <MessageCircle className="w-4 h-4 text-blue-300" />
                   <span>WhatsApp de Ventas: +{salesWhatsApp}</span>
                 </div>
               </>
@@ -384,7 +383,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
         </div>
 
         {isAdmin && (
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2.5 w-full sm:w-auto shrink-0">
+        <div className={`${heroGlassClass} flex flex-col sm:flex-row sm:flex-wrap gap-2.5 w-full sm:w-auto shrink-0`}>
           <button
             onClick={openAddModal}
             className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
@@ -414,7 +413,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
           </button>
         </div>
         )}
-      </div>
+      </SectionHero>
 
       {isLoading && (
         <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 font-semibold">

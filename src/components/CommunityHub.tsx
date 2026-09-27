@@ -37,7 +37,7 @@ import { ShareButtons } from './ShareButtons';
 import { useConfirm } from './ConfirmDialog';
 import { useReport } from './ReportDialog';
 import { syncDeepLink } from '../utils/shareLinks';
-import { SectionGlow, SectionPhoto, sectionHeaderClass } from './SectionArt';
+import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
 
 interface CommunityHubProps {
   activeVehicle: Vehicle | null;
@@ -399,19 +399,18 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       <SectionGlow tone="comunidad" />
 
       {/* Community Hero: Clean Editorial Header */}
-      <div data-reveal className={sectionHeaderClass}>
-        <SectionPhoto src="/section-comunidad.jpg" alt="Encuentro de carros con personas reunidas" />
+      <SectionHero image="/section-comunidad.jpg" alt="Encuentro de carros con personas reunidas" focus="50% 55%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
+<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
             Clubes de propietarios y apasionados.
           </h1>
 
-          <p className="hidden sm:block text-sm text-slate-600 leading-relaxed font-normal">
+          <p className="hidden sm:block text-sm text-white/80 leading-relaxed font-normal">
             Únete a los clubes de tu marca o crea el tuyo. Comparte experiencias, resuelve dudas mecánicas, recomienda talleres de confianza y organiza rodadas en Colombia.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0">
+        <div className={`${heroGlassClass} flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0`}>
           <button
             onClick={handleOpenCreate}
             className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-xs transition-all cursor-pointer min-h-[46px]"
@@ -429,7 +428,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
             </button>
           )}
         </div>
-      </div>
+      </SectionHero>
 
       {communitiesLoading && (
         <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 font-semibold">

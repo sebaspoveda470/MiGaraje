@@ -39,7 +39,7 @@ import { getListingPhotos } from '../services/listingService';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
-import { SectionGlow, SectionPhoto, sectionHeaderClass } from './SectionArt';
+import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
 
 interface CarMarketplaceProps {
   carListings: VehicleListing[];
@@ -440,37 +440,36 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       <SectionGlow tone="vehiculos" />
       
       {/* Header Banner: Compra & Venta de Vehículos */}
-      <div data-reveal className={sectionHeaderClass}>
-        <SectionPhoto src="/section-vehiculos.jpg" alt="Carro recorriendo una carretera entre montañas" />
+      <SectionHero image="/section-vehiculos.jpg" alt="Carro recorriendo una carretera entre montañas" focus="80% 72%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
+<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
             Compra y vende tu carro, directo con el dueño.
           </h1>
 
-          <p className="hidden sm:block text-sm text-slate-600 leading-relaxed font-normal">
+          <p className="hidden sm:block text-sm text-white/80 leading-relaxed font-normal">
             Encuentra vehículos publicados por sus propietarios en Bogotá, Medellín, Cali, Barranquilla y todo el país. Contacta directo con el vendedor por WhatsApp y, antes de pagar, consulta el RUNT y agenda un peritaje de tu confianza.
           </p>
 
-          <div className="hidden sm:flex flex-wrap items-center gap-4 text-xs text-slate-600 font-medium pt-1">
+          <div className="hidden sm:flex flex-wrap items-center gap-4 text-xs text-white/85 font-medium pt-1">
             <div className="flex items-center gap-1.5">
-              <BadgeCheck className="w-4 h-4 text-blue-600" />
+              <BadgeCheck className="w-4 h-4 text-blue-300" />
               <span>Publicación gratuita</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1.5">
-              <FileCheck className="w-4 h-4 text-blue-600" />
+              <FileCheck className="w-4 h-4 text-blue-300" />
               <span>Datos declarados por el vendedor</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1.5">
-              <MessageCircle className="w-4 h-4 text-blue-600" />
+              <MessageCircle className="w-4 h-4 text-blue-300" />
               <span>Trato directo vía WhatsApp</span>
             </div>
           </div>
         </div>
 
         {/* Action Button: Vender mi Vehículo */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full sm:w-auto shrink-0">
+        <div className={`${heroGlassClass} flex flex-col sm:flex-row sm:items-center gap-2.5 w-full sm:w-auto shrink-0`}>
           <button
             onClick={openPublishModal}
             className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-semibold text-sm px-6 py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
@@ -480,7 +479,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           </button>
           <span className="hidden sm:block text-[11px] text-slate-500">Publicación rápida y gratuita</span>
         </div>
-      </div>
+      </SectionHero>
 
       {/* Colombian Filters Bar */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">

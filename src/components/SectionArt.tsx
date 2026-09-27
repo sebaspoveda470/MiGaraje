@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { prefersReducedMotion } from '../utils/scrollReveal';
 
 export type SectionTone = 'vehiculos' | 'productos' | 'comunidad';
 
@@ -13,27 +14,72 @@ const GLOWS: Record<SectionTone, string> = {
 };
 
 /**
- * Soft colored light behind a section's title that fades into the page background.
+ * Soft colored light behind a section's header that fades into the page background.
  * Place it first inside a `relative isolate` container.
  */
 export const SectionGlow: React.FC<{ tone: SectionTone }> = ({ tone }) => (
   <div
     aria-hidden="true"
-    className="pointer-events-none absolute -z-10 -top-16 sm:-top-24 -inset-x-8 sm:-inset-x-24 h-[420px] sm:h-[560px] [mask-image:linear-gradient(to_bottom,black_45%,transparent)]"
+    className="pointer-events-none absolute -z-10 -top-16 sm:-top-24 -inset-x-8 sm:-inset-x-24 h-[420px] sm:h-[620px] [mask-image:linear-gradient(to_bottom,black_45%,transparent)]"
     style={{ background: GLOWS[tone] }}
   />
 );
 
-/** Header photo, computers only (phones keep the title and buttons within reach). */
-export const SectionPhoto: React.FC<{ src: string; alt: string }> = ({ src, alt }) => (
-  <div
-    data-reveal="zoom"
-    className="hidden lg:block lg:col-start-2 lg:row-start-1 lg:row-span-2 self-stretch min-h-[240px] rounded-[2rem] overflow-hidden shadow-lg"
-  >
-    <img src={src} alt={alt} loading="lazy" className="w-full h-full object-cover" />
-  </div>
-);
+/** Frosted-glass card for the header's buttons (same surface as the home page cards) */
+export const heroGlassClass =
+  'bg-white/80 backdrop-blur-2xl backdrop-saturate-150 border border-white/60 shadow-xl rounded-3xl p-3 sm:p-4';
 
-/** Header layout: text and buttons on the left, photo on the right (computers). */
-export const sectionHeaderClass =
-  'px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col items-start gap-4 sm:gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-x-12 lg:gap-y-6 lg:items-center';
+interface SectionHeroProps {
+  image: string;
+  alt: string;
+  /** Where the photo is anchored when it's cropped (CSS object-position) */
+  focus?: string;
+  children: React.ReactNode;
+}
+
+/**
+ * Section header in the home page style: full photo with a slow parallax, the title in white
+ * over a dark fade, and the buttons in a glass card (children decide the content).
+ */
+export const SectionHero: React.FC<SectionHeroProps> = ({ image, alt, focus = '50% 60%', children }) => {
+  const photoRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    let frame = 0;
+    const update = () => {
+      const y = Math.min(window.scrollY, 700);
+      if (photoRef.current) photoRef.current.style.transform = `translate3d(0, ${y * 0.18}px, 0) scale(${1 + y * 0.00012})`;
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  return (
+    <div className="relative overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem] bg-slate-900 min-h-[360px] sm:min-h-[440px] lg:min-h-[480px] flex flex-col justify-end">
+      <div className="absolute inset-x-0 -top-[6%] h-[125%] hero-settle pointer-events-none">
+        <img
+          ref={photoRef}
+          src={image}
+          alt={alt}
+          className="w-full h-full object-cover select-none will-change-transform"
+          style={{ objectPosition: focus }}
+        />
+      </div>
+      {/* Dark fade from the bottom-left so the white title reads on any photo */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 lg:bg-gradient-to-tr lg:from-black/90 lg:via-black/55 lg:to-transparent pointer-events-none" />
+
+      <div className="relative z-10 p-4 sm:p-8 lg:p-12 flex flex-col items-stretch sm:items-start gap-4 sm:gap-5 lg:max-w-[62%] text-white">
+        {children}
+      </div>
+    </div>
+  );
+};
