@@ -5,6 +5,8 @@
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Wordmark, matching the official logo */
   --font-logo: "Montserrat", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Titles (h1–h3) */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
 
   --color-blue-50: #eef6ff;
   --color-blue-100: #d9ebff;
@@ -45,6 +47,20 @@
   --radius-xl: 0.875rem;
   --radius-2xl: 1.25rem;
   --radius-3xl: 1.75rem;
+}
+
+/* Titles: a soft retro serif in italics (Fraunces). Base layer, so a component can still
+   override with utilities; small uppercase labels stay in the sans font. */
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-variation-settings: "SOFT" 100;
+  }
+  h1:where(.uppercase), h2:where(.uppercase), h3:where(.uppercase) {
+    font-family: var(--font-sans);
+    font-style: normal;
+  }
 }
 
 body {
