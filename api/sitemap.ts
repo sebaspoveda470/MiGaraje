@@ -11,6 +11,9 @@ export async function GET(request: Request): Promise<Response> {
 
   const urls = [
     `${origin}/`,
+    `${origin}/vehiculos`,
+    `${origin}/productos`,
+    `${origin}/comunidad`,
     ...listings.filter((l) => l.status !== 'vendido').map((l) => `${origin}/?vehiculo=${l.id}`),
     ...products.map((p) => `${origin}/?producto=${p.id}`),
     ...communities.map((c) => `${origin}/?comunidad=${c.id}`),

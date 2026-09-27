@@ -14,6 +14,23 @@ export const TAB_FOR_LINK: Record<DeepLinkType, string> = {
   comunidad: 'comunidades',
 };
 
+// Each tab has its own address, so analytics and the back button work per section
+const PATH_FOR_TAB: Record<string, string> = {
+  garaje: '/',
+  vehiculos: '/vehiculos',
+  productos: '/productos',
+  comunidades: '/comunidad',
+};
+
+export function pathForTab(tab: string): string {
+  return PATH_FOR_TAB[tab] || '/';
+}
+
+export function tabFromPath(pathname: string): string {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  return Object.keys(PATH_FOR_TAB).find((tab) => PATH_FOR_TAB[tab] === clean) || 'garaje';
+}
+
 export function readDeepLink(): DeepLink | null {
   const params = new URLSearchParams(window.location.search);
   for (const type of TYPES) {
@@ -32,7 +49,8 @@ export function buildShareUrl(type: DeepLinkType, id: string): string {
  * so copying the URL or reloading keeps the same item open. Pass null to clear.
  */
 export function syncDeepLink(link: DeepLink | null): void {
-  const url = link ? `/?${link.type}=${encodeURIComponent(link.id)}` : '/';
+  const path = window.location.pathname;
+  const url = link ? `${path}?${link.type}=${encodeURIComponent(link.id)}` : path;
   if (window.location.pathname + window.location.search !== url) {
     window.history.replaceState(null, '', url);
   }

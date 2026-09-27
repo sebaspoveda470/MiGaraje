@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, User as AuthUser } from 'firebase/auth';
 import { Header } from './components/Header';
 import { SmartRecommendations } from './components/SmartRecommendations';
@@ -52,7 +52,7 @@ import {
 } from './types';
 import { Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
 import { getDocAlerts, describeDoc } from './utils/vehicleDocs';
-import { readDeepLink, syncDeepLink, TAB_FOR_LINK } from './utils/shareLinks';
+import { readDeepLink, syncDeepLink, TAB_FOR_LINK, pathForTab, tabFromPath } from './utils/shareLinks';
 
 // Keys written by the previous localStorage-only version of the app.
 const LEGACY_STORAGE_KEYS = [
@@ -96,7 +96,9 @@ export function App() {
   // Navigation & UI Modals State
   // A shared link (?vehiculo=, ?producto=, ?comunidad=) opens that item directly
   const [deepLink, setDeepLink] = useState(() => readDeepLink());
-  const [activeTab, setActiveTab] = useState<string>(() => (deepLink ? TAB_FOR_LINK[deepLink.type] : 'garaje'));
+  const [activeTab, setActiveTab] = useState<string>(() =>
+    deepLink ? TAB_FOR_LINK[deepLink.type] : tabFromPath(window.location.pathname)
+  );
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
   const [isStoreRegisterOpen, setIsStoreRegisterOpen] = useState<boolean>(false);
@@ -227,11 +229,33 @@ export function App() {
     return subscribeToReports(setReports, showError('No se pudieron cargar los reportes.'));
   }, [isAdmin]);
 
-  // Leaving a tab clears the item link from the address bar; the shared link is used only once
+  const isFirstTabSync = useRef(true);
+
+  // Each tab has its own address (/vehiculos, /productos…). Changing tab adds a history entry,
+  // so the phone's back button returns to the previous section. Item links are dropped when
+  // leaving their tab, and a shared link is used only once.
   useEffect(() => {
     const link = readDeepLink();
-    if (link && TAB_FOR_LINK[link.type] !== activeTab) syncDeepLink(null);
+    const keepLink = link && TAB_FOR_LINK[link.type] === activeTab;
+    const target = pathForTab(activeTab) + (keepLink ? window.location.search : '');
+    if (window.location.pathname + window.location.search !== target) {
+      // The first sync only tidies the address the page was opened with
+      if (isFirstTabSync.current) window.history.replaceState(null, '', target);
+      else window.history.pushState(null, '', target);
+    }
+    isFirstTabSync.current = false;
     if (deepLink && TAB_FOR_LINK[deepLink.type] !== activeTab) setDeepLink(null);
+  }, [activeTab]);
+
+  useEffect(() => {
+    const onPopState = () => setActiveTab(tabFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // New section: start at the top
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
   }, [activeTab]);
 
   // Keep a valid active vehicle selected

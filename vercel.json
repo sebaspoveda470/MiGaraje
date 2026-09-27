@@ -10,7 +10,7 @@
       "dest": "/api/sitemap"
     },
     {
-      "src": "/",
+      "src": "/(|vehiculos|productos|comunidad)",
       "has": [
         {
           "type": "query",
@@ -20,7 +20,7 @@
       "dest": "/api/share"
     },
     {
-      "src": "/",
+      "src": "/(|vehiculos|productos|comunidad)",
       "has": [
         {
           "type": "query",
@@ -30,7 +30,7 @@
       "dest": "/api/share"
     },
     {
-      "src": "/",
+      "src": "/(|vehiculos|productos|comunidad)",
       "has": [
         {
           "type": "query",
