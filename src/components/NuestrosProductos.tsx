@@ -353,17 +353,17 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
       <SectionGlow tone="productos" />
       
       {/* Header Banner */}
-      <SectionHero image="/section-productos.jpg" alt="Persona lavando a mano un carro negro" focus="50% 50%">
+      <SectionHero image="/section-productos.jpg" alt="Persona lavando a mano un vehículo negro" focus="50% 50%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
             Nuestros Productos MiGaraje
           </h1>
 
           <p className="hidden sm:block text-sm text-white/80 leading-relaxed font-normal">
-            Fórmulas profesionales de estética, detailing y mantenimiento desarrolladas especialmente para el cuidado de tu carro. Atención personalizada y pedidos vía WhatsApp.
+            Todo lo que necesitas para que tu vehículo luzca como nuevo, por dentro y por fuera. Productos de limpieza y cuidado creados por MiGaraje: pídelos por WhatsApp y te los enviamos a cualquier ciudad de Colombia.
           </p>
 
-          <p className="sm:hidden text-xs text-white/80">Cuidado profesional para tu carro, con pedidos por WhatsApp.</p>
+          <p className="sm:hidden text-xs text-white/80">Deja tu vehículo como nuevo. Pide por WhatsApp y te lo enviamos a toda Colombia.</p>
 
           <div className="hidden sm:flex flex-wrap items-center gap-4 text-xs text-white/85 font-semibold pt-1">
             <div className="flex items-center gap-1.5">

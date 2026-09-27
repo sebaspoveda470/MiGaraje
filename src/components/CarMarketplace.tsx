@@ -440,10 +440,10 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       <SectionGlow tone="vehiculos" />
       
       {/* Header Banner: Compra & Venta de Vehículos */}
-      <SectionHero image="/section-vehiculos.jpg" alt="Carro recorriendo una carretera entre montañas" focus="80% 72%">
+      <SectionHero image="/section-vehiculos.jpg" alt="Vehículo recorriendo una carretera entre montañas" focus="80% 72%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
-            Compra y vende tu carro, directo con el dueño.
+            Compra y vende tu vehículo, directo con el dueño.
           </h1>
 
           <p className="hidden sm:block text-sm text-white/80 leading-relaxed font-normal">

@@ -64,7 +64,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
         </div>
         <h2 className="text-2xl font-black text-slate-950 tracking-tight mb-2">No tienes ningún vehículo activo</h2>
         <p className="text-slate-600 text-xs sm:text-sm mb-6 max-w-md mx-auto leading-relaxed">
-          Registra tu carro en tu Garaje personal para generar el plan de mantenimiento según tu kilometraje, consultar Pico y Placa y unirte a tu club en Mi Comunidad.
+          Registra tu vehículo en tu Garaje personal para generar el plan de mantenimiento según tu kilometraje, consultar Pico y Placa y unirte a tu club en Mi Comunidad.
         </p>
         <button
           onClick={onOpenAddVehicleModal}
@@ -210,7 +210,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                 className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-xs transition-all cursor-pointer min-h-[42px]"
               >
                 <Tag className="w-3.5 h-3.5 text-white/90" />
-                <span>{isForSale ? 'Ver mi anuncio de venta' : 'Vender este carro'}</span>
+                <span>{isForSale ? 'Ver mi anuncio de venta' : 'Vender este vehículo'}</span>
               </button>
             )}
 
@@ -356,7 +356,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-xl font-black text-slate-950 tracking-tight">
-              Productos Oficiales MiGaraje para tu Carro
+              Productos Oficiales MiGaraje para tu Vehículo
             </h2>
             <p className="text-xs text-slate-600 mt-0.5">
               Cuidado estético y desengrasantes profesionales con compra directa por WhatsApp.

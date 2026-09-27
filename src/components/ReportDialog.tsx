@@ -116,7 +116,7 @@ export const ReportProvider: React.FC<ReportProviderProps> = ({ currentUserId, r
                 maxLength={500}
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
-                placeholder="Ej: me pidió consignar un anticipo antes de ver el carro"
+                placeholder="Ej: me pidió consignar un anticipo antes de ver el vehículo"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:outline-none focus:border-slate-400 resize-none"
               />
             </div>

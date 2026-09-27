@@ -96,6 +96,7 @@ export async function deleteAccount(authUser: AuthUser): Promise<void> {
     ...posts.docs.map((d) => deleteDoc(d.ref)),
     ...reviews.docs.map((d) => deleteDoc(d.ref)),
     ...memberships.docs.map((d) => updateDoc(d.ref, { memberIds: arrayRemove(uid) })),
+    ...memberships.docs.map((d) => deleteDoc(doc(d.ref, 'members', uid))),
     ...vehicles.docs.map((d) => deleteVehicle(uid, d.id)),
   ]);
   await deleteDoc(doc(db, 'users', uid));

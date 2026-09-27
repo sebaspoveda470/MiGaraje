@@ -1,7 +1,7 @@
 {
   "name": "MiGaraje - Ecosistema Automotriz",
   "short_name": "MiGaraje",
-  "description": "MiGaraje: compra y venta de vehículos entre propietarios, productos de cuidado MiGaraje por WhatsApp, recordatorios para tu carro y comunidades por marca en Colombia.",
+  "description": "MiGaraje: compra y venta de vehículos entre propietarios, productos de cuidado MiGaraje por WhatsApp, recordatorios para tu vehículo y comunidades por marca en Colombia.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

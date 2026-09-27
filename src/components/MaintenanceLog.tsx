@@ -114,7 +114,7 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
             <span>Bitácora de Mantenimiento</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">Historial de tu {vehicle.brand} {vehicle.model}</h2>
-          <p className="text-xs text-slate-600 mt-0.5">Registra cada servicio: te ayuda a controlar gastos y a vender mejor tu carro.</p>
+          <p className="text-xs text-slate-600 mt-0.5">Registra cada servicio: te ayuda a controlar gastos y a vender mejor tu vehículo.</p>
         </div>
         {!showForm && (
           <button

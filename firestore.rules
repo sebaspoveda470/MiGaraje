@@ -164,6 +164,18 @@ service cloud.firestore {
       );
 
       allow delete: if isUser(resource.data.createdBy) || isAdmin();
+
+      // Public member cards (name and vehicle), written only by the member themselves
+      match /members/{uid} {
+        allow read: if true;
+        allow create, update: if isUser(uid)
+          && incoming().keys().hasOnly(['name', 'car', 'joinedAt'])
+          && isShortString(incoming().name, 120)
+          && (!('car' in incoming()) || (incoming().car is string && incoming().car.size() <= 120))
+          && incoming().joinedAt == request.time;
+        allow delete: if isUser(uid) || isAdmin()
+          || isUser(get(/databases/$(database)/documents/communities/$(clubId)).data.createdBy);
+      }
     }
 
     match /communityPosts/{postId} {

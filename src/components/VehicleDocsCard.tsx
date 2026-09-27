@@ -64,7 +64,7 @@ export const VehicleDocsCard: React.FC<{ vehicle: Vehicle; onEdit?: () => void }
               </div>
               {exemptHint && (
                 <div className="text-[11px] text-slate-500">
-                  Los carros particulares hacen su primera revisión 5 años después de matriculados; si es tu caso, aún no la necesitas.
+                  Los vehículos particulares hacen su primera revisión 5 años después de matriculados; si es tu caso, aún no la necesitas.
                 </div>
               )}
             </div>

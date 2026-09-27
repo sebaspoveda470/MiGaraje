@@ -174,6 +174,16 @@ export type BrandCommunity = CommunityClub;
 
 export type PostCategory = 'fallas' | 'mantenimiento' | 'modificaciones' | 'rutas' | 'general';
 
+/** Public card of a community member: communities/{clubId}/members/{uid} */
+export interface CommunityMember {
+  /** The member's uid */
+  id: string;
+  name: string;
+  /** Vehicle they had active when joining, e.g. "Mazda 3 2019" */
+  car?: string;
+  joinedAt: number;
+}
+
 export interface PostComment {
   id: string;
   authorId: string;

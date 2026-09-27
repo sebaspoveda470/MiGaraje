@@ -106,7 +106,7 @@ export const INITIAL_CARE_PRODUCTS: CareProduct[] = [
       'Masajear en movimientos circulares sobre el cuero.',
       'Retirar el exceso con una microfibra seca después de 5 minutos.'
     ],
-    benefits: ['Tacto mate sedoso de carro nuevo', 'Previene arrugas y resequedad', 'Aroma agradable a cuero fino'],
+    benefits: ['Tacto mate sedoso de vehículo nuevo', 'Previene arrugas y resequedad', 'Aroma agradable a cuero fino'],
     image: 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?auto=format&fit=crop&w=600&q=80',
     inStock: true,
     idealFor: ['Cojinería de cuero natural o sintético', 'Volantes y paneles de puertas'],

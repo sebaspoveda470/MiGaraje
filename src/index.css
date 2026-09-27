@@ -88,6 +88,13 @@ body {
   transform: none;
 }
 
+/* Header photos stay in the background: slightly blurred and muted so the text leads.
+   The small scale hides the soft edges the blur leaves. */
+.photo-soft {
+  filter: blur(3px) saturate(0.85);
+  scale: 1.04;
+}
+
 /* Home photo settles in when the page opens */
 @keyframes hero-settle {
   from { transform: scale(1.12); filter: brightness(0.6); }

@@ -7,6 +7,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   updateDoc,
   writeBatch,
   arrayUnion,
@@ -16,7 +17,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { CommunityClub, CommunityPost, PostComment } from '../types';
+import { CommunityClub, CommunityMember, CommunityPost, PostComment } from '../types';
 import { INITIAL_COMMUNITIES } from '../data/initialData';
 
 const communitiesRef = collection(db, 'communities');
@@ -52,20 +53,32 @@ export function subscribeToCommunities(
   );
 }
 
+/** Who is joining: shown publicly in the community's member list */
+export interface MemberCard {
+  name: string;
+  car?: string;
+}
+
+const memberRef = (communityId: string, uid: string) => doc(communitiesRef, communityId, 'members', uid);
+
 /**
  * Creates a community owned by `uid`; the creator joins automatically. Returns its id.
  */
 export async function createCommunity(
   uid: string,
-  community: Omit<CommunityClub, 'id' | 'memberIds' | 'createdBy' | 'createdAt'>
+  community: Omit<CommunityClub, 'id' | 'memberIds' | 'createdBy' | 'createdAt'>,
+  card: MemberCard
 ): Promise<string> {
   const ref = doc(communitiesRef);
-  await setDoc(ref, {
+  const batch = writeBatch(db);
+  batch.set(ref, {
     ...community,
     memberIds: [uid],
     createdBy: uid,
     createdAt: serverTimestamp(),
   });
+  batch.set(memberRef(ref.id, uid), { ...card, joinedAt: serverTimestamp() });
+  await batch.commit();
   return ref.id;
 }
 
@@ -73,10 +86,53 @@ export async function deleteCommunity(communityId: string): Promise<void> {
   await deleteDoc(doc(communitiesRef, communityId));
 }
 
-export async function setCommunityMembership(communityId: string, uid: string, isMember: boolean): Promise<void> {
-  await updateDoc(doc(communitiesRef, communityId), {
+/**
+ * Joins or leaves a community. Joining also publishes the member's card (name and vehicle)
+ * so others can see who is in it; leaving removes it.
+ */
+export async function setCommunityMembership(
+  communityId: string,
+  uid: string,
+  isMember: boolean,
+  card?: MemberCard
+): Promise<void> {
+  const batch = writeBatch(db);
+  batch.update(doc(communitiesRef, communityId), {
     memberIds: isMember ? arrayUnion(uid) : arrayRemove(uid),
   });
+  if (isMember && card) batch.set(memberRef(communityId, uid), { ...card, joinedAt: serverTimestamp() });
+  if (!isMember) batch.delete(memberRef(communityId, uid));
+  await batch.commit();
+}
+
+/** Publishes the card of someone who joined before member cards existed. */
+export async function saveMemberCard(communityId: string, uid: string, card: MemberCard): Promise<void> {
+  await setDoc(memberRef(communityId, uid), { ...card, joinedAt: serverTimestamp() });
+}
+
+/** Streams a community's member cards, newest first. */
+export function subscribeToMembers(
+  communityId: string,
+  onChange: (members: CommunityMember[]) => void,
+  onError?: (err: Error) => void
+): () => void {
+  return onSnapshot(
+    collection(communitiesRef, communityId, 'members'),
+    (snapshot) => {
+      const members = snapshot.docs.map((d) => {
+        const data = d.data({ serverTimestamps: 'estimate' });
+        return {
+          id: d.id,
+          name: data.name as string,
+          car: data.car as string | undefined,
+          joinedAt: (data.joinedAt as Timestamp | undefined)?.toMillis() || Date.now(),
+        };
+      });
+      members.sort((a, b) => b.joinedAt - a.joinedAt);
+      onChange(members);
+    },
+    onError
+  );
 }
 
 /**
@@ -122,6 +178,33 @@ export function subscribeToClubPosts(
       });
       posts.sort((a, b) => b.createdAt - a.createdAt);
       onChange(posts);
+    },
+    onError
+  );
+}
+
+/**
+ * Streams the latest posts of every community (the public "Lo último" feed), newest first.
+ */
+export function subscribeToRecentPosts(
+  max: number,
+  onChange: (posts: CommunityPost[]) => void,
+  onError?: (err: Error) => void
+): () => void {
+  return onSnapshot(
+    query(postsRef, orderBy('createdAt', 'desc'), limit(max)),
+    (snapshot) => {
+      onChange(
+        snapshot.docs.map((d) => {
+          const data = d.data({ serverTimestamps: 'estimate' });
+          return {
+            ...(data as CommunityPost),
+            id: d.id,
+            likedBy: (data.likedBy as string[]) || [],
+            createdAt: (data.createdAt as Timestamp | undefined)?.toMillis() || Date.now(),
+          };
+        })
+      );
     },
     onError
   );

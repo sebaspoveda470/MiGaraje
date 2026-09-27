@@ -57,17 +57,17 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
             ref={photoRef}
             src="/hero-fj.jpg"
             alt="Toyota Land Cruiser FJ40 clásico con placa colombiana en las montañas"
-            className="w-full h-auto lg:h-full object-cover object-[50%_62%] select-none will-change-transform"
+            className="photo-soft w-full h-auto lg:h-full object-cover object-[50%_62%] select-none will-change-transform"
           />
         </div>
         {/* Soft shading so the white headline reads on the bright sky */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/45 lg:from-black/30 lg:via-transparent lg:to-black/30 pointer-events-none" />
 
         {/* Headline */}
-        <div ref={headlineRef} className="relative z-10 order-1 px-6 pt-10 sm:pt-16 lg:pt-24 lg:px-14 text-center lg:text-left lg:max-w-[58%] will-change-transform">
-          <h1 className="text-[34px] leading-[1.05] sm:text-6xl xl:text-7xl font-semibold text-white tracking-[-0.03em] drop-shadow-sm">
+        <div ref={headlineRef} className="relative z-10 order-1 px-6 pt-10 sm:pt-16 lg:pt-24 lg:px-14 text-center lg:text-left lg:max-w-[64%] will-change-transform">
+          <h1 className="text-[34px] leading-[1.05] sm:text-6xl lg:text-[56px] xl:text-6xl font-semibold text-white tracking-[-0.03em] drop-shadow-sm">
             <span data-reveal className="inline-block" style={{ '--reveal-delay': '250ms' } as React.CSSProperties}>
-              Todo para tu carro,
+              Todo para tu vehículo,
             </span>
             <br />
             <span data-reveal className="inline-block text-white/75" style={{ '--reveal-delay': '450ms' } as React.CSSProperties}>
@@ -83,7 +83,7 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
             style={{ '--reveal-delay': '700ms' } as React.CSSProperties}
             className={`${glass} rounded-3xl p-4 sm:p-6 w-full sm:max-w-md lg:max-w-none lg:w-[500px] lg:shrink-0`}
           >
-            <h2 className="text-base sm:text-lg font-semibold text-slate-900 tracking-tight">Encuentra o publica tu carro</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900 tracking-tight">Encuentra o publica tu vehículo</h2>
             <p className="hidden sm:block mt-1 text-sm text-slate-600 leading-relaxed">
               Compra y vende directo entre propietarios en toda Colombia, con productos MiGaraje y clubes por marca.
             </p>
@@ -107,7 +107,7 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
               onClick={onRegisterCar}
               className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-blue-700 cursor-pointer"
             >
-              <Plus className="w-4 h-4" /> Registrar mi carro en Mi Garaje
+              <Plus className="w-4 h-4" /> Registrar mi vehículo en Mi Garaje
             </button>
           </div>
 
@@ -145,7 +145,7 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
         ))}
         <div data-reveal className="hidden lg:block bg-white rounded-3xl p-6 shadow-xs">
           <div className="text-3xl font-display font-semibold text-slate-900">Gratis</div>
-          <div className="text-sm font-semibold text-slate-900 mt-1">Publicar tu carro</div>
+          <div className="text-sm font-semibold text-slate-900 mt-1">Publicar tu vehículo</div>
           <div className="text-xs text-slate-500 mt-0.5">Sin costo y en minutos</div>
         </div>
       </div>
