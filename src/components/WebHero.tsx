@@ -29,7 +29,7 @@ export const WebHero: React.FC<WebHeroProps> = ({
     <section className="relative overflow-hidden rounded-3xl bg-white border border-slate-200/90 shadow-xl shadow-slate-900/5 mb-8">
       
       {/* Top Architectural Banner */}
-      <div className="relative flex flex-col justify-between p-5 sm:p-10 lg:p-14 overflow-hidden bg-slate-50 min-h-[420px] sm:min-h-[480px] lg:min-h-[500px]">
+      <div className="relative flex flex-col justify-between p-5 sm:p-10 lg:p-14 overflow-hidden bg-slate-50 min-h-[340px] sm:min-h-[480px] lg:min-h-[500px]">
         
         {/* Subtle geometric grid backdrop */}
         <div 
@@ -72,7 +72,7 @@ export const WebHero: React.FC<WebHeroProps> = ({
         <div className="relative z-10 pt-6 sm:pt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
           <button
             onClick={handleExploreCars}
-            className="flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl shadow-lg transition-all cursor-pointer group min-h-[46px]"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl shadow-lg transition-all cursor-pointer group min-h-[46px]"
           >
             <span>Ver Vehículos en Venta</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -88,7 +88,7 @@ export const WebHero: React.FC<WebHeroProps> = ({
 
           <button
             onClick={onRegisterCar}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-black text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[46px]"
+            className="flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white font-black text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[46px]"
           >
             <span>Registrar mi Carro</span>
           </button>

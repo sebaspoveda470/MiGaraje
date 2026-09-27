@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* MiGaraje brand: the blue scale follows the logo (#0084FF) and headings/body use Plus Jakarta Sans */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-blue-50: #eef6ff;
+  --color-blue-100: #d9ebff;
+  --color-blue-200: #bcdcff;
+  --color-blue-300: #8ec6ff;
+  --color-blue-400: #4fa6ff;
+  --color-blue-500: #1a8cff;
+  --color-blue-600: #0070e0; /* primary buttons: logo blue, darkened for readable white text */
+  --color-blue-700: #0059b8;
+  --color-blue-800: #064b96;
+  --color-blue-900: #0b3f7a;
+  --color-blue-950: #0a284f;
+}
+
 /* Mobile optimization: disable gray tap flash on touch devices */
 html, body {
   -webkit-tap-highlight-color: transparent;

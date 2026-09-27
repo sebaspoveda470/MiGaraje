@@ -119,9 +119,9 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
         {!showForm && (
           <button
             onClick={openForm}
-            className="shrink-0 flex items-center gap-1.5 bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer"
+            className="shrink-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-blue-400" />
+            <Plus className="w-4 h-4 text-white/90" />
             Registrar servicio
           </button>
         )}

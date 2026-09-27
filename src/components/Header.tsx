@@ -336,7 +336,7 @@ cart,
                         setGarageDropdownOpen(false);
                         handleOpenGarage();
                       }}
-                      className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow-xs transition-all cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-xl shadow-xs transition-all cursor-pointer"
                     >
                       <PlusCircle className="w-4 h-4" />
                       <span>Registrar Nuevo Vehículo</span>
@@ -367,7 +367,7 @@ cart,
             <button
               onClick={handleOpenCartDrawer}
               aria-label="Abrir Carrito de Compras"
-              className="relative p-2.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+              className="relative p-2.5 sm:px-3.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white transition-all shadow-xs flex items-center gap-2 cursor-pointer"
               title="Carrito de Compras / Repuestos"
             >
               <div className="relative">

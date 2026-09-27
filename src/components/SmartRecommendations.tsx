@@ -62,9 +62,9 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
         </p>
         <button
           onClick={onOpenAddVehicleModal}
-          className="inline-flex items-center gap-2 bg-slate-950 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-all cursor-pointer text-xs sm:text-sm min-h-[46px]"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-all cursor-pointer text-xs sm:text-sm min-h-[46px]"
         >
-          <Plus className="w-4 h-4 text-blue-400" />
+          <Plus className="w-4 h-4 text-white/90" />
           <span>Registrar mi Primer Vehículo</span>
         </button>
       </div>
@@ -200,9 +200,9 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
 
             <button
               onClick={() => onNavigateToTab('comunidades')}
-              className="flex items-center gap-1.5 bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[42px]"
+              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[42px]"
             >
-              <Users className="w-3.5 h-3.5 text-blue-400" />
+              <Users className="w-3.5 h-3.5 text-white/90" />
               <span>Ver Club {activeVehicle.brand}</span>
             </button>
           </div>
@@ -306,9 +306,9 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
 
           <button
             onClick={() => onNavigateToTab('productos')}
-            className="flex items-center gap-1.5 text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 px-4 py-2.5 rounded-xl transition-all cursor-pointer shrink-0 min-h-[42px]"
+            className="flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition-all cursor-pointer shrink-0 min-h-[42px]"
           >
-            <Sparkles className="w-4 h-4 text-blue-400" />
+            <Sparkles className="w-4 h-4 text-white/90" />
             <span>Ver Productos de Cuidado</span>
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -389,7 +389,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                 <span className="text-[11px] text-slate-500">{prod.volume}</span>
                 <button
                   onClick={() => onNavigateToTab('productos')}
-                  className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer"
                 >
                   Ver Producto
                 </button>

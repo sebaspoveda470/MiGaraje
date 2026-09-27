@@ -153,6 +153,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [showSold, setShowSold] = useState(true);
   const [sortBy, setSortBy] = useState<SortKey>('recientes');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  // Phones show only the search box until "Filtros" is tapped
+  const [showFilters, setShowFilters] = useState(false);
   const [pubIsUniqueOwner, setPubIsUniqueOwner] = useState(true);
   const [pubSoatValid, setPubSoatValid] = useState(true);
   const [pubTecnoValid, setPubTecnoValid] = useState(true);
@@ -288,6 +290,16 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
   const soldCount = carListings.filter(isSold).length;
 
+  const activeFilterCount = [
+    selectedBrand !== 'todas',
+    selectedCity !== 'todas',
+    selectedTransmission !== 'todas',
+    maxPrice < PRICE_CAP,
+    onlyFavorites,
+    sortBy !== 'recientes',
+    !showSold,
+  ].filter(Boolean).length;
+
   const getWhatsAppLink= (car: VehicleListing) => {
     const phoneWithCountry = toWhatsAppNumber(car.whatsappNumber || car.sellerPhone);
     const text = `Hola ${car.sellerName}! 👋 Vi tu vehículo publicado en MiGaraje: *${car.title}* por $${car.price.toLocaleString('es-CO')} COP en ${car.location}. ¿Aún está disponible para agendar una cita o peritaje?`;
@@ -371,24 +383,25 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Header Banner: Compra & Venta de Vehículos */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="space-y-3 max-w-2xl">
+      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
+        <div className="space-y-2 sm:space-y-3 max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-blue-400" /> Compra & Venta de Vehículos
             </span>
-            <span className="text-xs text-slate-500 font-medium">Trato Directo y Seguro</span>
+            <span className="hidden sm:inline text-xs text-slate-500 font-medium">Trato Directo y Seguro</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
-            Compra y vende tu vehículo sin intermediarios abusivos ni estafas
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+            <span className="sm:hidden">Compra y vende tu carro, directo con el dueño</span>
+            <span className="hidden sm:inline">Compra y vende tu vehículo sin intermediarios abusivos ni estafas</span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+          <p className="hidden sm:block text-sm text-slate-600 leading-relaxed font-normal">
             Encuentra vehículos publicados por sus propietarios en Bogotá, Medellín, Cali, Barranquilla y todo el país. Contacta directo con el vendedor por WhatsApp y, antes de pagar, consulta el RUNT y agenda un peritaje de tu confianza.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 font-medium pt-1">
+          <div className="hidden sm:flex flex-wrap items-center gap-4 text-xs text-slate-600 font-medium pt-1">
             <div className="flex items-center gap-1.5">
               <BadgeCheck className="w-4 h-4 text-blue-600" />
               <span>Publicación gratuita</span>
@@ -410,12 +423,12 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
         <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={openPublishModal}
-            className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-black text-xs sm:text-sm px-6 py-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
+            className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-xs sm:text-sm px-6 py-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
           >
-            <Plus className="w-4 h-4 text-blue-400" />
+            <Plus className="w-4 h-4 text-white/90" />
             <span>¡Vender mi Vehículo Ahora!</span>
           </button>
-          <span className="text-[11px] text-slate-500 text-center">Publicación rápida y gratuita</span>
+          <span className="hidden sm:block text-[11px] text-slate-500 text-center">Publicación rápida y gratuita</span>
         </div>
       </div>
 
@@ -423,20 +436,33 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           
-          {/* Search input */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Buscar marca, modelo o versión..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
-            />
+          {/* Search input (+ filters toggle on phones) */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Buscar marca, modelo o versión..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowFilters((v) => !v)}
+              aria-expanded={showFilters}
+              className={`sm:hidden shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-bold cursor-pointer ${
+                showFilters || activeFilterCount > 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-200'
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+            </button>
           </div>
 
           {/* Brand select */}
-          <div>
+          <div className={`${showFilters ? '' : 'hidden'} sm:block`}>
             <select
               value={selectedBrand}
               onChange={(e) => setSelectedBrand(e.target.value)}
@@ -451,7 +477,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           </div>
 
           {/* Colombian City Select */}
-          <div>
+          <div className={`${showFilters ? '' : 'hidden'} sm:block`}>
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
@@ -466,7 +492,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           </div>
 
           {/* Transmission Select */}
-          <div>
+          <div className={`${showFilters ? '' : 'hidden'} sm:block`}>
             <select
               value={selectedTransmission}
               onChange={(e) => setSelectedTransmission(e.target.value)}
@@ -481,7 +507,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
         </div>
 
         {/* Price Slider Bar */}
-        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs border-t border-slate-100">
+        <div className={`${showFilters ? 'flex' : 'hidden'} pt-2 sm:flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs border-t border-slate-100`}>
           <div className="flex items-center gap-2">
             <span className="text-slate-500 font-bold">Precio máximo:</span>
             <span className="font-mono font-black text-slate-950 text-sm">
@@ -496,11 +522,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
             step={5000000}
             value={maxPrice}
             onChange={(e) => setMaxPrice(Number(e.target.value))}
-            className="w-full sm:w-64 accent-slate-950 cursor-pointer"
+            className="w-full sm:w-64 accent-blue-600 cursor-pointer"
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+        <div className={`${showFilters ? 'flex' : 'hidden'} sm:flex flex-wrap items-center justify-between gap-2 pt-1`}>
           <label className="flex items-center gap-2 text-xs text-slate-600 font-bold">
             Ordenar por:
             <select
@@ -520,7 +546,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 type="checkbox"
                 checked={showSold}
                 onChange={(e) => setShowSold(e.target.checked)}
-                className="w-4 h-4 accent-slate-950 cursor-pointer"
+                className="w-4 h-4 accent-blue-600 cursor-pointer"
               />
               Mostrar vendidos ({soldCount})
             </label>
@@ -705,9 +731,9 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                       href={getWhatsAppLink(car)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs min-h-[42px]"
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs min-h-[42px]"
                     >
-                      <MessageCircle className="w-4 h-4 text-blue-400 shrink-0" />
+                      <MessageCircle className="w-4 h-4 text-white/90 shrink-0" />
                       <span>WhatsApp</span>
                     </a>
                   )}
@@ -1056,9 +1082,9 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 <button
                   type="submit"
                   disabled={isPublishing || isProcessingImage}
-                  className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-blue-400" />}
+                  {isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-white/90" />}
                   <span>{editingListing ? 'Guardar Cambios' : 'Publicar mi Vehículo en Venta'}</span>
                 </button>
               </div>

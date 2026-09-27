@@ -316,8 +316,12 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     );
   };
 
-  const renderWhatsAppButton = (prod: CareProduct, label: string, className: string) => {
-    if (prod.inStock === false) label = 'Preguntar disponibilidad';
+  /** shortLabel is shown on phones, where the button shares the row with other buttons */
+  const renderWhatsAppButton = (prod: CareProduct, label: string, className: string, shortLabel?: string) => {
+    if (prod.inStock === false) {
+      label = 'Preguntar disponibilidad';
+      shortLabel = shortLabel && 'Preguntar';
+    }
     const href = generateWhatsAppUrl(prod);
     if (!href) {
       return (
@@ -329,9 +333,16 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     }
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
-        <MessageCircle className="w-4 h-4 text-blue-400 shrink-0" />
-        <span>{label}</span>
-        <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+        <MessageCircle className="w-4 h-4 text-white/90 shrink-0" />
+        {shortLabel ? (
+          <>
+            <span className="sm:hidden">{shortLabel}</span>
+            <span className="hidden sm:inline">{label}</span>
+          </>
+        ) : (
+          <span>{label}</span>
+        )}
+        <ExternalLink className="hidden sm:block w-3.5 h-3.5 text-white/70" />
       </a>
     );
   };
@@ -340,24 +351,26 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Header Banner */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-3 max-w-2xl">
+      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+        <div className="space-y-2 sm:space-y-3 max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-blue-400" /> Línea Oficial MiGaraje
             </span>
-            <span className="text-xs text-slate-500 font-medium">Venta Directa por WhatsApp • Envíos a Toda Colombia</span>
+            <span className="hidden sm:inline text-xs text-slate-500 font-medium">Venta Directa por WhatsApp • Envíos a Toda Colombia</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
             Nuestros Productos MiGaraje
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+          <p className="hidden sm:block text-sm text-slate-600 leading-relaxed font-normal">
             Fórmulas profesionales de estética, detailing y mantenimiento desarrolladas especialmente para el cuidado de tu carro. Atención personalizada y pedidos vía WhatsApp.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 font-semibold pt-1">
+          <p className="sm:hidden text-xs text-slate-600">Cuidado profesional para tu carro, con pedidos por WhatsApp.</p>
+
+          <div className="hidden sm:flex flex-wrap items-center gap-4 text-xs text-slate-600 font-semibold pt-1">
             <div className="flex items-center gap-1.5">
               <Truck className="w-4 h-4 text-blue-600" />
               <span>Envíos a nivel nacional</span>
@@ -378,9 +391,9 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
         <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0">
           <button
             onClick={openAddModal}
-            className="bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
+            className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
           >
-            <Plus className="w-4 h-4 text-blue-400" />
+            <Plus className="w-4 h-4 text-white/90" />
             <span>+ Publicar Nuevo Producto</span>
           </button>
 
@@ -620,7 +633,8 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   {renderWhatsAppButton(
                     prod,
                     'Comprar por WhatsApp',
-                    'w-full bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white font-bold text-xs py-3 px-3 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer'
+                    'w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs py-3 px-3 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer',
+                    'Comprar'
                   )}
                 </div>
                 <button
@@ -704,7 +718,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
           whatsAppButton={renderWhatsAppButton(
             selectedProduct,
             'Pedir este Producto por WhatsApp',
-            'w-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer'
+            'w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer'
           )}
         />
       )}
@@ -762,7 +776,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 <button
                   type="submit"
                   disabled={isSavingPhone}
-                  className="px-5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
                 >
                   {isSavingPhone && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Guardar Número
@@ -918,9 +932,9 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 <button
                   type="submit"
                   disabled={isSavingProduct || isProcessingImage}
-                  className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {isSavingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-blue-400" />}
+                  {isSavingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 text-white/90" />}
                   <span>{editingProduct ? 'Guardar Cambios' : 'Publicar en Nuestros Productos'}</span>
                 </button>
               </div>

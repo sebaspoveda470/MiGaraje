@@ -210,7 +210,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ doc, onClose, onSwitch }
           >
             {isPrivacy ? 'Ver Términos y Condiciones' : 'Ver Política de Privacidad'}
           </button>
-          <button onClick={onClose} className="bg-slate-950 hover:bg-slate-800 text-white font-bold px-5 py-2 rounded-xl cursor-pointer">
+          <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-xl cursor-pointer">
             Entendido
           </button>
         </div>

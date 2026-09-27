@@ -187,7 +187,7 @@ export const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ isOp
             <button
               type="submit"
               disabled={isSaving || isProcessingImage}
-              className="bg-slate-950 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
             >
               {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Crear Comunidad

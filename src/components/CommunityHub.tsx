@@ -397,20 +397,21 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
 
       {/* Community Hero: Clean Editorial Header */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="space-y-3 max-w-2xl">
+      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-10 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
+        <div className="space-y-2 sm:space-y-3 max-w-2xl">
           <div className="flex items-center gap-2">
             <span className="bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
               <Users className="w-4 h-4 text-blue-400" /> Mi Comunidad MiGaraje
             </span>
-            <span className="text-xs text-slate-500 font-medium">Clubes • Colombia</span>
+            <span className="hidden sm:inline text-xs text-slate-500 font-medium">Clubes • Colombia</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
-            Mi Comunidad de Propietarios & Apasionados
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-950 tracking-tight">
+            <span className="sm:hidden">Clubes de propietarios y apasionados</span>
+            <span className="hidden sm:inline">Mi Comunidad de Propietarios & Apasionados</span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+          <p className="hidden sm:block text-sm text-slate-600 leading-relaxed font-normal">
             Únete a los clubes de tu marca o crea el tuyo. Comparte experiencias, resuelve dudas mecánicas, recomienda talleres de confianza y organiza rodadas en Colombia.
           </p>
         </div>
@@ -418,9 +419,9 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
         <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={handleOpenCreate}
-            className="flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[46px]"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-xs transition-all cursor-pointer min-h-[46px]"
           >
-            <PlusCircle className="w-4 h-4 text-blue-400" />
+            <PlusCircle className="w-4 h-4 text-white/90" />
             <span>Crear una Comunidad</span>
           </button>
           {currentCommunity && (
@@ -910,7 +911,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                 <button
                   type="submit"
                   disabled={isPosting}
-                  className="bg-slate-950 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
                 >
                   {isPosting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   {isMember ? 'Publicar en la Comunidad' : 'Unirme y Publicar'}

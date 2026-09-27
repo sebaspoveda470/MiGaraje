@@ -228,9 +228,9 @@ const summary = summarizeRatings(reviews);
             {!isEditing && (
               <button
                 onClick={startReview}
-                className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <Pencil className="w-3.5 h-3.5 text-blue-400" />
+                <Pencil className="w-3.5 h-3.5 text-white/90" />
                 {myReview ? 'Editar mi reseña' : 'Escribir una reseña'}
               </button>
             )}
