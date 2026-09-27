@@ -54,6 +54,39 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ---------- Motion (see src/utils/scrollReveal.ts) ---------- */
+
+/* Hidden only once JS confirmed it can reveal them again */
+.reveal-ready [data-reveal] {
+  transition-property: opacity, transform, box-shadow, border-color, background-color;
+  transition-duration: 0.9s, 0.9s, 0.2s, 0.2s, 0.2s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms), var(--reveal-delay, 0ms), 0s, 0s, 0s;
+}
+.reveal-ready [data-reveal]:not([data-revealed]) {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+}
+.reveal-ready [data-reveal='zoom']:not([data-revealed]) {
+  transform: scale(0.94);
+}
+.reveal-ready [data-reveal='fade']:not([data-revealed]) {
+  transform: none;
+}
+
+/* Home photo settles in when the page opens */
+@keyframes hero-settle {
+  from { transform: scale(1.12); filter: brightness(0.6); }
+  to { transform: scale(1); filter: brightness(1); }
+}
+.hero-settle {
+  animation: hero-settle 1.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-settle { animation: none; }
+}
+
 /* Mobile optimization: disable gray tap flash on touch devices */
 html, body {
   -webkit-tap-highlight-color: transparent;

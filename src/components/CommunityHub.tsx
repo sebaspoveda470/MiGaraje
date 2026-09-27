@@ -397,7 +397,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
 
       {/* Community Hero: Clean Editorial Header */}
-      <div className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 sm:gap-6">
+      <div data-reveal className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
             Clubes de propietarios y apasionados.
@@ -498,6 +498,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                 return (
                   <button
                     key={comm.id}
+                    data-reveal="zoom"
                     onClick={() => selectClub(comm.id)}
                     className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer ${
                       isSelected
@@ -657,6 +658,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                     return (
                       <div
                         key={post.id}
+                        data-reveal
                         className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-slate-300 transition-all space-y-4"
                       >
                         {/* Author Header */}

@@ -351,7 +351,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Header Banner */}
-      <div className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 sm:gap-6">
+      <div data-reveal className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
             Nuestros Productos MiGaraje
@@ -480,6 +480,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
         {filteredProducts.map((prod) => (
           <div
             key={prod.id}
+            data-reveal
             className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between group relative"
           >
             <div>

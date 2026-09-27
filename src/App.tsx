@@ -9,6 +9,7 @@ import { GarageModal } from './components/GarageModal';
 import { CartDrawer } from './components/CartDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { UsersPanel } from './components/UsersPanel';
+import { useScrollReveal } from './utils/scrollReveal';
 import type { SellRequest } from './components/CarMarketplace';
 import { AuthModal } from './components/AuthModal';
 import { LegalModal, LegalDoc } from './components/LegalModal';
@@ -90,6 +91,9 @@ export function App() {
   const [authReady, setAuthReady] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const isAdmin = isAdminEmail(authUser?.email) && !!authUser?.emailVerified;
+
+  // Cards and sections rise into view while scrolling
+  useScrollReveal();
 
   // Garage
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);

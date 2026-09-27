@@ -58,7 +58,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
 
   if (!activeVehicle) {
     return (
-      <div className="bg-white border border-slate-200 rounded-3xl p-10 sm:p-14 text-center max-w-xl mx-auto shadow-xs">
+      <div data-reveal className="bg-white border border-slate-200 rounded-3xl p-10 sm:p-14 text-center max-w-xl mx-auto shadow-xs">
         <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-200">
           <Car className="w-8 h-8 text-slate-700" />
         </div>
@@ -130,7 +130,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Active Vehicle Hero Showcase */}
-      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
+      <div data-reveal className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
         <div className="p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           
           {/* Left: Vehicle Image & Badges */}
@@ -305,7 +305,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
       )}
 
       {/* Mileage Maintenance Plan: Clean White Card */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+      <div data-reveal className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold tracking-wider uppercase mb-1">
@@ -376,6 +376,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
           {careProducts.slice(0, 3).map((prod) => (
             <div
               key={prod.id}
+              data-reveal
               className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div className="space-y-3">

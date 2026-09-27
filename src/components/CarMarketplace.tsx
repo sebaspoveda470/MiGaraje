@@ -438,7 +438,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Header Banner: Compra & Venta de Vehículos */}
-      <div className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 sm:gap-6">
+      <div data-reveal className="px-1 sm:px-2 pt-2 sm:pt-6 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 sm:gap-6">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
 <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-slate-950 tracking-[-0.025em]">
             Compra y vende tu carro, directo con el dueño.
@@ -624,6 +624,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
           return (
             <div
               key={car.id}
+              data-reveal
               className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between group"
             >
               <div>

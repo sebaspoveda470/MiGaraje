@@ -23,7 +23,7 @@ export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal
     <footer className="mt-12 border-t border-slate-200 bg-white text-slate-600 text-xs pb-24 sm:pb-0">
       {/* Slim call to action */}
       <div className="bg-blue-50 border-b border-blue-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div data-reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm font-bold text-slate-900 text-center sm:text-left">¿Vas a vender tu carro? Publícalo gratis en MiGaraje.</p>
           <button
             onClick={() => onNavigateTab('vehiculos')}
