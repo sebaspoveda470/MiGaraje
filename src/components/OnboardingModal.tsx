@@ -154,11 +154,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     return Object.keys(errors).length === 0;
   };
 
-  const handleNextToVehicle = (e: React.FormEvent) => {
+  // The account is created in one step; the vehicle is optional and can be added later
+  const handleCreateAccount = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateUserStep()) {
-      setStep(2);
-    }
+    if (validateUserStep()) save(null);
+  };
+
+  const handleAddVehicleNow = () => {
+    if (validateUserStep()) setStep(2);
   };
 
   const buildProfile = (): UserProfile => ({
@@ -238,40 +241,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </div>
             
             <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
-              {step === 1 ? 'Bienvenido a tu Garaje Digital' : 'Registra tu Vehículo Real'}
+              {step === 1 ? 'Crea tu cuenta en un paso' : 'Registra tu vehículo (opcional)'}
             </h2>
             <p className="text-[11px] sm:text-sm text-slate-300 mt-0.5 max-w-md mx-auto leading-relaxed">
               {step === 1 
-                ? 'Completa tu perfil para acceder a tu plan de mantenimiento preventivo, compra y venta de vehículos y clubes en Mi Comunidad.'
-                : 'Ingresa los datos de tu auto. Puedes subir tu propia foto o usar nuestra imagen de referencia automática.'}
+                ? 'Solo necesitamos tu nombre. Tu vehículo lo puedes registrar después, cuando quieras.'
+                : 'Ingresa los datos de tu vehículo. Puedes subir tu propia foto o usar nuestra imagen de referencia automática.'}
             </p>
 
-            {/* Stepper with Crisp White Highlights */}
-            <div className="flex items-center justify-center gap-2 sm:gap-3 mt-3 sm:mt-4">
-              <div className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
-                step === 1 
-                  ? 'bg-white text-slate-950 shadow-md shadow-white/20' 
-                  : 'bg-white/10 text-slate-400 border border-white/10'
-              }`}>
-                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black ${
-                  step === 1 ? 'bg-blue-600 text-white' : 'bg-slate-700 text-white'
-                }`}>1</div>
-                <span>1. Usuario</span>
-              </div>
-
-              <div className="w-4 sm:w-6 h-0.5 bg-white/20" />
-
-              <div className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
-                step === 2 
-                  ? 'bg-white text-slate-950 shadow-md shadow-white/20' 
-                  : 'bg-white/10 text-slate-400 border border-white/10'
-              }`}>
-                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black ${
-                  step === 2 ? 'bg-blue-600 text-white' : 'bg-slate-700 text-white'
-                }`}>2</div>
-                <span>2. Vehículo & Foto</span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -280,7 +257,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           
           {/* STEP 1: USER REGISTRATION */}
           {step === 1 && (
-            <form onSubmit={handleNextToVehicle} className="space-y-4">
+            <form onSubmit={handleCreateAccount} className="space-y-4">
               
               <div className="flex items-center gap-3 bg-blue-50 border border-blue-200/80 rounded-2xl p-3.5 text-xs text-blue-900 font-medium">
                 <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
@@ -304,20 +281,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 {userErrors.fullName && (
                   <p className="text-[11px] text-red-600 font-semibold mt-1">{userErrors.fullName}</p>
                 )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <Mail className="w-4 h-4 text-blue-600" />
-                  <span>Correo Electrónico *</span>
-                </label>
-                <input
-                  type="email"
-                  readOnly
-                  value={email}
-                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none shadow-xs cursor-not-allowed"
-                />
               </div>
 
               {/* Phone & City Grid */}
@@ -351,35 +314,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </div>
               </div>
 
-              {/* Profile Role */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                  <Crown className="w-4 h-4 text-blue-600" />
-                  <span>Tipo de Perfil</span>
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {[
-                    { id: 'propietario', label: 'Propietario' },
-                    { id: 'entusiasta', label: 'Entusiasta' },
-                    { id: 'coleccionista', label: 'Coleccionista' },
-                    { id: 'mecanico', label: 'Mecánico / Taller' },
-                  ].map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() => setRole(r.id as any)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
-                        role === r.id
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/30'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:bg-slate-100'
-                      }`}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Data processing authorization (Ley 1581 de 2012) */}
               <div>
                 <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer bg-white border border-slate-200 rounded-xl p-3">
@@ -404,14 +338,27 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 {userErrors.consent && <p className="text-[11px] text-red-600 font-semibold mt-1">{userErrors.consent}</p>}
               </div>
 
-              {/* Submit Step 1 */}
-              <div className="pt-3">
+              {saveError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold">{saveError}</p>
+              )}
+
+              {/* Create the account right away; the vehicle is optional */}
+              <div className="pt-2 space-y-2.5">
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-6 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-black text-sm tracking-wide shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isSaving}
+                  className="w-full py-3.5 px-6 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-black text-sm tracking-wide shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                 >
-                  <span>Continuar al Registro de tu Vehículo</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{isSaving ? 'Creando tu cuenta…' : 'Crear mi cuenta'}</span>
+                  {!isSaving && <ArrowRight className="w-4 h-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddVehicleNow}
+                  disabled={isSaving}
+                  className="w-full py-2.5 px-6 rounded-full text-blue-700 hover:bg-blue-50 font-bold text-xs transition-all cursor-pointer disabled:opacity-60"
+                >
+                  También quiero registrar mi vehículo ahora (opcional)
                 </button>
               </div>
             </form>
