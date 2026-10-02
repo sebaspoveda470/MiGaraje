@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart, Pencil, Flag } from 'lucide-react';
+import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart, Pencil, Flag, Phone, Clock, ShieldCheck, FileCheck, UserCheck } from 'lucide-react';
 import { VehicleListing } from '../types';
 import { PhotoGallery } from './PhotoPicker';
 import { ShareButtons } from './ShareButtons';
 import { getListingPhotos } from '../services/listingService';
-import { timeAgo } from '../utils/media';
+import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { useReport } from './ReportDialog';
 
 interface VehicleDetailModalProps {
@@ -63,13 +63,52 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
   const plateLabel = car.plateEnding ? `Placa termina en ${car.plateEnding}${car.plateCity ? ` · ${car.plateCity}` : ''}` : null;
 
+  // Calling uses the same number buyers write to on WhatsApp
+  const callNumber = toWhatsAppNumber(car.sellerPhone || car.whatsappNumber);
+  const callLink = callNumber ? `tel:+${callNumber}` : null;
+
+  // "Este vehículo cuenta con": only what the seller declared
+  const highlights = [
+    car.isUniqueOwner && { icon: UserCheck, label: 'Único dueño' },
+    car.soatValid && { icon: ShieldCheck, label: 'SOAT vigente' },
+    car.tecnoValid && { icon: FileCheck, label: 'Tecnomecánica al día' },
+  ].filter(Boolean) as { icon: typeof UserCheck; label: string }[];
+
+  const contactButtons = (size: 'bar' | 'panel') =>
+    isSold ? (
+      <div className={`text-center bg-slate-100 text-slate-500 font-bold text-sm px-6 py-3.5 rounded-full border border-slate-200 ${size === 'bar' ? 'flex-1 sm:flex-none sm:ml-auto' : 'w-full'}`}>
+        Vehículo vendido
+      </div>
+    ) : (
+      <div className={`flex gap-2 ${size === 'bar' ? 'flex-1 sm:flex-none sm:ml-auto' : 'flex-col'}`}>
+        <a
+          href={whatsAppLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-sm px-5 py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 ${size === 'bar' ? 'flex-1 sm:flex-none' : 'w-full'}`}
+        >
+          <MessageCircle className="w-5 h-5" />
+          {size === 'bar' ? 'WhatsApp' : 'Escribir por WhatsApp'}
+        </a>
+        {callLink && (
+          <a
+            href={callLink}
+            className={`bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-900 border border-slate-300 font-black text-sm px-5 py-3.5 rounded-full transition-all flex items-center justify-center gap-2 ${size === 'bar' ? 'flex-1 sm:flex-none' : 'w-full'}`}
+          >
+            <Phone className="w-4 h-4 text-blue-600" />
+            {size === 'bar' ? 'Llamar' : 'Llamar al vendedor'}
+          </a>
+        )}
+      </div>
+    );
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="bg-white sm:border sm:border-slate-200 rounded-t-3xl sm:rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden relative max-h-[94dvh] sm:max-h-[92dvh] flex flex-col"
+        className="bg-white sm:border sm:border-slate-200 rounded-t-3xl sm:rounded-3xl max-w-3xl lg:max-w-6xl w-full shadow-2xl overflow-hidden relative max-h-[94dvh] sm:max-h-[92dvh] lg:h-[88dvh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -80,13 +119,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="overflow-y-auto flex-1">
+        {/* Phones and tablets: one scrolling column. Computers: photos on the left, details on the right. */}
+        <div className="overflow-y-auto flex-1 min-h-0 lg:overflow-hidden lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
           {/* Photos: nothing on top of them except the counter */}
-          <div className="p-3 sm:p-4 pb-0 sm:pb-0">
-            <PhotoGallery key={car.id} images={photos} alt={car.title} aspectClass="aspect-4/3 sm:aspect-16/10" fit="contain" />
+          <div className="p-3 sm:p-4 pb-0 sm:pb-0 lg:p-5 lg:overflow-y-auto lg:bg-slate-50">
+            <PhotoGallery key={car.id} images={photos} alt={car.title} aspectClass="aspect-4/3 sm:aspect-16/10 lg:aspect-4/3" fit="contain" />
           </div>
 
-          <div className="p-5 sm:p-7 space-y-6">
+          <div className="p-5 sm:p-7 lg:pt-14 space-y-6 lg:overflow-y-auto lg:border-l lg:border-slate-200">
             {/* Title, price and share */}
             <div className="space-y-3">
               {(isSold || plateLabel || car.isUniqueOwner) && (
@@ -105,7 +145,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </div>
               )}
 
-              <h2 className="font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-tight">{car.title}</h2>
+              <h2 className="font-sans text-xl sm:text-2xl lg:text-3xl font-black text-slate-950 tracking-tight leading-tight">{car.title}</h2>
+              <p className="hidden lg:block text-xs text-slate-500">
+                Publicado por: <span className="font-bold text-blue-700">{car.sellerName}</span>
+              </p>
 
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
                 <span className="inline-flex items-center gap-1">
@@ -145,6 +188,39 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </div>
             </div>
 
+            {/* Computers: what it includes, when/where, phone and contact buttons right under the price */}
+            <div className="hidden lg:block space-y-5">
+              {highlights.length > 0 && (
+                <div className="space-y-3">
+                  <div className="text-sm font-bold text-slate-950 pb-2 border-b border-slate-200">Este vehículo cuenta con:</div>
+                  <div className="flex flex-wrap gap-x-6 gap-y-3">
+                    {highlights.map(({ icon: Icon, label }) => (
+                      <div key={label} className="flex flex-col items-center gap-1.5 text-center w-24">
+                        <div className="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-800 leading-tight">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="space-y-1.5 text-sm text-slate-700">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-slate-400" /> Publicado {timeAgo(car.createdAt).toLowerCase()}
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-slate-400" /> {car.city || car.location}
+                </div>
+                {!isSold && car.sellerPhone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-slate-400" /> Teléfono: <span className="font-bold text-slate-950">{car.sellerPhone}</span>
+                  </div>
+                )}
+              </div>
+              {contactButtons('panel')}
+            </div>
+
             {/* Description */}
             <section className="space-y-2">
               <h3 className="text-sm font-black text-slate-950">Descripción</h3>
@@ -153,7 +229,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </p>
             </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
               {/* Specs */}
               <section className="space-y-1">
                 <h3 className="text-sm font-black text-slate-950">Ficha técnica</h3>
@@ -237,27 +313,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Single call to action */}
-        <div className="p-3 sm:p-4 border-t border-slate-200 bg-white shrink-0 flex items-center gap-3">
+        {/* Contact bar (phones and tablets; computers have the buttons in the right column) */}
+        <div className="lg:hidden p-3 sm:p-4 border-t border-slate-200 bg-white shrink-0 flex items-center gap-3">
           <div className="hidden sm:block min-w-0">
             <div className="text-lg font-black text-slate-950 truncate">{formatCOP(car.price)}</div>
             <div className="text-[11px] text-slate-500 truncate">{car.title}</div>
           </div>
-          {isSold ? (
-            <div className="flex-1 sm:flex-none sm:ml-auto text-center bg-slate-100 text-slate-500 font-bold text-sm px-6 py-3.5 rounded-2xl border border-slate-200">
-              Vehículo vendido
-            </div>
-          ) : (
-            <a
-              href={whatsAppLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 sm:flex-none sm:ml-auto bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-sm px-6 py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Escribir al vendedor
-            </a>
-          )}
+          {contactButtons('bar')}
         </div>
       </div>
     </div>
