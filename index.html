@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="google-site-verification" content="5pabcSMohGF1BSjxEhKiUrAkqlkqCz7-bTHXmupsZ3c" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MiGaraje | Compra & Venta de Vehículos, Nuestros Productos & Mi Comunidad</title>
+    <title>MiGaraje | Compra y venta de vehículos en Colombia, productos y comunidades</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
     <meta name="theme-color" content="#020617" />
@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Montserrat:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="description" content="MiGaraje: Plataforma automotriz para comprar y vender tu vehículo, productos oficiales MiGaraje con venta directa por WhatsApp y Mi Comunidad de clubes por marca." />
+    <meta name="description" content="Compra y vende tu vehículo directo con el dueño, sin comisiones. Productos MiGaraje para el cuidado de tu vehículo con pedidos por WhatsApp y comunidades de propietarios por marca en Colombia." />
     <meta property="og:title" content="MiGaraje - Compra & Venta de Vehículos & Ecosistema Automotriz" />
     <meta property="og:description" content="MiGaraje: Plataforma automotriz para comprar y vender tu vehículo, productos oficiales MiGaraje con venta directa por WhatsApp y Mi Comunidad de clubes por marca." />
     <meta property="og:type" content="website" />
@@ -25,9 +25,53 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- Tells Google what MiGaraje is (business data for search results) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://migaraje-one.vercel.app/#organizacion",
+            "name": "MiGaraje",
+            "url": "https://migaraje-one.vercel.app/",
+            "logo": "https://migaraje-one.vercel.app/icon-512.png",
+            "description": "Plataforma colombiana para comprar y vender vehículos entre propietarios, con productos de cuidado automotriz y comunidades por marca.",
+            "email": "migaraje.co@gmail.com",
+            "areaServed": { "@type": "Country", "name": "Colombia" },
+            "address": { "@type": "PostalAddress", "addressLocality": "Bogotá", "addressCountry": "CO" }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://migaraje-one.vercel.app/#sitio",
+            "name": "MiGaraje",
+            "url": "https://migaraje-one.vercel.app/",
+            "inLanguage": "es-CO",
+            "publisher": { "@id": "https://migaraje-one.vercel.app/#organizacion" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+        <div id="root">
+      <!-- Shown for an instant while the app loads, and readable by search engines without running it.
+           React replaces everything inside #root when it starts. -->
+      <main style="font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; max-width: 720px; margin: 0 auto; padding: 48px 20px; color: #1d1d1f; line-height: 1.6">
+        <h1 style="font-size: 30px; line-height: 1.15; margin: 0 0 12px">MiGaraje: todo para tu vehículo, en un solo lugar</h1>
+        <p style="color: #56565b; margin: 0 0 20px">
+          Plataforma colombiana para comprar y vender vehículos directo entre propietarios, pedir productos de cuidado
+          automotriz por WhatsApp y unirte a comunidades de propietarios por marca.
+        </p>
+        <ul style="padding-left: 18px; margin: 0 0 20px">
+          <li><a href="/vehiculos">Compra y venta de vehículos</a>: anuncios publicados por sus dueños en Bogotá, Medellín, Cali y todo el país, sin comisiones.</li>
+          <li><a href="/productos">Productos MiGaraje</a>: limpieza y cuidado para tu vehículo, con envíos a toda Colombia.</li>
+          <li><a href="/comunidad">Comunidades</a>: clubes de Mazda, Toyota, BMW, Chevrolet, clásicos y más, para resolver dudas y compartir experiencias.</li>
+          <li><a href="/">Mi Garaje</a>: recordatorios de SOAT y tecnomecánica e historial de mantenimiento de tu vehículo.</li>
+        </ul>
+        <p style="color: #6e6e73; font-size: 14px; margin: 0">Cargando MiGaraje…</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
