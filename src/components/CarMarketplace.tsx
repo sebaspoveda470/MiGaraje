@@ -29,13 +29,14 @@ import {
   CircleCheck,
   RotateCcw,
   Heart,
-  Pencil
+  Pencil,
+  Eye
 } from 'lucide-react';
 import { VehicleListing, UserProfile, Vehicle } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { PhotoPicker } from './PhotoPicker';
 import { VehicleDetailModal } from './VehicleDetailModal';
-import { getListingPhotos } from '../services/listingService';
+import { getListingPhotos, trackListingView } from '../services/listingService';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
@@ -148,6 +149,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     if (!deepLinkHandled.current) return;
     syncDeepLink(selectedCar ? { type: 'vehiculo', id: selectedCar.id } : null);
   }, [selectedCar]);
+
+  // "Visto N veces"
+  useEffect(() => {
+    if (selectedCar) trackListingView(selectedCar, currentUserId);
+  }, [selectedCar?.id]);
 
   // Form State for "Vender mi Vehículo" Publishing Modal
   const [pubBrand, setPubBrand] = useState('Mazda');
@@ -726,6 +732,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   <div className="flex items-center gap-1 text-[11px] text-slate-400 font-medium">
                     <Clock className="w-3 h-3" />
                     <span>{timeAgo(car.createdAt)}</span>
+                    {!!car.views && (
+                      <span className="inline-flex items-center gap-1 ml-2">
+                        <Eye className="w-3 h-3" /> {car.views === 1 ? 'Visto 1 vez' : `Visto ${car.views} veces`}
+                      </span>
+                    )}
                   </div>
 
                   <h3 

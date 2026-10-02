@@ -133,3 +133,23 @@ export async function updateListing(
   });
   await batch.commit();
 }
+
+/**
+ * Counts a visit to a listing, once per browser session and never for its own seller.
+ * Fire-and-forget: the counter is a nicety and must not disturb the page.
+ */
+export function trackListingView(listing: VehicleListing, viewerId: string | null): void {
+  if (viewerId && listing.ownerId === viewerId) return;
+  const key = `migaraje_viewed_${listing.id}`;
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+  } catch {
+    // storage unavailable: count anyway
+  }
+  fetch('/api/track-view', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ listingId: listing.id }),
+  }).catch(() => undefined);
+}

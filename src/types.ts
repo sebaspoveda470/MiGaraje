@@ -110,6 +110,8 @@ export interface VehicleListing {
   photoCount?: number;
   /** Garage vehicle (users/{uid}/vehicles/{id}) this listing was published from */
   garageVehicleId?: string;
+  /** Times the listing was opened by visitors (counted by /api/track-view) */
+  views?: number;
 }
 
 export type CareCategory = 'exterior' | 'interior' | 'motor_aditivos' | 'herramientas';

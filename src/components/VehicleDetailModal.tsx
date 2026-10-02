@@ -165,6 +165,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   {car.specs?.engine && <Row label="Motor" value={car.specs.engine} />}
                   {car.specs?.color && <Row label="Color" value={car.specs.color} />}
                   <Row label="Publicado" value={timeAgo(car.createdAt)} />
+                  {!!car.views && <Row label="Visitas" value={car.views === 1 ? '1 vez' : `${car.views} veces`} />}
                 </dl>
               </section>
 
