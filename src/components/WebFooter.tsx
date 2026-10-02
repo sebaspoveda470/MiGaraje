@@ -2,6 +2,7 @@ import React from 'react';
 import { Mail, MessageCircle, MapPin, Car, ChevronRight, Store } from 'lucide-react';
 import { Logo } from './Logo';
 import { SITE } from '../config/site';
+import { InstallAppButton } from './InstallApp';
 
 interface WebFooterProps {
   salesWhatsApp?: string;
@@ -64,6 +65,9 @@ export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal
                   </button>
                 </li>
               )}
+              <li>
+                <InstallAppButton className="hover:text-blue-700 transition-colors text-left" />
+              </li>
             </ul>
           </nav>
 
