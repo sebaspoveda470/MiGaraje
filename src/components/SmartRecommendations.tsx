@@ -58,20 +58,24 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
 
   if (!activeVehicle) {
     return (
-      <div data-reveal className="bg-white border border-slate-200 rounded-3xl p-10 sm:p-14 text-center max-w-xl mx-auto shadow-xs">
-        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-200">
-          <Car className="w-8 h-8 text-slate-700" />
+      <div data-reveal className="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 bg-white/15 rounded-2xl flex items-center justify-center shrink-0">
+            <Car className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">Lleva el control de tu vehículo</h2>
+            <p className="text-white/80 text-xs sm:text-sm mt-1 max-w-xl leading-relaxed">
+              Regístralo gratis en Mi Garaje: te avisamos cuando se venzan el SOAT y la tecnomecánica, guardas tu historial de mantenimientos y lo puedes poner en venta con un toque.
+            </p>
+          </div>
         </div>
-        <h2 className="text-2xl font-black text-slate-950 tracking-tight mb-2">No tienes ningún vehículo activo</h2>
-        <p className="text-slate-600 text-xs sm:text-sm mb-6 max-w-md mx-auto leading-relaxed">
-          Registra tu vehículo en tu Garaje personal para generar el plan de mantenimiento según tu kilometraje, consultar Pico y Placa y unirte a tu club en Mi Comunidad.
-        </p>
         <button
           onClick={onOpenAddVehicleModal}
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-full shadow-md transition-all cursor-pointer text-xs sm:text-sm min-h-[46px]"
+          className="inline-flex items-center justify-center gap-2 bg-white hover:bg-blue-50 text-blue-700 font-semibold px-6 py-3 rounded-full transition-all cursor-pointer text-sm min-h-[46px] w-full sm:w-auto shrink-0"
         >
-          <Plus className="w-4 h-4 text-white/90" />
-          <span>Registrar mi Primer Vehículo</span>
+          <Plus className="w-4 h-4" />
+          <span>Registrar mi vehículo</span>
         </button>
       </div>
     );

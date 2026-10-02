@@ -9,6 +9,7 @@ import { GarageModal } from './components/GarageModal';
 import { CartDrawer } from './components/CartDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { UsersPanel } from './components/UsersPanel';
+import { HomeShowcase } from './components/HomeShowcase';
 import { useScrollReveal } from './utils/scrollReveal';
 import type { SellRequest } from './components/CarMarketplace';
 import { AuthModal } from './components/AuthModal';
@@ -452,6 +453,12 @@ export function App() {
     setActiveTab('vehiculos');
   };
 
+  // Opens one item (from the home page preview) in its own section
+  const openItem = (type: 'vehiculo' | 'producto' | 'comunidad', id: string) => {
+    setDeepLink({ type, id });
+    setActiveTab(TAB_FOR_LINK[type]);
+  };
+
   // Listing Management (Compra & Venta de Vehículos)
   const handlePublishListing = async (newListing: Omit<VehicleListing, 'id'>, photos: string[]) => {
     if (!authUser) return;
@@ -589,6 +596,18 @@ export function App() {
               onRegisterCar={handleOpenAddVehicle}
             />
 
+            {/* Visitors and owners without a vehicle see what the site offers first */}
+            {!activeVehicle && (
+              <HomeShowcase
+                listings={carListings}
+                products={careProducts}
+                onOpenListing={(id) => openItem('vehiculo', id)}
+                onOpenProduct={(id) => openItem('producto', id)}
+                onOpenCommunity={(id) => openItem('comunidad', id)}
+                onNavigate={setActiveTab}
+              />
+            )}
+
             {authReady && (
               <SmartRecommendations
                 activeVehicle={activeVehicle}
@@ -601,6 +620,17 @@ export function App() {
                 onError={(message, err) => showError(message)(err)}
                 onSellVehicle={authUser ? handleSellVehicle : undefined}
                 isForSale={!!activeVehicle && !!listingForVehicle(activeVehicle.id)}
+              />
+            )}
+
+            {activeVehicle && (
+              <HomeShowcase
+                listings={carListings}
+                products={careProducts}
+                onOpenListing={(id) => openItem('vehiculo', id)}
+                onOpenProduct={(id) => openItem('producto', id)}
+                onOpenCommunity={(id) => openItem('comunidad', id)}
+                onNavigate={setActiveTab}
               />
             )}
           </div>
