@@ -415,6 +415,39 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
         )}
       </SectionHero>
 
+      {/* How to buy: three steps, so a first order feels safe */}
+      <section aria-label="Cómo comprar" className="space-y-3">
+        <div className="flex sm:grid sm:grid-cols-3 gap-3 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+          {[
+            { n: '1', title: 'Elige tus productos', text: 'Agrégalos al carrito o toca “Comprar por WhatsApp” en el que te guste.' },
+            { n: '2', title: 'Confirma por WhatsApp', text: 'Te atendemos directamente: confirmamos disponibilidad, valor del envío y forma de pago.' },
+            { n: '3', title: 'Recíbelo en tu ciudad', text: 'Despachamos a toda Colombia. Pagas solo cuando todo esté acordado contigo.' },
+          ].map((step) => (
+            <div key={step.n} data-reveal className="w-[78%] shrink-0 snap-start sm:w-auto bg-white/80 rounded-3xl p-4 sm:p-5 border border-slate-200/70 flex items-start gap-3">
+              <div className="w-9 h-9 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center shrink-0">{step.n}</div>
+              <div>
+                <div className="text-sm font-semibold text-slate-900">{step.title}</div>
+                <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{step.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        {salesWhatsApp && (
+          <p className="text-xs text-slate-500 px-1">
+            ¿Tienes dudas antes de pedir?{' '}
+            <a
+              href={`https://wa.me/${salesWhatsApp}?text=${encodeURIComponent('Hola MiGaraje 👋 Tengo una pregunta sobre sus productos.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-emerald-700 hover:underline"
+            >
+              Escríbenos por WhatsApp
+            </a>{' '}
+            y te respondemos.
+          </p>
+        )}
+      </section>
+
       {isLoading && (
         <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 font-semibold">
           <Loader2 className="w-5 h-5 animate-spin" /> Cargando productos...
