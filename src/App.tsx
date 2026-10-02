@@ -512,7 +512,7 @@ export function App() {
 
   return (
     <ReportProvider currentUserId={authUser?.uid || null} requireAuth={requireAuth} onDone={showToast}>
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans relative overflow-x-hidden selection:bg-slate-900 selection:text-white">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans relative overflow-x-clip selection:bg-slate-900 selection:text-white">
 
       {/* Toast Banner */}
       {toast && (
@@ -528,7 +528,7 @@ export function App() {
       )}
 
       {/* App Header */}
-      <div className="relative z-30">
+      <div className="sticky top-0 z-40">
         <Header
           activeTab={activeTab}
           onTabChange={setActiveTab}
