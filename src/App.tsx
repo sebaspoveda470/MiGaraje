@@ -519,7 +519,7 @@ export function App() {
 
   return (
     <ReportProvider currentUserId={authUser?.uid || null} requireAuth={requireAuth} onDone={showToast}>
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans relative overflow-x-clip selection:bg-slate-900 selection:text-white">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans relative isolate overflow-x-clip selection:bg-slate-900 selection:text-white">
 
       {/* Toast Banner */}
       {toast && (

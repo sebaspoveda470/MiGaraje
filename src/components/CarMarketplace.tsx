@@ -442,7 +442,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   };
 
   return (
-    <div className="relative isolate space-y-8 animate-in fade-in duration-300">
+    <div className="relative space-y-8 animate-in fade-in duration-300">
       <SectionGlow tone="vehiculos" />
       
       {/* Header Banner: Compra & Venta de Vehículos */}

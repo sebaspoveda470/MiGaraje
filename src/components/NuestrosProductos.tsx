@@ -349,7 +349,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
   };
 
   return (
-    <div className="relative isolate space-y-8 animate-in fade-in duration-300">
+    <div className="relative space-y-8 animate-in fade-in duration-300">
       <SectionGlow tone="productos" />
       
       {/* Header Banner */}

@@ -15,7 +15,8 @@ const GLOWS: Record<SectionTone, string> = {
 
 /**
  * Soft colored light behind a section's header that fades into the page background.
- * Place it first inside a `relative isolate` container.
+ * Place it first inside a `relative` container. It sits behind the content thanks to the `isolate` on the
+ * app root; the section itself must not isolate, or its modals would open underneath the sticky header.
  */
 export const SectionGlow: React.FC<{ tone: SectionTone }> = ({ tone }) => (
   <div

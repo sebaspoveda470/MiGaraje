@@ -659,7 +659,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
   };
 
   return (
-    <div className="relative isolate space-y-8 animate-in fade-in duration-300">
+    <div className="relative space-y-8 animate-in fade-in duration-300">
       <SectionGlow tone="comunidad" />
 
       <SectionHero image="/section-comunidad.jpg" alt="Encuentro de vehículos con personas reunidas" focus="50% 55%">
