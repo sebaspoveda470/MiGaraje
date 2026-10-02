@@ -259,18 +259,27 @@ export function subscribeToComments(
 
 /**
  * Adds a comment and bumps the post's counter in one atomic write.
+ * Then asks the server to email the post's author (it decides whether to send).
  */
 export async function addComment(
   postId: string,
   comment: Omit<PostComment, 'id' | 'createdAt'>
 ): Promise<void> {
   const batch = writeBatch(db);
-  batch.set(doc(collection(postsRef, postId, 'comments')), {
+  const commentRef = doc(collection(postsRef, postId, 'comments'));
+  batch.set(commentRef, {
     ...comment,
     createdAt: serverTimestamp(),
   });
   batch.update(doc(postsRef, postId), { commentsCount: increment(1) });
   await batch.commit();
+
+  // Best effort: a failed notification must not fail the comment
+  fetch('/api/notify-comment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ postId, commentId: commentRef.id }),
+  }).catch(() => undefined);
 }
 
 /** Deletes one comment (author or admin). The post's counter is left as is. */

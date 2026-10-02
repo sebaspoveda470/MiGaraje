@@ -208,7 +208,7 @@ onLogout,
                   className="mt-0.5 w-4 h-4 accent-blue-600 shrink-0"
                 />
                 <span className="text-slate-700">
-                  <strong>Recibir recordatorios por correo</strong> cuando se acerque el vencimiento del SOAT o la revisión técnico-mecánica de mis vehículos.
+                  <strong>Recibir recordatorios y avisos por correo</strong>: cuando se acerque el vencimiento del SOAT o la revisión técnico-mecánica de mis vehículos, y cuando alguien responda mis publicaciones en Mi Comunidad.
                 </span>
               </label>
               <div className="flex justify-end gap-2 pt-1">
@@ -255,7 +255,7 @@ onLogout,
             </div>
             <div className="flex items-center gap-2 text-slate-600 font-medium min-w-0 sm:col-span-2">
               <BellRing className="w-4 h-4 text-blue-600 shrink-0" />
-              <span>Recordatorios por correo: {user?.emailReminders === false ? 'desactivados' : 'activados'}</span>
+              <span>Recordatorios y avisos por correo: {user?.emailReminders === false ? 'desactivados' : 'activados'}</span>
             </div>
           </div>
           )}
