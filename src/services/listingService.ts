@@ -9,6 +9,7 @@ import {
   orderBy,
   writeBatch,
   serverTimestamp,
+  deleteField,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -152,4 +153,34 @@ export function trackListingView(listing: VehicleListing, viewerId: string | nul
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ listingId: listing.id }),
   }).catch(() => undefined);
+}
+
+// ---------- Featured listings ("Destacado") ----------
+
+// Kept in config/featuredListings, which only the admin can write (firestore.rules), so a seller
+// can't feature their own listing. Shape: { until: { [listingId]: millis } }.
+const featuredRef = doc(db, 'config', 'featuredListings');
+
+/** Listing id → moment (millis) until which it is featured. Expired entries are left out. */
+export type FeaturedMap = Record<string, number>;
+
+export function subscribeToFeatured(onChange: (featured: FeaturedMap) => void, onError?: (err: Error) => void): () => void {
+  return onSnapshot(
+    featuredRef,
+    (snap) => {
+      const until = (snap.data()?.until as FeaturedMap) || {};
+      const now = Date.now();
+      onChange(Object.fromEntries(Object.entries(until).filter(([, millis]) => millis > now)));
+    },
+    onError
+  );
+}
+
+/** Admin only: features a listing for `days` days, or removes the highlight with `null`. */
+export async function setListingFeatured(listingId: string, days: number | null): Promise<void> {
+  await setDoc(
+    featuredRef,
+    { until: { [listingId]: days === null ? deleteField() : Date.now() + days * 24 * 60 * 60 * 1000 } },
+    { merge: true }
+  );
 }

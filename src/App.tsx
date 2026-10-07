@@ -36,7 +36,17 @@ import {
   setFavorite,
   FavoriteKind,
 } from './services/userService';
-import { subscribeToListings, publishListing, updateListing, deleteListing, setListingSold, ExtraPhotosError } from './services/listingService';
+import {
+  subscribeToListings,
+  publishListing,
+  updateListing,
+  deleteListing,
+  setListingSold,
+  ExtraPhotosError,
+  subscribeToFeatured,
+  setListingFeatured,
+  FeaturedMap,
+} from './services/listingService';
 import {
   subscribeToProducts,
   saveProduct,
@@ -124,6 +134,7 @@ export function App() {
 
   // Shared catalog data (Firestore, realtime)
   const [carListings, setCarListings] = useState<VehicleListing[]>([]);
+  const [featured, setFeatured] = useState<FeaturedMap>({});
   const [listingsLoading, setListingsLoading] = useState(true);
   const [careProducts, setCareProducts] = useState<CareProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -200,6 +211,10 @@ export function App() {
         showError('No pudimos cargar los vehículos en venta.')(err);
       }
     );
+  }, []);
+
+  useEffect(() => {
+    return subscribeToFeatured(setFeatured, (err) => console.error('No se pudieron cargar los destacados', err));
   }, []);
 
   useEffect(() => {
@@ -485,6 +500,13 @@ export function App() {
       .catch(showError('No se pudo actualizar el anuncio.'));
   };
 
+  // Admin: feature a listing ("Destacado") or remove the highlight
+  const handleSetFeatured = (listing: VehicleListing, days: number | null) => {
+    setListingFeatured(listing.id, days)
+      .then(() => showToast(days ? `"${listing.title}" quedó destacado por ${days} días` : 'Se quitó el destacado'))
+      .catch(showError('No se pudo cambiar el destacado.'));
+  };
+
   const handleDeleteListing = (listingId: string) => {
     deleteListing(listingId)
       .then(() => showToast('Publicación eliminada'))
@@ -600,6 +622,7 @@ export function App() {
             {!activeVehicle && (
               <HomeShowcase
                 listings={carListings}
+                featured={featured}
                 products={careProducts}
                 onOpenListing={(id) => openItem('vehiculo', id)}
                 onOpenProduct={(id) => openItem('producto', id)}
@@ -626,6 +649,7 @@ export function App() {
             {activeVehicle && (
               <HomeShowcase
                 listings={carListings}
+                featured={featured}
                 products={careProducts}
                 onOpenListing={(id) => openItem('vehiculo', id)}
                 onOpenProduct={(id) => openItem('producto', id)}
@@ -652,6 +676,9 @@ onToggleSold={handleToggleSold}
             favoriteIds={user?.favoriteListings || []}
             onToggleFavorite={(id) => handleToggleFavorite('favoriteListings', id)}
             initialListingId={deepLink?.type === 'vehiculo' ? deepLink.id : null}
+            featured={featured}
+            onSetFeatured={isAdmin ? handleSetFeatured : undefined}
+            onNotify={showToast}
             sellRequest={sellRequest}
             onSellRequestHandled={() => setSellRequest(null)}
           />

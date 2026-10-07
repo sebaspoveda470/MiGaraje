@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, MapPin, Gauge, Star, MessageSquare, ThumbsUp, Clock } from 'lucide-react';
+import { FeaturedMap } from '../services/listingService';
 import { CareProduct, CommunityClub, CommunityPost, VehicleListing } from '../types';
 import { subscribeToCommunities, subscribeToRecentPosts } from '../services/communityService';
 import { timeAgo } from '../utils/media';
 
 interface HomeShowcaseProps {
   listings: VehicleListing[];
+  /** Featured listings go first */
+  featured?: FeaturedMap;
   products: CareProduct[];
   onOpenListing: (id: string) => void;
   onOpenProduct: (id: string) => void;
@@ -40,7 +43,7 @@ const cardClass =
  * Home page preview of what the site has right now: latest vehicles for sale,
  * MiGaraje products and the newest community posts. Each block hides itself while empty.
  */
-export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, products, onOpenListing, onOpenProduct, onOpenCommunity, onNavigate }) => {
+export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured = {}, products, onOpenListing, onOpenProduct, onOpenCommunity, onNavigate }) => {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [communities, setCommunities] = useState<CommunityClub[]>([]);
 
@@ -57,9 +60,9 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, products, 
     () =>
       listings
         .filter((l) => l.status !== 'vendido')
-        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+        .sort((a, b) => Number(!!featured[b.id]) - Number(!!featured[a.id]) || (b.createdAt || 0) - (a.createdAt || 0))
         .slice(0, 3),
-    [listings]
+    [listings, featured]
   );
   const featuredProducts = useMemo(() => products.filter((p) => p.inStock).slice(0, 4), [products]);
   const clubById = useMemo(() => new Map(communities.map((c) => [c.id, c])), [communities]);
@@ -78,8 +81,13 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, products, 
           <div className={`${rowClass} sm:grid-cols-2 lg:grid-cols-3`}>
             {latestListings.map((car) => (
               <button key={car.id} data-reveal onClick={() => onOpenListing(car.id)} className={cardClass}>
-                <div className="aspect-[16/10] overflow-hidden bg-slate-100">
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                   <img src={car.images[0]} alt={car.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {featured[car.id] && (
+                    <span className="absolute top-3 left-3 bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-xs inline-flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-slate-950" /> Destacado
+                    </span>
+                  )}
                 </div>
                 <div className="p-4 sm:p-5 space-y-2">
                   <div className="text-base font-semibold text-slate-950 line-clamp-1">{car.title}</div>

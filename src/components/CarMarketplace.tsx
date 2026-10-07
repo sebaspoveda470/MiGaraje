@@ -30,13 +30,14 @@ import {
   RotateCcw,
   Heart,
   Pencil,
-  Eye
+  Eye,
+  Star
 } from 'lucide-react';
 import { VehicleListing, UserProfile, Vehicle } from '../types';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { PhotoPicker } from './PhotoPicker';
 import { VehicleDetailModal } from './VehicleDetailModal';
-import { getListingPhotos, trackListingView } from '../services/listingService';
+import { getListingPhotos, trackListingView, FeaturedMap } from '../services/listingService';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
@@ -56,6 +57,10 @@ interface CarMarketplaceProps {
   initialListingId?: string | null;
   favoriteIds: string[];
   onToggleFavorite: (listingId: string) => void;
+  /** Listings the admin featured ("Destacado"): shown first and with a badge */
+  featured?: FeaturedMap;
+  onSetFeatured?: (listing: VehicleListing, days: number | null) => void;
+  onNotify?: (message: string, isError?: boolean) => void;
   /** "Vender" pressed on a garage vehicle: open its listing, or the form filled with its data */
   sellRequest?: SellRequest | null;
   onSellRequestHandled?: () => void;
@@ -122,9 +127,13 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   initialListingId,
   favoriteIds,
   onToggleFavorite,
+  featured = {},
+  onSetFeatured,
+  onNotify,
   sellRequest,
   onSellRequestHandled,
 }) => {
+  const isFeatured = (car: VehicleListing) => !!featured[car.id] && !isSold(car);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('todas');
   const [selectedCity, setSelectedCity] = useState('todas');
@@ -343,7 +352,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       }
     }
     return true;
-  }).sort((a, b) => Number(isSold(a)) - Number(isSold(b)) || COMPARATORS[sortBy](a, b));
+  }).sort((a, b) => Number(isSold(a)) - Number(isSold(b)) || Number(isFeatured(b)) - Number(isFeatured(a)) || COMPARATORS[sortBy](a, b));
 
   const soldCount = carListings.filter(isSold).length;
 
@@ -663,6 +672,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
                   {/* Top Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                    {isFeatured(car) && (
+                      <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-xs inline-flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-slate-950" /> Destacado
+                      </span>
+                    )}
                     {car.isUniqueOwner && (
                       <span className="bg-slate-950 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
                         Único Dueño
@@ -874,6 +888,10 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
             handleToggleSold(carListings.find((c) => c.id === selectedCar.id) || selectedCar);
           }}
           onClose={() => setSelectedCar(null)}
+          isAdmin={isAdmin}
+          featuredUntil={featured[selectedCar.id]}
+          onSetFeatured={onSetFeatured ? (days) => onSetFeatured(selectedCar, days) : undefined}
+          onNotify={onNotify}
         />
       )}
 
