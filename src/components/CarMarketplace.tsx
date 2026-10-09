@@ -42,6 +42,8 @@ import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { getVehicleReferenceImage } from '../utils/vehicleImages';
 import { normalizePlate, isValidPlate, plateLastDigit } from '../utils/plates';
+import { CityPicker } from './CityPicker';
+import { findPlace, resolveTyped, normalizeText } from '../utils/places';
 import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
 
 interface CarMarketplaceProps {
@@ -102,18 +104,6 @@ export const isSold = (car: VehicleListing) => car.status === 'vendido';
 // The price slider's top position means "no limit".
 const PRICE_CAP = 500000000;
 
-const COLOMBIAN_CITIES = [
-  'todas',
-  'Bogotá D.C.',
-  'Medellín',
-  'Cali',
-  'Barranquilla',
-  'Bucaramanga',
-  'Pereira',
-  'Envigado',
-  'Cartagena',
-  'Manizales',
-];
 
 export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   carListings,
@@ -176,7 +166,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   const [pubPlateEnding, setPubPlateEnding] = useState('5');
   // Full plate: never published (the listing only shows its last digit)
   const [pubPlate, setPubPlate] = useState('');
-  const [pubPlateCity, setPubPlateCity] = useState('Bogotá');
+  // City where the vehicle is registered (optional): shown next to the plate's last digit
+  const [pubPlateCity, setPubPlateCity] = useState('');
   const [pubTransmission, setPubTransmission] = useState('Automática');
   const [pubFuel, setPubFuel] = useState('Gasolina');
   const [pubSellerName, setPubSellerName] = useState('');
@@ -249,7 +240,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     setPubPlate(normalizePlate(v.plate));
     if (v.soatExpiry) setPubSoatValid(v.soatExpiry >= today);
     if (v.tecnoExpiry) setPubTecnoValid(v.tecnoExpiry >= today);
-    if (currentUser?.city && COLOMBIAN_CITIES.includes(currentUser.city)) setPubCity(currentUser.city);
+    const home = findPlace(currentUser?.city);
+    if (home) setPubCity(home.label);
     // Only the owner's own photo, not the automatic reference picture
     setPubImages(v.image?.startsWith('data:') ? [v.image] : []);
     setPubSellerName(currentUser?.fullName || '');
@@ -274,7 +266,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     setPubYear(car.year);
     setPubPrice(car.price);
     setPubMileage(car.mileage);
-    setPubCity(car.city || 'Bogotá D.C.');
+    // "Armenia, Quindío" keeps its department; older listings only stored the city
+    setPubCity((/, Colombia$/.test(car.location || '') ? null : findPlace(car.location))?.label || findPlace(car.city)?.label || car.city || 'Bogotá D.C.');
     setPubPlateEnding(car.plateEnding || '');
     setPubPlate(plateOfListing(car.id));
     setPubPlateCity(car.plateCity || '');
@@ -337,8 +330,9 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       return false;
     }
     if (selectedCity !== 'todas') {
-      const carLoc = (car.city || car.location).toLowerCase();
-      if (!carLoc.includes(selectedCity.toLowerCase())) {
+      // Accent-insensitive, by municipality name ("medellin" finds "Medellín")
+      const wanted = normalizeText(selectedCity.split(',')[0]);
+      if (wanted && !normalizeText(`${car.city || ''} ${car.location || ''}`).includes(wanted)) {
         return false;
       }
     }
@@ -414,8 +408,15 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     }
     const plateEnding = plate ? plateLastDigit(plate) : pubPlateEnding;
 
+    const place = resolveTyped(pubCity);
+    if (!place) {
+      setPublishError('Elige de la lista la ciudad o municipio donde está el vehículo.');
+      return;
+    }
+    const plateCity = resolveTyped(pubPlateCity)?.city || pubPlateCity.trim();
+
     const title = `${pubBrand} ${pubModel.trim()} ${pubYear}`;
-    const tags = [pubIsUniqueOwner ? 'Único Dueño' : null, plateEnding ? `Placa ${plateEnding} ${pubPlateCity}` : null]
+    const tags = [pubIsUniqueOwner ? 'Único Dueño' : null, plateEnding ? `Placa ${plateEnding} ${plateCity}`.trim() : null]
       .filter(Boolean) as string[];
     const newListing: Omit<VehicleListing, 'id'> = {
       title,
@@ -426,10 +427,10 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       currency: 'COP',
       mileage: Number(pubMileage),
       condition: pubMileage < 30000 ? 'seminuevo' : 'usado',
-      location: `${pubCity}, Colombia`,
-      city: pubCity,
+      location: place.label === place.city ? `${place.city}, Colombia` : place.label,
+      city: place.city,
       plateEnding,
-      plateCity: pubPlateCity,
+      plateCity,
       isUniqueOwner: pubIsUniqueOwner,
       soatValid: pubSoatValid,
       tecnoValid: pubTecnoValid,
@@ -572,17 +573,13 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
           {/* Colombian City Select */}
           <div className={`${showFilters ? '' : 'hidden'} sm:block`}>
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
-            >
-              {COLOMBIAN_CITIES.map((c) => (
-                <option key={c} value={c}>
-                  {c === 'todas' ? 'Toda Colombia (Ciudades)' : c}
-                </option>
-              ))}
-            </select>
+            <CityPicker
+              clearable
+              value={selectedCity === 'todas' ? '' : selectedCity}
+              onChange={(text) => setSelectedCity(text.trim() ? text : 'todas')}
+              placeholder="Toda Colombia (ciudad o municipio)"
+              inputClassName="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-slate-400 focus:bg-white"
+            />
           </div>
 
           {/* Transmission Select */}
@@ -1028,16 +1025,8 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Ciudad Ubicación *</label>
-                  <select
-                    value={pubCity}
-                    onChange={(e) => setPubCity(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
-                  >
-                    {COLOMBIAN_CITIES.filter((c) => c !== 'todas').map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  <label className="block font-bold text-slate-800 mb-1">Ciudad o municipio *</label>
+                  <CityPicker required value={pubCity} onChange={(text) => setPubCity(text)} placeholder="Escribe y elige" />
                 </div>
 
                 <div>
@@ -1054,6 +1043,11 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                   />
                   <p className="text-[0.625rem] text-slate-500 mt-1 leading-snug">No se publica: en el anuncio solo se ve el último dígito.</p>
                 </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Ciudad de matrícula <span className="font-normal text-slate-500">(opcional)</span></label>
+                <CityPicker value={pubPlateCity} onChange={(text) => setPubPlateCity(text)} placeholder="Dónde está matriculado el vehículo" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">

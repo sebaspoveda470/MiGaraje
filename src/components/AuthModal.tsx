@@ -88,7 +88,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
       : 'Guarda tus vehículos, publica en Compra & Venta y participa en Mi Comunidad.';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-2xl overflow-hidden animate-fade-in">
+    <div className="fixed inset-0 z-[65] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-2xl overflow-hidden animate-fade-in">
       <div className="relative w-full max-w-md max-h-[92dvh] bg-white text-slate-900 rounded-3xl shadow-2xl shadow-black/80 border border-slate-200 flex flex-col overflow-hidden my-auto">
         <div className="shrink-0 bg-slate-950 text-white p-5 sm:p-6 text-center relative overflow-hidden border-b border-slate-800">
           <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-600/30 rounded-full blur-2xl pointer-events-none" />

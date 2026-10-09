@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Tag } from 'lucide-react';
 import { UserProfile, Vehicle } from '../types';
+import { CityPicker } from './CityPicker';
 import { useConfirm } from './ConfirmDialog';
 
 const ROLES: { id: NonNullable<UserProfile['role']>; label: string }[] = [
@@ -180,7 +181,7 @@ onLogout,
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Ciudad</label>
-                  <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Bogotá, Medellín..." className={inputClass} />
+                  <CityPicker value={city} onChange={(text) => setCity(text)} placeholder="Ciudad o municipio" inputClassName={inputClass} />
                 </div>
               </div>
               <div>

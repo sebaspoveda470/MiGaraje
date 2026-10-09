@@ -13,6 +13,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { CartItem, CheckoutOrder, UserProfile } from '../types';
+import { CityPicker } from './CityPicker';
 import { createOrder } from '../services/storeService';
 import { auth } from '../firebase';
 
@@ -68,6 +69,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [completedOrder, setCompletedOrder] = useState<CheckoutOrder | null>(null);
+  // "Continuar" was pressed without an account: go on to shipping as soon as the person signs in
+  const [resumeAfterSignIn, setResumeAfterSignIn] = useState(false);
 
   // Prefill contact data from the profile
   useEffect(() => {
@@ -77,12 +80,24 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     setReceiverCity((prev) => prev || user.city || '');
   }, [user]);
 
+  useEffect(() => {
+    if (user && resumeAfterSignIn) {
+      setResumeAfterSignIn(false);
+      setOrderError(null);
+      setCheckoutStep('shipping');
+    }
+  }, [user, resumeAfterSignIn]);
+
   if (!isOpen) return null;
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleProceed = () => {
-    if (!requireAuth()) return;
+    if (!requireAuth()) {
+      // The sign-in (or profile) window is now open on top of the cart
+      setResumeAfterSignIn(true);
+      return;
+    }
     setOrderError(null);
     setCheckoutStep('shipping');
   };
@@ -239,7 +254,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </div>
                   <div>
                     <label className="block font-semibold text-slate-900 mb-1">Ciudad *</label>
-                    <input type="text" required value={receiverCity} onChange={(e) => setReceiverCity(e.target.value)} className={inputClass} />
+                    <CityPicker required value={receiverCity} onChange={(text) => setReceiverCity(text)} placeholder="Ciudad o municipio" inputClassName={inputClass} />
                   </div>
                 </div>
 
@@ -345,11 +360,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <p className="text-[0.6875rem] text-slate-500">El costo de envío se confirma por WhatsApp según tu ciudad.</p>
             </div>
 
+            {!user && (
+              <p className="text-[0.6875rem] text-blue-900 bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 leading-relaxed">
+                Para hacer tu pedido necesitas una cuenta. <strong>Inicia sesión o regístrate</strong> (toma 1 minuto) y tu carrito te espera aquí.
+              </p>
+            )}
+
             <button
               onClick={handleProceed}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Continuar con el Pedido</span>
+              <span>{user ? 'Continuar con el Pedido' : 'Iniciar sesión para continuar'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

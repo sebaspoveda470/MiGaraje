@@ -23,6 +23,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { UserProfile, Vehicle, VehicleCategory } from '../types';
+import { CityPicker } from './CityPicker';
 import { Logo } from './Logo';
 import { getVehicleReferenceImage, getVehicleImageOptions } from '../utils/vehicleImages';
 import { compressImageFile } from '../utils/media';
@@ -78,7 +79,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [fullName, setFullName] = useState(account?.displayName || '');
   const email = account?.email || '';
   const [phone, setPhone] = useState('');
-  const [city, setCity] = useState('Bogotá, Colombia');
+  const [city, setCity] = useState('');
   const [role, setRole] = useState<'propietario' | 'entusiasta' | 'coleccionista' | 'mecanico'>('propietario');
   const [userErrors, setUserErrors] = useState<{ fullName?: string; consent?: string }>({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -214,7 +215,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-2xl overflow-hidden animate-fade-in">
+    <div className="fixed inset-0 z-[65] flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-2xl overflow-hidden animate-fade-in">
       
       {/* Main Modal Container with Enhanced White Surfaces and Crisp Aesthetics */}
       <div className="relative w-full max-w-2xl max-h-[92dvh] sm:max-h-[88dvh] bg-white text-slate-900 rounded-3xl shadow-2xl shadow-black/80 border border-slate-200 flex flex-col overflow-hidden my-auto">
@@ -304,12 +305,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     <MapPin className="w-4 h-4 text-blue-600" />
                     <span>Ciudad</span>
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Bogotá, Medellín, Cali..."
+                  <CityPicker
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
+                    onChange={(text) => setCity(text)}
+                    placeholder="Escribe tu ciudad o municipio"
+                    inputClassName="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
                   />
                 </div>
               </div>

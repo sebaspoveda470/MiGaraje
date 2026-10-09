@@ -10,6 +10,7 @@ import {
   Store
 } from 'lucide-react';
 import { PartnerStore } from '../types';
+import { CityPicker } from './CityPicker';
 import { registerPartnerStore } from '../services/storeService';
 
 interface PartnerStoreModalProps {
@@ -267,14 +268,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
                   </div>
                   <div>
                     <label className="block text-slate-900 font-semibold mb-1">Ciudad Principal de Despacho *</label>
-                    <input
-                      type="text"
-                      required
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Ej: Bogotá, Medellín, Cali..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
-                    />
+                    <CityPicker required value={city} onChange={(text) => setCity(text)} placeholder="Ciudad o municipio" inputClassName="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white" />
                   </div>
                 </div>
 
