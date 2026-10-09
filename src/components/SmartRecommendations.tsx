@@ -152,7 +152,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                 </div>
               )}
               {activeVehicle.hasClassicPlates && (
-                <div className="absolute top-2 left-2 bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
+                <div className="absolute top-2 left-2 bg-amber-400 text-slate-950 font-black text-[0.625rem] uppercase px-2 py-0.5 rounded shadow-xs flex items-center gap-1">
                   <Crown className="w-3 h-3" /> Placa Antiguo
                 </div>
               )}
@@ -171,7 +171,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                     {activeVehicle.plate}
                   </span>
                 )}
-                <span className="text-[11px] text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <span className="text-[0.6875rem] text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Vehículo Registrado
                 </span>
               </div>
@@ -232,11 +232,11 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
         {/* Colombian Quick Status Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-slate-200 bg-slate-50/60 divide-x divide-slate-200 text-left">
           <div className="p-4 sm:p-5">
-            <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Próximo Cambio de Aceite</div>
+            <div className="text-[0.6875rem] text-slate-500 font-bold uppercase tracking-wider">Próximo Cambio de Aceite</div>
             <div className="text-base sm:text-lg font-black text-slate-950 mt-0.5">
               {nextOilChangeKm.toLocaleString()} km
             </div>
-            <div className="text-[11px] text-slate-500">Faltan aprox. {kmToOilChange.toLocaleString('es-CO')} km</div>
+            <div className="text-[0.6875rem] text-slate-500">Faltan aprox. {kmToOilChange.toLocaleString('es-CO')} km</div>
             {isEditingKm ? (
               <form onSubmit={saveMileage} className="mt-2 flex items-center gap-1.5">
                 <input
@@ -247,8 +247,8 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                   placeholder="Km actuales"
                   className="w-24 bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:outline-none focus:border-blue-600"
                 />
-                <button type="submit" className="text-[11px] font-bold bg-blue-600 text-white px-2 py-1 rounded-lg cursor-pointer">OK</button>
-                <button type="button" onClick={() => setIsEditingKm(false)} className="text-[11px] font-bold text-slate-500 cursor-pointer">✕</button>
+                <button type="submit" className="text-[0.6875rem] font-bold bg-blue-600 text-white px-2 py-1 rounded-lg cursor-pointer">OK</button>
+                <button type="button" onClick={() => setIsEditingKm(false)} className="text-[0.6875rem] font-bold text-slate-500 cursor-pointer">✕</button>
               </form>
             ) : (
               <button
@@ -256,7 +256,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                   setKmInput(String(activeVehicle.mileage));
                   setIsEditingKm(true);
                 }}
-                className="mt-1.5 text-[11px] font-bold text-blue-600 hover:underline cursor-pointer"
+                className="mt-1.5 text-[0.6875rem] font-bold text-blue-600 hover:underline cursor-pointer"
               >
                 Actualizar kilometraje ({activeVehicle.mileage.toLocaleString('es-CO')} km)
               </button>
@@ -264,30 +264,30 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
           </div>
 
           <div className="p-4 sm:p-5">
-            <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Revisión Técnico-Mecánica</div>
+            <div className="text-[0.6875rem] text-slate-500 font-bold uppercase tracking-wider">Revisión Técnico-Mecánica</div>
             <div className={`text-base sm:text-lg font-black mt-0.5 ${tecnoColor}`}>
               {tecnoStatus.state === 'sin_fecha' ? 'Sin fecha' : tecnoStatus.state === 'vigente' ? 'Al Día' : tecnoStatus.state === 'vencido' ? 'Vencida' : 'Por vencer'}
             </div>
-            <div className="text-[11px] text-slate-500">{describeDoc(tecnoStatus)}</div>
+            <div className="text-[0.6875rem] text-slate-500">{describeDoc(tecnoStatus)}</div>
           </div>
 
           <div className="p-4 sm:p-5">
-            <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Pico y Placa</div>
+            <div className="text-[0.6875rem] text-slate-500 font-bold uppercase tracking-wider">Pico y Placa</div>
             <div className="text-base sm:text-lg font-black text-slate-950 mt-0.5">
               {lastDigit ? `Terminada en ${lastDigit}` : 'Sin Placa'}
             </div>
-            <div className="text-[11px] text-slate-500">
+            <div className="text-[0.6875rem] text-slate-500">
               {lastDigit ? (Number(lastDigit) % 2 === 0 ? 'Dígito Par' : 'Dígito Impar') : 'Registrar placa'}
             </div>
           </div>
 
           <div className="p-4 sm:p-5">
-            <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Comunidad Oficial</div>
+            <div className="text-[0.6875rem] text-slate-500 font-bold uppercase tracking-wider">Comunidad Oficial</div>
             <div className="text-base sm:text-lg font-black text-slate-950 mt-0.5">
               Club {activeVehicle.brand}
             </div>
             <div 
-              className="text-[11px] text-blue-600 font-bold hover:underline cursor-pointer"
+              className="text-[0.6875rem] text-blue-600 font-bold hover:underline cursor-pointer"
               onClick={() => onNavigateToTab('comunidades')}
             >
               Ir a Mi Comunidad →
@@ -312,7 +312,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
       <div data-reveal className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold tracking-wider uppercase mb-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[0.6875rem] font-bold tracking-wider uppercase mb-1">
               <FileCheck className="w-3.5 h-3.5 text-blue-600" />
               <span>Plan de Mantenimiento</span>
             </div>
@@ -390,13 +390,13 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                     alt={prod.name}
                     className="w-full h-full object-contain"
                   />
-                  <div className="absolute top-2 left-2 bg-slate-950 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                  <div className="absolute top-2 left-2 bg-slate-950 text-white text-[0.625rem] font-bold px-2 py-0.5 rounded">
                     MiGaraje Oficial
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-[10px] text-blue-600 font-bold uppercase">{prod.subcategory}</div>
+                  <div className="text-[0.625rem] text-blue-600 font-bold uppercase">{prod.subcategory}</div>
                   <h3 className="font-sans text-xs font-bold text-slate-900 line-clamp-1 mt-0.5">
                     {prod.name}
                   </h3>
@@ -407,7 +407,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
               </div>
 
               <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-[11px] text-slate-500">{prod.volume}</span>
+                <span className="text-[0.6875rem] text-slate-500">{prod.volume}</span>
                 <button
                   onClick={() => onNavigateToTab('productos')}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-full transition-all cursor-pointer"

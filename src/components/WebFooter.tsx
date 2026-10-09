@@ -3,6 +3,7 @@ import { Mail, MessageCircle, MapPin, Car, ChevronRight, Store } from 'lucide-re
 import { Logo } from './Logo';
 import { SITE } from '../config/site';
 import { InstallAppButton } from './InstallApp';
+import { FontSizeControl } from './FontSizeControl';
 
 interface WebFooterProps {
   salesWhatsApp?: string;
@@ -49,7 +50,7 @@ export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal
 
           {/* Sections */}
           <nav aria-label="Secciones" className="space-y-2">
-            <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Secciones</h4>
+            <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[0.6875rem]">Secciones</h4>
             <ul className="space-y-1.5">
               {SECTIONS.map((s) => (
                 <li key={s.tab}>
@@ -73,7 +74,7 @@ export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal
 
           {/* Contact */}
           <div className="space-y-2">
-            <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Contacto</h4>
+            <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[0.6875rem]">Contacto</h4>
             <ul className="space-y-1.5">
               {salesWhatsApp && (
                 <li>
@@ -88,7 +89,7 @@ export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal
                 </li>
               )}
               <li>
-                <a href={`mailto:${SITE.contactEmail}`} className="inline-flex items-center gap-1.5 hover:text-blue-700 text-[11px] sm:text-xs">
+                <a href={`mailto:${SITE.contactEmail}`} className="inline-flex items-center gap-1.5 hover:text-blue-700 text-[0.6875rem] sm:text-xs break-all">
                   <Mail className="w-3.5 h-3.5 shrink-0" /> {SITE.contactEmail}
                 </a>
               </li>
@@ -99,8 +100,9 @@ export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal
           </div>
         </div>
 
-        <div className="pt-5 mt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
+        <div className="pt-5 mt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-[0.6875rem] text-slate-500">
           <span>© {new Date().getFullYear()} MiGaraje Colombia</span>
+          <FontSizeControl />
           <div className="flex items-center gap-3">
             <button onClick={() => onOpenLegal('terminos')} className="hover:text-slate-900 hover:underline cursor-pointer">
               Términos y Condiciones

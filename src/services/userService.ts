@@ -11,6 +11,7 @@ import {
   where,
   arrayUnion,
   arrayRemove,
+  deleteField,
   serverTimestamp,
 } from 'firebase/firestore';
 import { deleteUser, User as AuthUser } from 'firebase/auth';
@@ -42,6 +43,17 @@ export type FavoriteKind = 'favoriteListings' | 'favoriteProducts';
 export async function setFavorite(uid: string, kind: FavoriteKind, itemId: string, favorite: boolean): Promise<void> {
   await updateDoc(doc(db, 'users', uid), {
     [kind]: favorite ? arrayUnion(itemId) : arrayRemove(itemId),
+  });
+}
+
+/**
+ * Records the plate a listing was published with (in the owner's private profile), so the same
+ * person can't publish the same vehicle twice. `previousPlates` are older plates of that listing to forget.
+ */
+export async function setListingPlate(uid: string, plate: string, listingId: string, previousPlates: string[] = []): Promise<void> {
+  await updateDoc(doc(db, 'users', uid), {
+    ...Object.fromEntries(previousPlates.filter((p) => p !== plate).map((p) => [`listedPlates.${p}`, deleteField()])),
+    [`listedPlates.${plate}`]: listingId,
   });
 }
 

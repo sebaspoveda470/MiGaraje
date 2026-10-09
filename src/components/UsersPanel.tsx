@@ -120,7 +120,7 @@ export const UsersPanel: React.FC<UsersPanelProps> = ({ isOpen, carListings, onC
             </div>
             <div>
               <h3 className="text-base font-black text-slate-950">Usuarios registrados</h3>
-              <p className="text-[11px] text-slate-500">Solo tú ves esta sección • datos protegidos (Ley 1581)</p>
+              <p className="text-[0.6875rem] text-slate-500">Solo tú ves esta sección • datos protegidos (Ley 1581)</p>
             </div>
           </div>
           <button
@@ -142,7 +142,7 @@ export const UsersPanel: React.FC<UsersPanelProps> = ({ isOpen, carListings, onC
           ].map((s) => (
             <div key={s.label} className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2">
               <div className="text-base font-black text-slate-950 truncate">{users ? s.value : '…'}</div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{s.label}</div>
+              <div className="text-[0.625rem] font-bold uppercase tracking-wider text-slate-500">{s.label}</div>
             </div>
           ))}
         </div>
@@ -203,13 +203,13 @@ export const UsersPanel: React.FC<UsersPanelProps> = ({ isOpen, carListings, onC
                     </div>
                     <div className="min-w-0">
                       <div className="font-black text-slate-950 text-sm truncate">{profile.fullName || 'Sin nombre'}</div>
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[0.6875rem] text-slate-500">
                         {ROLE_LABELS[profile.role || ''] || 'Propietario'} • se registró el {formatDate(profile.joinedDate)}
                       </div>
                     </div>
                   </div>
                   {listings > 0 && (
-                    <span className="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1">
+                    <span className="shrink-0 text-[0.625rem] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1">
                       <Tag className="w-3 h-3" /> {listings} en venta
                     </span>
                   )}
@@ -243,7 +243,7 @@ export const UsersPanel: React.FC<UsersPanelProps> = ({ isOpen, carListings, onC
                 </div>
 
                 {vehicles.length === 0 ? (
-                  <div className="text-[11px] text-slate-400 italic">Sin vehículos registrados</div>
+                  <div className="text-[0.6875rem] text-slate-400 italic">Sin vehículos registrados</div>
                 ) : (
                   <div className="space-y-1.5">
                     {vehicles.map((v) => (
@@ -258,9 +258,9 @@ export const UsersPanel: React.FC<UsersPanelProps> = ({ isOpen, carListings, onC
                         <div className="min-w-0 flex-1">
                           <div className="font-bold text-slate-900 truncate">
                             {vehicleLabel(v)}
-                            {v.plate && <span className="ml-1.5 text-[10px] font-black px-1.5 py-0.5 rounded bg-yellow-300 text-slate-950">{v.plate}</span>}
+                            {v.plate && <span className="ml-1.5 text-[0.625rem] font-black px-1.5 py-0.5 rounded bg-yellow-300 text-slate-950">{v.plate}</span>}
                           </div>
-                          <div className="text-[11px] text-slate-500 truncate">
+                          <div className="text-[0.6875rem] text-slate-500 truncate">
                             {v.mileage.toLocaleString('es-CO')} km • {v.transmission} • {v.fuelType}
                             {v.soatExpiry && ` • SOAT ${formatDate(v.soatExpiry)}`}
                             {v.tecnoExpiry && ` • Tecno ${formatDate(v.tecnoExpiry)}`}
@@ -275,7 +275,7 @@ export const UsersPanel: React.FC<UsersPanelProps> = ({ isOpen, carListings, onC
           })}
 
           {users && (
-            <p className="text-[10px] text-slate-400 text-center pt-2 leading-relaxed">
+            <p className="text-[0.625rem] text-slate-400 text-center pt-2 leading-relaxed">
               Aquí aparecen quienes completaron el formulario de bienvenida. Úsalos solo para atender a tus clientes,
               como indica tu Política de Privacidad.
             </p>

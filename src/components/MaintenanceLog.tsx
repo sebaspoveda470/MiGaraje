@@ -109,7 +109,7 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
     <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold tracking-wider uppercase mb-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[0.6875rem] font-bold tracking-wider uppercase mb-1">
             <BookOpen className="w-3.5 h-3.5 text-blue-600" />
             <span>Bitácora de Mantenimiento</span>
           </div>
@@ -130,15 +130,15 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
       {services && services.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-            <div className="text-[10px] text-slate-500 font-bold uppercase">Gastado en {year}</div>
+            <div className="text-[0.625rem] text-slate-500 font-bold uppercase">Gastado en {year}</div>
             <div className="text-sm sm:text-lg font-black text-slate-950 mt-0.5">{formatCOP(spentThisYear)}</div>
           </div>
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-            <div className="text-[10px] text-slate-500 font-bold uppercase">Total histórico</div>
+            <div className="text-[0.625rem] text-slate-500 font-bold uppercase">Total histórico</div>
             <div className="text-sm sm:text-lg font-black text-slate-950 mt-0.5">{formatCOP(spentTotal)}</div>
           </div>
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-            <div className="text-[10px] text-slate-500 font-bold uppercase">Servicios</div>
+            <div className="text-[0.625rem] text-slate-500 font-bold uppercase">Servicios</div>
             <div className="text-sm sm:text-lg font-black text-slate-950 mt-0.5">{services.length}</div>
           </div>
         </div>

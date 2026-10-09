@@ -133,7 +133,7 @@ const summary = summarizeRatings(reviews);
               alt={product.name}
               fit="contain"
               overlay={
-                <div className="absolute top-3 left-3 bg-slate-950 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
+                <div className="absolute top-3 left-3 bg-slate-950 text-white text-[0.625rem] font-black uppercase px-2.5 py-0.5 rounded-full">
                   MiGaraje
                 </div>
               }
@@ -148,7 +148,7 @@ const summary = summarizeRatings(reviews);
           {/* Info */}
           <div className="space-y-4 flex flex-col justify-between">
             <div>
-              <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">{product.subcategory}</span>
+              <span className="text-[0.6875rem] font-bold text-blue-600 uppercase tracking-wider">{product.subcategory}</span>
               <h2 className="font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-1 pr-6">{product.name}</h2>
               <div className="mt-2">
                 <ShareButtons
@@ -174,7 +174,7 @@ const summary = summarizeRatings(reviews);
                   ${product.price.toLocaleString('es-CO')} <span className="text-sm font-normal text-slate-500">COP</span>
                 </span>
                 {product.inStock === false && (
-                  <span className="text-[10px] font-black bg-slate-900 text-white px-2 py-0.5 rounded-full tracking-wider">AGOTADO</span>
+                  <span className="text-[0.625rem] font-black bg-slate-900 text-white px-2 py-0.5 rounded-full tracking-wider">AGOTADO</span>
                 )}
               </div>
 
@@ -196,7 +196,7 @@ const summary = summarizeRatings(reviews);
                 <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3">
                   <div className="text-xs font-bold text-slate-900">Modo de Uso:</div>
                   {product.applicationGuide.map((step, idx) => (
-                    <div key={idx} className="text-[11px] text-slate-500">
+                    <div key={idx} className="text-[0.6875rem] text-slate-500">
                       {idx + 1}. {step}
                     </div>
                   ))}
@@ -243,13 +243,13 @@ const summary = summarizeRatings(reviews);
                 <div className="flex justify-center mt-1">
                   <StarRating value={summary.average} />
                 </div>
-                <div className="text-[11px] text-slate-500 mt-1">
+                <div className="text-[0.6875rem] text-slate-500 mt-1">
                   {summary.count} {summary.count === 1 ? 'reseña' : 'reseñas'}
                 </div>
               </div>
               <div className="sm:col-span-2 space-y-1">
                 {distribution.map((row) => (
-                  <div key={row.stars} className="flex items-center gap-2 text-[11px] text-slate-600">
+                  <div key={row.stars} className="flex items-center gap-2 text-[0.6875rem] text-slate-600">
                     <span className="w-8 shrink-0 whitespace-nowrap">{row.stars} ★</span>
                     <div className="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
                       <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(row.count / summary.count) * 100}%` }} />
@@ -312,17 +312,17 @@ const summary = summarizeRatings(reviews);
                       <div className="min-w-0">
                         <div className="font-bold text-slate-950 truncate flex items-center gap-1.5">
                           {review.userName}
-                          {review.userId === currentUserId && <span className="text-[10px] text-slate-400 font-normal">(tú)</span>}
+                          {review.userId === currentUserId && <span className="text-[0.625rem] text-slate-400 font-normal">(tú)</span>}
                         </div>
                         <div className="flex items-center gap-2">
                           <StarRating value={review.rating} size="sm" />
-                          <span className="text-[10px] text-slate-400">{timeAgo(review.updatedAt || review.createdAt)}</span>
+                          <span className="text-[0.625rem] text-slate-400">{timeAgo(review.updatedAt || review.createdAt)}</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {review.orderId && (
-                        <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="text-[0.625rem] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <BadgeCheck className="w-3 h-3" /> Compra por MiGaraje
                         </span>
                       )}

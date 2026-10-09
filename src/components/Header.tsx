@@ -212,7 +212,7 @@ cart,
                 </div>
                 <div className="hidden xl:block text-left max-w-[110px] truncate">
                   <div className="text-xs font-bold text-slate-900 truncate">{user.fullName.split(' ')[0]}</div>
-                  <div className="text-[10px] text-slate-500 capitalize truncate">{user.role || 'Propietario'}</div>
+                  <div className="text-[0.625rem] text-slate-500 capitalize truncate">{user.role || 'Propietario'}</div>
                 </div>
               </button>
             ) : (
@@ -220,8 +220,8 @@ cart,
                 onClick={onOpenOnboarding}
                 className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs shrink-0"
               >
-                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                <span className="text-[11px] sm:text-xs">Ingresar</span>
+                <Sparkles className="large-text-optional w-3.5 h-3.5 text-blue-600" />
+                <span className="text-[0.6875rem] sm:text-xs">Ingresar</span>
               </button>
             )}
 
@@ -247,9 +247,9 @@ cart,
                     <Car className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   )}
                 </div>
-                <div className="min-w-0 flex-1 truncate">
+                <div className="large-text-optional min-w-0 flex-1 truncate">
                   <div className="flex items-center gap-1">
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-900 truncate whitespace-nowrap">
+                    <span className="text-[0.6875rem] sm:text-xs font-bold text-slate-900 truncate whitespace-nowrap">
                       <span className="sm:hidden">Mi Auto</span>
                       <span className="hidden sm:inline">
                         {activeVehicle ? `${activeVehicle.brand} ${activeVehicle.model}` : 'Mi Auto'}
@@ -259,7 +259,7 @@ cart,
                       <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 shrink-0" title="Placa de Antiguo" />
                     )}
                   </div>
-                  <span className="hidden sm:block text-[10px] text-slate-500 font-medium truncate">
+                  <span className="hidden sm:block text-[0.625rem] text-slate-500 font-medium truncate">
                     {activeVehicle ? `${activeVehicle.year} • ${(activeVehicle.mileage / 1000).toFixed(0)}k km` : '+ Agregar'}
                   </span>
                 </div>
@@ -273,7 +273,7 @@ cart,
                 <div className="hidden sm:block absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-2 py-1.5 border-b border-slate-100 mb-1.5 flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-900">Mis Vehículos Registrados</span>
-                    <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-mono font-bold">
+                    <span className="text-[0.625rem] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-mono font-bold">
                       {allVehicles.length} Autos
                     </span>
                   </div>
@@ -308,10 +308,10 @@ cart,
                                   {veh.brand} {veh.model}
                                 </span>
                                 {veh.hasClassicPlates && (
-                                  <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded-full font-bold">Antiguo</span>
+                                  <span className="text-[0.5625rem] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded-full font-bold">Antiguo</span>
                                 )}
                               </div>
-                              <div className="text-[11px] text-slate-500">
+                              <div className="text-[0.6875rem] text-slate-500">
                                 Año {veh.year} • {veh.mileage.toLocaleString()} km
                               </div>
                             </div>
@@ -393,7 +393,7 @@ cart,
               >
                 <Flag className="w-4 h-4" />
                 {!!pendingReportsCount && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white font-black text-[10px] min-w-4 h-4 px-1 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white font-black text-[0.625rem] min-w-4 h-4 px-1 rounded-full flex items-center justify-center">
                     {pendingReportsCount}
                   </span>
                 )}
@@ -410,7 +410,7 @@ cart,
               <div className="relative">
                 <ShoppingCart className="w-4 h-4 text-white" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-2.5 -right-2.5 bg-blue-600 text-white font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                  <span className="absolute -top-2.5 -right-2.5 bg-blue-600 text-white font-black text-[0.625rem] w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
                     {itemCount}
                   </span>
                 )}

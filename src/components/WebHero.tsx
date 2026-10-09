@@ -65,7 +65,7 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
 
         {/* Headline */}
         <div ref={headlineRef} className="relative z-10 order-1 px-6 pt-10 sm:pt-16 lg:pt-24 lg:px-14 text-center lg:text-left lg:max-w-[64%] will-change-transform">
-          <h1 className="text-[34px] leading-[1.05] sm:text-6xl lg:text-[56px] xl:text-6xl font-semibold text-white tracking-[-0.03em] drop-shadow-sm">
+          <h1 className="text-[2.125rem] leading-[1.05] sm:text-6xl lg:text-[3.5rem] xl:text-6xl font-semibold text-white tracking-[-0.03em] drop-shadow-sm">
             <span data-reveal className="inline-block" style={{ '--reveal-delay': '250ms' } as React.CSSProperties}>
               Todo para tu vehículo,
             </span>
@@ -134,13 +134,13 @@ export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicl
         <button data-reveal onClick={onExploreVehicles} className="lg:hidden text-left bg-white rounded-3xl p-4 sm:p-6 shadow-xs cursor-pointer">
           <div className="text-2xl font-display font-semibold text-slate-900">{listingsCount ?? '…'}</div>
           <div className="text-xs font-semibold text-slate-900 mt-1">Vehículos en venta</div>
-          <div className="text-[11px] text-slate-500 mt-0.5">Publicados por propietarios</div>
+          <div className="text-[0.6875rem] text-slate-500 mt-0.5">Publicados por propietarios</div>
         </button>
         {HIGHLIGHTS.map((h) => (
           <div key={h.title} data-reveal className="bg-white rounded-3xl p-4 sm:p-6 shadow-xs">
             <div className={`text-2xl sm:text-3xl font-display font-semibold ${h.accent ? 'text-blue-600' : 'text-slate-900'}`}>{h.value}</div>
             <div className="text-xs sm:text-sm font-semibold text-slate-900 mt-1">{h.title}</div>
-            <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">{h.detail}</div>
+            <div className="text-[0.6875rem] sm:text-xs text-slate-500 mt-0.5">{h.detail}</div>
           </div>
         ))}
         <div data-reveal className="hidden lg:block bg-white rounded-3xl p-6 shadow-xs">

@@ -240,7 +240,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
               <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">
                 {isEditing ? `Modificar Datos de ${vehicleToEdit?.brand} ${vehicleToEdit?.model}` : 'Registrar Nuevo Vehículo'}
               </h2>
-              <p className="text-[11px] sm:text-xs text-slate-300 truncate">
+              <p className="text-[0.6875rem] sm:text-xs text-slate-300 truncate">
                 {isEditing 
                   ? 'Actualiza kilometraje, placas, motor, foto o especificaciones' 
                   : 'Plan de mantenimiento y recordatorios de SOAT y tecnomecánica'}
@@ -271,12 +271,12 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                 </div>
 
                 {customUserPhoto ? (
-                  <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[0.625rem] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-blue-600" />
                     Foto Personal Subida
                   </span>
                 ) : (
-                  <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[0.625rem] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                     <Sparkles className="w-3 h-3 text-blue-600" />
                     Referencia Automática ({brand} {model})
                   </span>
@@ -331,7 +331,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
               {/* Alternate Color Variants */}
               {!customUserPhoto && referenceOptions.length > 1 && (
                 <div className="flex items-center gap-2 pt-1 overflow-x-auto pb-1">
-                  <span className="text-[11px] font-bold text-slate-600 shrink-0 flex items-center gap-1">
+                  <span className="text-[0.6875rem] font-bold text-slate-600 shrink-0 flex items-center gap-1">
                     <SlidersHorizontal className="w-3 h-3 text-blue-600" />
                     Variantes:
                   </span>
@@ -340,7 +340,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                       key={idx}
                       type="button"
                       onClick={() => setSelectedVariantUrl(opt.url)}
-                      className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
+                      className={`text-[0.6875rem] px-2.5 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
                         activePreviewImage === opt.url
                           ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-xs'
                           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
@@ -360,7 +360,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                   <Car className="w-4 h-4 text-blue-600" />
                   <span>Marca del Vehículo *</span>
                 </span>
-                <span className="text-[11px] text-blue-600 font-semibold">Selecciona o escribe abajo</span>
+                <span className="text-[0.6875rem] text-blue-600 font-semibold">Selecciona o escribe abajo</span>
               </label>
               
               <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1 pb-1 mb-2">
@@ -412,7 +412,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                         key={m}
                         type="button"
                         onClick={() => handleModelChange(m)}
-                        className="text-[10px] px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-blue-500 hover:text-blue-600 cursor-pointer font-medium"
+                        className="text-[0.625rem] px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-blue-500 hover:text-blue-600 cursor-pointer font-medium"
                       >
                         {m}
                       </button>
@@ -523,7 +523,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-slate-500">Las encuentras en tu póliza del SOAT, en el certificado de la revisión o en el RUNT.</p>
+              <p className="text-[0.6875rem] text-slate-500">Las encuentras en tu póliza del SOAT, en el certificado de la revisión o en el RUNT.</p>
             </div>
 
             {/* Type / Category */}

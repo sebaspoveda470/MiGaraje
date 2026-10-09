@@ -115,7 +115,7 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
                           {veh.brand} {veh.model}
                         </span>
                         {veh.plate && (
-                          <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-mono font-bold px-1.5 py-0.2 rounded">
+                          <span className="text-[0.625rem] bg-amber-100 text-amber-900 border border-amber-300 font-mono font-bold px-1.5 py-0.2 rounded">
                             {veh.plate}
                           </span>
                         )}
@@ -131,7 +131,7 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
                       </div>
 
                       {isCurrent && (
-                        <div className="text-[11px] text-blue-700 font-bold flex items-center gap-1 mt-1">
+                        <div className="text-[0.6875rem] text-blue-700 font-bold flex items-center gap-1 mt-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                           <span>Vehículo activo actual</span>
                         </div>
@@ -149,7 +149,7 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
                           onClose();
                           onSellVehicle(veh);
                         }}
-                        className="px-2.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[0.6875rem] font-bold flex items-center gap-1 cursor-pointer"
                         title="Vender este vehículo"
                       >
                         <Tag className="w-3.5 h-3.5" /> Vender

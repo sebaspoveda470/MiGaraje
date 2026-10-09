@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="google-site-verification" content="5pabcSMohGF1BSjxEhKiUrAkqlkqCz7-bTHXmupsZ3c" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- "Tamaño de letra" (src/components/FontSizeControl.tsx): applied here so the page never flashes at the wrong size -->
+    <script>
+      try {
+        var size = localStorage.getItem('migaraje_font_size');
+        if (size === 'grande') document.documentElement.style.fontSize = '112.5%';
+        if (size === 'muy-grande') document.documentElement.style.fontSize = '125%';
+        if (size === 'grande' || size === 'muy-grande') document.documentElement.setAttribute('data-font-size', size);
+      } catch (e) {}
+    </script>
     <title>MiGaraje | Compra y venta de vehículos en Colombia, productos y comunidades</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />

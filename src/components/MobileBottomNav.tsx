@@ -66,7 +66,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 <div className="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center">
                   <ShoppingCart className="w-3.5 h-3.5 text-white" />
                 </div>
-                <span className="absolute -top-1 -right-1 bg-white text-slate-950 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow">
+                <span className="absolute -top-1 -right-1 bg-white text-slate-950 text-[0.5625rem] font-black w-4 h-4 rounded-full flex items-center justify-center shadow">
                   {cartItemCount}
                 </span>
               </div>
@@ -74,7 +74,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 <div className="text-xs font-bold truncate">
                   {cartItemCount} {cartItemCount === 1 ? 'producto en carrito' : 'productos en carrito'}
                 </div>
-                <div className="text-[10px] text-slate-400 truncate flex items-center gap-1">
+                <div className="text-[0.625rem] text-slate-400 truncate flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3 text-blue-400" />
                   <span>Pedido por WhatsApp</span>
                 </div>
@@ -116,7 +116,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                     <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white" />
                   )}
                 </div>
-                <span className="text-[10px] mt-1 leading-none tracking-tight">
+                <span className="text-[0.625rem] mt-1 leading-none tracking-tight">
                   {tab.label}
                 </span>
 </button>

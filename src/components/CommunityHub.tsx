@@ -84,7 +84,7 @@ const colorFor = (seed: string) => AVATAR_COLORS[[...seed].reduce((sum, ch) => s
 const Avatar: React.FC<{ name: string; seed?: string; size?: 'xs' | 'sm' | 'md' }> = ({ name, seed, size = 'md' }) => (
   <div
     className={`${
-      size === 'md' ? 'w-10 h-10 text-sm' : size === 'sm' ? 'w-7 h-7 text-[11px]' : 'w-6 h-6 text-[10px] ring-2 ring-white'
+      size === 'md' ? 'w-10 h-10 text-sm' : size === 'sm' ? 'w-7 h-7 text-[0.6875rem]' : 'w-6 h-6 text-[0.625rem] ring-2 ring-white'
     } ${colorFor(seed || name)} rounded-full text-white font-bold flex items-center justify-center shrink-0`}
     title={name}
   >
@@ -161,10 +161,10 @@ const PostComments: React.FC<{
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <span className="font-bold text-slate-900">{comment.authorName}</span>
-                    {comment.authorCar && <span className="text-[10px] text-slate-500"> · {comment.authorCar}</span>}
+                    {comment.authorCar && <span className="text-[0.625rem] text-slate-500"> · {comment.authorCar}</span>}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <span className="text-[10px] text-slate-400" title={exactDate(comment.createdAt)}>
+                    <span className="text-[0.625rem] text-slate-400" title={exactDate(comment.createdAt)}>
                       {timeAgo(comment.createdAt)}
                     </span>
                     {comment.authorId !== currentUserId && (
@@ -244,7 +244,7 @@ const PostCard: React.FC<{
           <Avatar name={post.authorName} seed={post.authorId} />
           <div className="min-w-0">
             <div className="text-sm font-semibold text-slate-900 truncate">{post.authorName}</div>
-            <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-x-1.5">
+            <div className="text-[0.6875rem] text-slate-500 flex flex-wrap items-center gap-x-1.5">
               {post.authorCar && (
                 <span className="inline-flex items-center gap-1">
                   <Car className="w-3 h-3" /> {post.authorCar}
@@ -254,7 +254,7 @@ const PostCard: React.FC<{
               <span title={exactDate(post.createdAt)} className="inline-flex items-center gap-1">
                 <Clock className="w-3 h-3" /> {timeAgo(post.createdAt)}
               </span>
-              {isNew && <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded-full">Nuevo</span>}
+              {isNew && <span className="text-[0.5625rem] font-bold uppercase tracking-wider bg-blue-600 text-white px-1.5 py-0.5 rounded-full">Nuevo</span>}
             </div>
           </div>
         </div>
@@ -285,16 +285,16 @@ const PostCard: React.FC<{
         {showCommunity && community && (
           <button
             onClick={() => onOpenCommunity(community.id)}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-100 hover:bg-blue-100 pl-1 pr-2.5 py-0.5 rounded-full cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold bg-blue-50 text-blue-800 border border-blue-100 hover:bg-blue-100 pl-1 pr-2.5 py-0.5 rounded-full cursor-pointer"
           >
-            <CommunityLogo club={community} className="w-4 h-4 rounded-full text-[8px]" />
+            <CommunityLogo club={community} className="w-4 h-4 rounded-full text-[0.5rem]" />
             {community.name}
           </button>
         )}
-        <span className="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">
+        <span className="text-[0.6875rem] font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">
           {CATEGORY_LABELS[post.category] || 'General'}
         </span>
-        {post.modelTag && <span className="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">{post.modelTag}</span>}
+        {post.modelTag && <span className="text-[0.6875rem] font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">{post.modelTag}</span>}
       </div>
 
       <div className="space-y-1.5">
@@ -664,7 +664,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 
       <SectionHero image="/section-comunidad.jpg" alt="Encuentro de vehículos con personas reunidas" focus="50% 55%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-          <h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
+          <h1 className="text-[1.75rem] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
             Comunidades de propietarios y apasionados.
           </h1>
           <p className="hidden sm:block text-sm text-white/80 leading-relaxed font-normal">
@@ -792,12 +792,12 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                         {comm.coverImage && <img src={comm.coverImage} alt="" loading="lazy" className="w-full h-full object-cover" />}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                         {isMatch && (
-                          <span className="absolute top-2.5 right-2.5 text-[10px] font-semibold bg-white/90 text-blue-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="absolute top-2.5 right-2.5 text-[0.625rem] font-semibold bg-white/90 text-blue-800 px-2 py-0.5 rounded-full flex items-center gap-1">
                             <Car className="w-3 h-3" /> Tu vehículo
                           </span>
                         )}
                         {isMemberOf(comm) && (
-                          <span className="absolute top-2.5 left-2.5 text-[10px] font-semibold bg-blue-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="absolute top-2.5 left-2.5 text-[0.625rem] font-semibold bg-blue-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1">
                             <Check className="w-3 h-3" /> Miembro
                           </span>
                         )}
@@ -806,7 +806,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                         <CommunityLogo club={comm} className="w-14 h-14 rounded-2xl border-4 border-white shadow-sm text-lg" />
                         <h3 className="mt-2 text-base font-semibold text-slate-950 leading-snug">{comm.name}</h3>
                         {comm.description && <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{comm.description}</p>}
-                        <div className="mt-auto pt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 font-medium">
+                        <div className="mt-auto pt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-slate-500 font-medium">
                           <span className="inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {memberLabel(comm.memberIds.length)}</span>
                           <span className="inline-flex items-center gap-1"><MessagesSquare className="w-3.5 h-3.5" /> {plural(stats?.posts || 0, 'publicación', 'publicaciones')}</span>
                           {stats?.last ? (
@@ -865,7 +865,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                       view === 'comunidad' ? 'bg-white text-slate-950 font-semibold shadow-sm' : 'text-slate-600 font-medium hover:text-slate-950'
                     }`}
                   >
-                    <CommunityLogo club={currentCommunity} className="w-4 h-4 rounded-full text-[8px]" />
+                    <CommunityLogo club={currentCommunity} className="w-4 h-4 rounded-full text-[0.5rem]" />
                     {currentCommunity.name}
                   </button>
                 )}
@@ -879,7 +879,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                     <div className="min-w-0">
                       <h2 className="text-lg sm:text-xl font-semibold text-slate-950">{currentCommunity.name}</h2>
                       {currentCommunity.description && <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{currentCommunity.description}</p>}
-                      <div className="text-[11px] text-slate-500 font-medium mt-1 flex flex-wrap items-center gap-x-2">
+                      <div className="text-[0.6875rem] text-slate-500 font-medium mt-1 flex flex-wrap items-center gap-x-2">
                         <span>{memberLabel(currentCommunity.memberIds.length)}</span>
                         <span>·</span>
                         <span>{clubPostsLoading ? 'Cargando…' : plural(clubPosts.length, 'publicación', 'publicaciones')}</span>
@@ -1028,10 +1028,10 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                             <div className="min-w-0 flex-1">
                               <div className="text-xs font-semibold text-slate-900 truncate">
                                 {m.name}
-                                {m.id === currentCommunity.createdBy && <span className="ml-1.5 text-[9px] font-bold uppercase text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full">Fundador</span>}
-                                {m.id === currentUserId && <span className="ml-1.5 text-[9px] font-bold uppercase text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full">Tú</span>}
+                                {m.id === currentCommunity.createdBy && <span className="ml-1.5 text-[0.5625rem] font-bold uppercase text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full">Fundador</span>}
+                                {m.id === currentUserId && <span className="ml-1.5 text-[0.5625rem] font-bold uppercase text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full">Tú</span>}
                               </div>
-                              <div className="text-[10px] text-slate-500 truncate">
+                              <div className="text-[0.625rem] text-slate-500 truncate">
                                 {m.car ? `${m.car} · ` : ''}se unió {timeAgo(m.joinedAt).toLowerCase()}
                               </div>
                             </div>
@@ -1040,7 +1040,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                       </ul>
                     )}
                     {members && currentCommunity.memberIds.length > Math.min(12, members.length) && (
-                      <p className="text-[11px] text-slate-500">y {currentCommunity.memberIds.length - Math.min(12, members.length)} más</p>
+                      <p className="text-[0.6875rem] text-slate-500">y {currentCommunity.memberIds.length - Math.min(12, members.length)} más</p>
                     )}
                     {!isMember && joinButton(currentCommunity, 'w-full py-2.5')}
                   </div>
@@ -1078,7 +1078,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                       </h3>
                       <div className="flex flex-wrap gap-1.5">
                         {currentCommunity.models.map((m) => (
-                          <span key={m} className="text-[11px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-medium">{m}</span>
+                          <span key={m} className="text-[0.6875rem] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-medium">{m}</span>
                         ))}
                       </div>
                     </div>
@@ -1100,7 +1100,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                               <CommunityLogo club={c} className="w-9 h-9 rounded-xl border border-slate-200 text-sm" />
                               <div className="min-w-0 flex-1">
                                 <div className="text-xs font-semibold text-slate-900 truncate">{c.name}</div>
-                                <div className="text-[10px] text-slate-500">
+                                <div className="text-[0.625rem] text-slate-500">
                                   {plural(activity.get(c.id)?.posts || 0, 'publicación', 'publicaciones')} · activa {timeAgo(activity.get(c.id)?.last).toLowerCase()}
                                 </div>
                               </div>
@@ -1123,7 +1123,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                             <Avatar name={h.name} seed={h.id} size="sm" />
                             <div className="min-w-0 flex-1">
                               <div className="text-xs font-semibold text-slate-900 truncate">{h.name}</div>
-                              <div className="text-[10px] text-slate-500 truncate">
+                              <div className="text-[0.625rem] text-slate-500 truncate">
                                 {h.car ? `${h.car} · ` : ''}
                                 {plural(h.posts, 'publicación', 'publicaciones')}
                                 {h.likes > 0 ? ` · ${plural(h.likes, 'me gusta', 'me gusta')}` : ''}
@@ -1198,7 +1198,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               </div>
 
               {postClub && !isMemberOfPostClub && (
-                <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl p-3 text-[11px] text-blue-900">
+                <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl p-3 text-[0.6875rem] text-blue-900">
                   <UserPlus className="w-4 h-4 text-blue-600 shrink-0 mt-px" />
                   <span>Para publicar debes ser miembro. Al publicar te unirás automáticamente a {postClub.name}.</span>
                 </div>

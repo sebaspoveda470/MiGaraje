@@ -113,6 +113,14 @@ body {
   .hero-settle { animation: none; }
 }
 
+/* Enlarged text ("Tamaño de letra") on phones: drop labels that have an icon next to them,
+   so the header's buttons still fit on one row. */
+@media (max-width: 639px) {
+  html[data-font-size] .large-text-optional {
+    display: none;
+  }
+}
+
 /* Mobile optimization: disable gray tap flash on touch devices */
 html, body {
   -webkit-tap-highlight-color: transparent;

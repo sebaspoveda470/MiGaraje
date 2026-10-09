@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, X, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, X, ArrowLeft, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Logo } from './Logo';
 import {
   signInWithGoogle,
@@ -39,6 +39,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -103,7 +104,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
               <Logo size="md" theme="dark" />
             </div>
             <h2 className="text-lg sm:text-2xl font-black tracking-tight">{title}</h2>
-            <p className="text-[11px] sm:text-sm text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">{subtitle}</p>
+            <p className="text-[0.6875rem] sm:text-sm text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">{subtitle}</p>
           </div>
         </div>
 
@@ -126,7 +127,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
                 <span>Continuar con Google</span>
               </button>
 
-              <div className="flex items-center gap-3 text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
+              <div className="flex items-center gap-3 text-[0.6875rem] text-slate-400 font-semibold uppercase tracking-wider">
                 <div className="flex-1 h-px bg-slate-200" />
                 <span>o con tu correo</span>
                 <div className="flex-1 h-px bg-slate-200" />
@@ -167,15 +168,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   minLength={6}
                   autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                   placeholder={mode === 'signup' ? 'Contraseña (mínimo 6 caracteres)' : 'Contraseña'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={inputClass}
+                  className={`${inputClass} pr-12`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  aria-pressed={showPassword}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             )}
 
@@ -234,7 +245,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
             )}
           </div>
 
-          <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+          <p className="text-[0.625rem] text-slate-400 text-center leading-relaxed">
             Consulta nuestros{' '}
             <button type="button" onClick={() => onOpenLegal('terminos')} className="underline hover:text-slate-600 cursor-pointer">
               Términos y Condiciones

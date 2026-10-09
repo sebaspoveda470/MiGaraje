@@ -355,7 +355,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
       {/* Header Banner */}
       <SectionHero image="/section-productos.jpg" alt="Persona lavando a mano un vehículo negro" focus="50% 50%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-<h1 className="text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
+<h1 className="text-[1.75rem] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
             Nuestros Productos MiGaraje
           </h1>
 
@@ -408,7 +408,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
             <ClipboardList className="w-3.5 h-3.5" />
             <span>Ver Pedidos</span>
             {pendingOrdersCount > 0 && (
-              <span className="bg-white text-blue-700 text-[10px] font-black rounded-full px-1.5 py-0.5">{pendingOrdersCount} nuevos</span>
+              <span className="bg-white text-blue-700 text-[0.625rem] font-black rounded-full px-1.5 py-0.5">{pendingOrdersCount} nuevos</span>
             )}
           </button>
         </div>
@@ -531,12 +531,12 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 />
 
                 {getProductImages(prod).length > 1 && (
-                  <div className="absolute bottom-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+                  <div className="absolute bottom-3 left-3 bg-black/60 text-white text-[0.625rem] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
                     <Images className="w-3 h-3" /> {getProductImages(prod).length} fotos
                   </div>
                 )}
 
-                <div className="absolute top-3 left-3 bg-slate-950 text-white text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs">
+                <div className="absolute top-3 left-3 bg-slate-950 text-white text-[0.625rem] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-xs">
                   MiGaraje Oficial
                 </div>
 
@@ -595,7 +595,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
               {/* Product Info */}
               <div className="p-5 space-y-2.5">
                 <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+                  <span className="text-[0.6875rem] font-bold text-blue-600 uppercase tracking-wider">
                     {prod.subcategory}
                   </span>
                   {(() => {
@@ -607,7 +607,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                         <span className="text-slate-400 font-normal">({summary.count})</span>
                       </div>
                     ) : (
-                      <span className="text-[10px] text-slate-400">Sin reseñas</span>
+                      <span className="text-[0.625rem] text-slate-400">Sin reseñas</span>
                     );
                   })()}
                 </div>
@@ -627,7 +627,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                 {prod.benefits && prod.benefits.length > 0 && (
                   <div className="pt-2 space-y-1">
                     {prod.benefits.slice(0, 2).map((b, i) => (
-                      <div key={i} className="text-[11px] text-slate-600 flex items-center gap-1.5">
+                      <div key={i} className="text-[0.6875rem] text-slate-600 flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span className="truncate">{b}</span>
                       </div>
@@ -641,7 +641,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
             <div className="p-5 pt-3 border-t border-slate-100 flex flex-col gap-3">
               <div className="flex items-baseline justify-between">
                 <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold">Precio Oficial</span>
+                  <span className="text-[0.625rem] text-slate-500 uppercase font-bold">Precio Oficial</span>
                   <div className="text-xl font-black text-slate-950 tracking-tight">
                     ${prod.price.toLocaleString()} <span className="text-xs text-slate-500 font-normal">COP</span>
                   </div>
@@ -786,7 +786,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
                   onChange={(e) => setTempWhatsApp(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white font-mono"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[0.6875rem] text-slate-500 mt-1">
                   Para Colombia empieza por 57 seguido de tu número celular (ejemplo: 573001234567).
                 </p>
                 {phoneError && (
@@ -828,7 +828,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
             </button>
 
             <div className="mb-5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+              <span className="text-[0.625rem] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
                 Línea Oficial MiGaraje
               </span>
               <h3 className="text-xl font-black text-slate-950 tracking-tight mt-1">

@@ -10,6 +10,7 @@ import { CartDrawer } from './components/CartDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { UsersPanel } from './components/UsersPanel';
 import { HomeShowcase } from './components/HomeShowcase';
+import { FontSizeControl } from './components/FontSizeControl';
 import { useScrollReveal } from './utils/scrollReveal';
 import type { SellRequest } from './components/CarMarketplace';
 import { AuthModal } from './components/AuthModal';
@@ -34,6 +35,7 @@ import {
   deleteVehicle,
   deleteAccount,
   setFavorite,
+  setListingPlate,
   FavoriteKind,
 } from './services/userService';
 import {
@@ -475,12 +477,30 @@ export function App() {
   };
 
   // Listing Management (Compra & Venta de Vehículos)
-  const handlePublishListing = async (newListing: Omit<VehicleListing, 'id'>, photos: string[]) => {
+  // Remembers (privately, in the seller's profile) which plate a listing has, so it can't be published twice
+  const rememberListingPlate = (listingId: string, plate: string) => {
+    if (!authUser || !plate || !listingId) return;
+    const known = user?.listedPlates || {};
+    const previous = Object.keys(known).filter((p) => known[p] === listingId);
+    setListingPlate(authUser.uid, plate, listingId, previous)
+      .then(() =>
+        setUser((prev) => {
+          if (!prev) return prev;
+          const next = Object.fromEntries(Object.entries(prev.listedPlates || {}).filter(([, id]) => id !== listingId));
+          return { ...prev, listedPlates: { ...next, [plate]: listingId } };
+        })
+      )
+      .catch((err) => console.error('No se pudo guardar la placa del anuncio', err));
+  };
+
+  const handlePublishListing = async (newListing: Omit<VehicleListing, 'id'>, photos: string[], plate: string) => {
     if (!authUser) return;
     try {
-      await publishListing(authUser.uid, newListing, photos);
+      const listingId = await publishListing(authUser.uid, newListing, photos);
+      rememberListingPlate(listingId, plate);
     } catch (err) {
       if (err instanceof ExtraPhotosError) {
+        rememberListingPlate(err.listingId, plate);
         showToast('Tu vehículo se publicó, pero solo con la foto principal. Inténtalo de nuevo más tarde para agregar las demás.', true);
         return;
       }
@@ -489,8 +509,9 @@ export function App() {
     showToast(`¡Tu ${newListing.title} ha sido publicado exitosamente en Compra & Venta!`);
   };
 
-  const handleUpdateListing = async (listingId: string, changes: Partial<VehicleListing>, photos: string[]) => {
+  const handleUpdateListing = async (listingId: string, changes: Partial<VehicleListing>, photos: string[], plate: string) => {
     await updateListing(listingId, changes, photos);
+    rememberListingPlate(listingId, plate);
     showToast('Anuncio actualizado');
   };
 
@@ -555,6 +576,13 @@ export function App() {
           <span>{toast.message}</span>
         </div>
       )}
+
+      {/* Accessibility strip: scrolls away with the page (the header below stays fixed) */}
+      <div className="bg-slate-50 border-b border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 flex justify-end">
+          <FontSizeControl />
+        </div>
+      </div>
 
       {/* App Header */}
       <div className="sticky top-0 z-40">

@@ -21,7 +21,7 @@ export const VehicleDocsCard: React.FC<{ vehicle: Vehicle; onEdit?: () => void }
     <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold tracking-wider uppercase mb-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[0.6875rem] font-bold tracking-wider uppercase mb-1">
             <CalendarClock className="w-3.5 h-3.5 text-blue-600" />
             <span>Documentos del Vehículo</span>
           </div>
@@ -56,14 +56,14 @@ export const VehicleDocsCard: React.FC<{ vehicle: Vehicle; onEdit?: () => void }
                   )}
                   {doc.label}
                 </span>
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${style.badge}`}>{style.badgeLabel}</span>
+                <span className={`text-[0.625rem] font-black px-2 py-0.5 rounded-full ${style.badge}`}>{style.badgeLabel}</span>
               </div>
               <div className={`text-base font-black ${style.text}`}>{describeDoc(doc)}</div>
-              <div className="text-[11px] text-slate-500">
+              <div className="text-[0.6875rem] text-slate-500">
                 {doc.expiry ? `Fecha de vencimiento: ${formatExpiry(doc.expiry)}` : 'Agrega la fecha para recibir el recordatorio.'}
               </div>
               {exemptHint && (
-                <div className="text-[11px] text-slate-500">
+                <div className="text-[0.6875rem] text-slate-500">
                   Los vehículos particulares hacen su primera revisión 5 años después de matriculados; si es tu caso, aún no la necesitas.
                 </div>
               )}
@@ -72,7 +72,7 @@ export const VehicleDocsCard: React.FC<{ vehicle: Vehicle; onEdit?: () => void }
         })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.6875rem] text-slate-500">
         <span>{needsAttention ? 'Renueva a tiempo para evitar multas.' : 'Verifica siempre tus fechas oficiales en el RUNT.'}</span>
         <a
           href="https://www.runt.gov.co/actores/ciudadano/consulta-de-vehiculos-por-placa"

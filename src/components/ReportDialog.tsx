@@ -121,7 +121,7 @@ export const ReportProvider: React.FC<ReportProviderProps> = ({ currentUserId, r
               />
             </div>
 
-            <p className="text-[11px] text-slate-500">Tu reporte es anónimo: la persona reportada no sabrá quién fue.</p>
+            <p className="text-[0.6875rem] text-slate-500">Tu reporte es anónimo: la persona reportada no sabrá quién fue.</p>
 
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setTarget(null)} className="px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-slate-700 hover:bg-slate-100 cursor-pointer">

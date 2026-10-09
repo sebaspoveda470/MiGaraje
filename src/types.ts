@@ -296,6 +296,8 @@ export interface UserProfile {
   emailReminders?: boolean;
   favoriteListings?: string[];
   favoriteProducts?: string[];
+  /** Plate (normalized, e.g. "ABC123") → id of the listing the user published with it. Private: never shown to others. */
+  listedPlates?: Record<string, string>;
 }
 
 export interface CheckoutOrder {

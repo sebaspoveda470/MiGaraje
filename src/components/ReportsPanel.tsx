@@ -121,7 +121,7 @@ export const ReportsPanel: React.FC<ReportsPanelProps> = ({ isOpen, reports, onC
             </div>
             <div>
               <h3 className="text-base font-black text-slate-950">Reportes</h3>
-              <p className="text-[11px] text-slate-500">{pendingCount} pendientes • solo tú ves esta sección</p>
+              <p className="text-[0.6875rem] text-slate-500">{pendingCount} pendientes • solo tú ves esta sección</p>
             </div>
           </div>
           <button
@@ -161,11 +161,11 @@ export const ReportsPanel: React.FC<ReportsPanelProps> = ({ isOpen, reports, onC
               <div key={group.key} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3 text-xs">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">{TYPE_LABELS[group.targetType]}</div>
+                    <div className="text-[0.625rem] font-black uppercase tracking-wider text-slate-500">{TYPE_LABELS[group.targetType]}</div>
                     <div className="font-bold text-slate-950 text-sm break-words">"{group.title}"</div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">Último reporte {timeAgo(group.latest)}</div>
+                    <div className="text-[0.6875rem] text-slate-500 mt-0.5">Último reporte {timeAgo(group.latest)}</div>
                   </div>
-                  <span className="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
+                  <span className="shrink-0 text-[0.625rem] font-black px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
                     {group.reports.length} {group.reports.length === 1 ? 'reporte' : 'reportes'}
                   </span>
                 </div>

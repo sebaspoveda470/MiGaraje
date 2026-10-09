@@ -63,7 +63,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ isOpen, orders, onClos
             </div>
             <div>
               <h3 className="text-base font-black text-slate-950">Pedidos</h3>
-              <p className="text-[11px] text-slate-500">{orders.length} en total • solo tú ves esta sección</p>
+              <p className="text-[0.6875rem] text-slate-500">{orders.length} en total • solo tú ves esta sección</p>
             </div>
           </div>
           <button
@@ -104,9 +104,9 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ isOpen, orders, onClos
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="font-black text-slate-950 text-sm">{order.orderNumber}</div>
-                    <div className="text-[11px] text-slate-500">{timeAgo(order.createdAt)}</div>
+                    <div className="text-[0.6875rem] text-slate-500">{timeAgo(order.createdAt)}</div>
                   </div>
-                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${status.badge}`}>{status.label}</span>
+                  <span className={`text-[0.625rem] font-black px-2 py-0.5 rounded-full border ${status.badge}`}>{status.label}</span>
                 </div>
 
                 <div className="space-y-1 text-slate-700">
@@ -136,7 +136,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ isOpen, orders, onClos
                       key={s}
                       disabled={updatingId === order.id}
                       onClick={() => changeStatus(order, s)}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border cursor-pointer disabled:opacity-60 ${
+                      className={`px-2.5 py-1.5 rounded-lg text-[0.6875rem] font-bold border cursor-pointer disabled:opacity-60 ${
                         order.status === s ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
@@ -146,7 +146,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ isOpen, orders, onClos
                   <button
                     disabled={updatingId === order.id || order.status === 'cancelada'}
                     onClick={() => changeStatus(order, 'cancelada')}
-                    className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-300 cursor-pointer disabled:opacity-50"
+                    className="px-2.5 py-1.5 rounded-lg text-[0.6875rem] font-bold border border-slate-200 text-slate-500 hover:text-red-700 hover:border-red-300 cursor-pointer disabled:opacity-50"
                   >
                     Cancelar
                   </button>
@@ -155,7 +155,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ isOpen, orders, onClos
                       href={`https://wa.me/${buyerWhatsApp}?text=${encodeURIComponent(`Hola ${order.buyerName.split(' ')[0]}! Te escribimos de MiGaraje por tu pedido ${order.orderNumber}.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-auto px-3 py-1.5 rounded-lg text-[11px] font-bold bg-slate-950 text-white hover:bg-slate-800 flex items-center gap-1.5"
+                      className="ml-auto px-3 py-1.5 rounded-lg text-[0.6875rem] font-bold bg-slate-950 text-white hover:bg-slate-800 flex items-center gap-1.5"
                     >
                       <MessageCircle className="w-3.5 h-3.5 text-blue-400" /> Escribir al cliente
                     </a>

@@ -79,8 +79,8 @@ export const Logo: React.FC<LogoProps> = ({
   onClick,
 }) => {
   const dims = {
-    sm: { icon: 'w-8 h-8', text: 'text-lg', sub: 'text-[9px]' },
-    md: { icon: 'w-10 h-10', text: 'text-xl', sub: 'text-[10px]' },
+    sm: { icon: 'w-8 h-8', text: 'text-lg', sub: 'text-[0.5625rem]' },
+    md: { icon: 'w-10 h-10', text: 'text-xl', sub: 'text-[0.625rem]' },
     lg: { icon: 'w-12 h-12', text: 'text-2xl sm:text-3xl', sub: 'text-xs' },
     xl: { icon: 'w-16 h-16', text: 'text-3xl sm:text-4xl', sub: 'text-sm' },
     '2xl': { icon: 'w-24 h-24', text: 'text-4xl sm:text-5xl', sub: 'text-base' },
@@ -103,7 +103,7 @@ export const Logo: React.FC<LogoProps> = ({
               <span className="text-[#1E8BFB]">Garaje</span>
             </span>
             {showBadge && (
-              <span className="text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="text-[0.5625rem] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                 {badgeText}
               </span>
             )}

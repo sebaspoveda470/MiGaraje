@@ -45,7 +45,7 @@ export const IntermediationModal: React.FC<IntermediationModalProps> = ({
             </div>
             <div className="min-w-0">
               <h3 className="text-base sm:text-lg font-black text-slate-950 truncate">Intermediación & Compra Segura</h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 truncate">Peritaje técnico y cuenta custodia sin riesgo</p>
+              <p className="text-[0.6875rem] sm:text-xs text-slate-500 truncate">Peritaje técnico y cuenta custodia sin riesgo</p>
             </div>
           </div>
           
@@ -89,7 +89,7 @@ export const IntermediationModal: React.FC<IntermediationModalProps> = ({
                 className="w-16 h-16 rounded-xl object-cover bg-slate-200 shrink-0 border border-slate-200"
               />
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] text-slate-500 font-bold uppercase">{listing.brand} {listing.year}</span>
+                <span className="text-[0.625rem] text-slate-500 font-bold uppercase">{listing.brand} {listing.year}</span>
                 <h4 className="text-sm font-bold text-slate-950 truncate">{listing.title}</h4>
                 <div className="text-base font-black text-slate-950 mt-0.5">
                   ${listing.price.toLocaleString()} {listing.currency}
@@ -100,7 +100,7 @@ export const IntermediationModal: React.FC<IntermediationModalProps> = ({
             {/* How Intermediation Works */}
             <div className="space-y-2 p-4 rounded-2xl bg-slate-50 border border-slate-200">
               <span className="font-bold text-slate-900 block">¿Cómo te protege nuestra intermediación?</span>
-              <div className="space-y-2 text-[11px] text-slate-600">
+              <div className="space-y-2 text-[0.6875rem] text-slate-600">
                 <div className="flex items-start gap-2">
                   <FileCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                   <span><strong>Peritaje Mecánico & Legal:</strong> Revisión de chasis, compresión de motor, historial de siniestros RUNT y antecedentes judiciales del vendedor.</span>

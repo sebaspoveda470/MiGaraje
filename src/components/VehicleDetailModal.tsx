@@ -159,19 +159,19 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             <div className="space-y-3">
               {(isSold || isFeatured || plateLabel || car.isUniqueOwner) && (
                 <div className="flex flex-wrap gap-1.5">
-                  {isSold && <span className="bg-red-600 text-white text-[11px] font-black px-2.5 py-1 rounded-full">VENDIDO</span>}
+                  {isSold && <span className="bg-red-600 text-white text-[0.6875rem] font-black px-2.5 py-1 rounded-full">VENDIDO</span>}
                   {isFeatured && (
-                    <span className="bg-amber-400 text-slate-950 text-[11px] font-black px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                    <span className="bg-amber-400 text-slate-950 text-[0.6875rem] font-black px-2.5 py-1 rounded-full inline-flex items-center gap-1">
                       <Star className="w-3 h-3 fill-slate-950" /> Destacado
                     </span>
                   )}
                   {plateLabel && (
-                    <span className="bg-slate-100 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-full border border-slate-200">
+                    <span className="bg-slate-100 text-slate-700 text-[0.6875rem] font-bold px-2.5 py-1 rounded-full border border-slate-200">
                       {plateLabel}
                     </span>
                   )}
                   {car.isUniqueOwner && (
-                    <span className="bg-slate-100 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-full border border-slate-200">
+                    <span className="bg-slate-100 text-slate-700 text-[0.6875rem] font-bold px-2.5 py-1 rounded-full border border-slate-200">
                       Único dueño
                     </span>
                   )}
@@ -196,7 +196,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
               <div className="flex items-end justify-between gap-3 pt-1">
                 <div>
-                  <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Precio</div>
+                  <div className="text-[0.6875rem] text-slate-500 font-bold uppercase tracking-wider">Precio</div>
                   <div className="text-2xl sm:text-3xl font-black text-slate-950 leading-tight">
                     {formatCOP(car.price)} <span className="text-xs text-slate-500 font-normal">COP</span>
                   </div>
@@ -232,7 +232,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         <div className="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className="text-[11px] font-bold text-slate-800 leading-tight">{label}</span>
+                        <span className="text-[0.6875rem] font-bold text-slate-800 leading-tight">{label}</span>
                       </div>
                     ))}
                   </div>
@@ -282,7 +282,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <section className="space-y-2">
                 <div>
                   <h3 className="text-sm font-black text-slate-950">Documentos</h3>
-                  <p className="text-[11px] text-slate-500">Según el vendedor. Verifícalos en el RUNT antes de comprar.</p>
+                  <p className="text-[0.6875rem] text-slate-500">Según el vendedor. Verifícalos en el RUNT antes de comprar.</p>
                 </div>
                 <div className="space-y-2 text-xs">
                   <DocCheck ok={car.soatValid} label={car.soatValid ? 'SOAT vigente' : 'SOAT no declarado'} />
@@ -299,18 +299,18 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </div>
               <div className="min-w-0">
                 <div className="text-sm font-bold text-slate-950 truncate">{car.sellerName}</div>
-                <div className="text-[11px] text-slate-500">Vendedor particular</div>
+                <div className="text-[0.6875rem] text-slate-500">Vendedor particular</div>
               </div>
             </section>
 
             {!canManage && (
               <div className="space-y-2">
-                <p className="text-[11px] text-slate-500 leading-relaxed">
+                <p className="text-[0.6875rem] text-slate-500 leading-relaxed">
                   🔒 Nunca envíes dinero ni anticipos antes de ver el vehículo en persona y verificarlo en el RUNT.
                 </p>
                 <button
                   onClick={() => report({ type: 'listing', id: car.id, title: car.title, ownerId: car.ownerId })}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-red-600 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-[0.6875rem] font-bold text-slate-400 hover:text-red-600 cursor-pointer"
                 >
                   <Flag className="w-3.5 h-3.5" /> Reportar este anuncio
                 </button>
@@ -382,7 +382,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
         <div className="lg:hidden p-3 sm:p-4 border-t border-slate-200 bg-white shrink-0 flex items-center gap-3">
           <div className="hidden sm:block min-w-0">
             <div className="text-lg font-black text-slate-950 truncate">{formatCOP(car.price)}</div>
-            <div className="text-[11px] text-slate-500 truncate">{car.title}</div>
+            <div className="text-[0.6875rem] text-slate-500 truncate">{car.title}</div>
           </div>
           {contactButtons('bar')}
         </div>

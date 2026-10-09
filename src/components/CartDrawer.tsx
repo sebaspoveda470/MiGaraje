@@ -144,7 +144,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </div>
             <div className="min-w-0">
               <h3 className="text-sm sm:text-base font-black text-slate-950 truncate">Carrito de Compras</h3>
-              <p className="text-[10px] text-slate-500 font-medium truncate">Productos oficiales MiGaraje • Pedido por WhatsApp</p>
+              <p className="text-[0.625rem] text-slate-500 font-medium truncate">Productos oficiales MiGaraje • Pedido por WhatsApp</p>
             </div>
           </div>
           <button
@@ -177,7 +177,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     <div key={item.id} className="p-3.5 rounded-2xl bg-white border border-slate-200 flex items-center gap-3 shadow-xs">
                       <img src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-contain bg-white shrink-0 border border-slate-200" />
                       <div className="flex-1 min-w-0">
-                        <span className="text-[9px] uppercase font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                        <span className="text-[0.5625rem] uppercase font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                           {item.brand}
                         </span>
                         <h4 className="text-xs font-bold text-slate-950 truncate mt-0.5">{item.name}</h4>
@@ -261,7 +261,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 text-[11px] text-blue-900 leading-relaxed">
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 text-[0.6875rem] text-blue-900 leading-relaxed">
                 Registraremos tu pedido y luego podrás enviarlo por WhatsApp. El costo de envío y la forma de pago se confirman por ese medio.
               </div>
 
@@ -342,7 +342,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <span>Total productos:</span>
                 <span className="text-base">{formatCOP(subtotal)}</span>
               </div>
-              <p className="text-[11px] text-slate-500">El costo de envío se confirma por WhatsApp según tu ciudad.</p>
+              <p className="text-[0.6875rem] text-slate-500">El costo de envío se confirma por WhatsApp según tu ciudad.</p>
             </div>
 
             <button

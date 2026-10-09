@@ -143,7 +143,7 @@ onLogout,
               <h3 className="text-sm sm:text-base font-black text-white leading-tight truncate">
                 {user?.fullName || 'Perfil de Usuario'}
               </h3>
-              <p className="text-[11px] sm:text-xs text-blue-300 font-bold capitalize flex items-center gap-1 mt-0.5">
+              <p className="text-[0.6875rem] sm:text-xs text-blue-300 font-bold capitalize flex items-center gap-1 mt-0.5">
                 <Crown className="w-3 h-3 text-blue-400 shrink-0" />
                 <span className="truncate">{user?.role || 'Propietario MiGaraje'}</span>
               </p>
@@ -229,7 +229,7 @@ onLogout,
           <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 text-xs shadow-xs">
             <button
               onClick={startEditing}
-              className="absolute top-2.5 right-2.5 flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-lg cursor-pointer"
+              className="absolute top-2.5 right-2.5 flex items-center gap-1 text-[0.6875rem] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-lg cursor-pointer"
             >
               <Edit3 className="w-3 h-3" /> Editar
             </button>
@@ -319,12 +319,12 @@ onLogout,
                           <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5 truncate">
                             <span className="truncate">{v.brand} {v.model}</span>
                             {v.hasClassicPlates && (
-                              <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold border border-amber-300 shrink-0">
+                              <span className="text-[0.5625rem] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold border border-amber-300 shrink-0">
                                 Antiguo
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-500 font-medium truncate">
+                          <div className="text-[0.6875rem] text-slate-500 font-medium truncate">
                             Año {v.year} • {v.mileage.toLocaleString()} km
                           </div>
                         </div>
@@ -339,7 +339,7 @@ onLogout,
                               onClose();
                               onSellVehicle(v);
                             }}
-                            className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 border border-emerald-200 transition-colors flex items-center gap-1 text-[11px] font-bold cursor-pointer"
+                            className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 border border-emerald-200 transition-colors flex items-center gap-1 text-[0.6875rem] font-bold cursor-pointer"
                             title="Publicar este vehículo en Compra & Venta"
                           >
                             <Tag className="w-3.5 h-3.5" />
@@ -354,7 +354,7 @@ onLogout,
                               onClose();
                               onEditVehicle(v);
                             }}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors flex items-center gap-1 text-[11px] font-bold cursor-pointer"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors flex items-center gap-1 text-[0.6875rem] font-bold cursor-pointer"
                             title="Editar información de este vehículo"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -363,12 +363,12 @@ onLogout,
                         )}
 
                         {isActive ? (
-                          <span className="text-[10px] bg-blue-600 text-white font-bold px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
+                          <span className="text-[0.625rem] bg-blue-600 text-white font-bold px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" />
                             Activo
                           </span>
                         ) : (
-                          <span className="text-[10px] text-slate-500 font-semibold bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-lg">
+                          <span className="text-[0.625rem] text-slate-500 font-semibold bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-lg">
                             Activar
                           </span>
                         )}
@@ -384,7 +384,7 @@ onLogout,
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-red-600 cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 text-[0.6875rem] font-bold text-slate-400 hover:text-red-600 cursor-pointer disabled:opacity-60"
             >
               {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
               {isDeleting ? 'Eliminando cuenta...' : 'Eliminar mi cuenta y mis datos'}

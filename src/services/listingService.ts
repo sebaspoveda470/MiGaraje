@@ -22,7 +22,10 @@ const listingsRef = collection(db, 'vehicleListings');
 const photosRef = (listingId: string) => collection(db, 'vehicleListings', listingId, 'photos');
 
 /** Thrown when the listing was published but its extra photos could not be saved */
-export class ExtraPhotosError extends Error {}
+export class ExtraPhotosError extends Error {
+  /** The listing itself was created; only its extra photos failed */
+  listingId = '';
+}
 
 /**
  * Streams every published vehicle listing, newest first.
@@ -75,7 +78,9 @@ export async function publishListing(ownerId: string, listing: Omit<VehicleListi
     } catch (err) {
       console.error('No se pudieron guardar las fotos adicionales', err);
       await updateDoc(ref, { photoCount: 1 }).catch(() => undefined);
-      throw new ExtraPhotosError('Anuncio publicado sin fotos adicionales');
+      const error = new ExtraPhotosError('Anuncio publicado sin fotos adicionales');
+      error.listingId = ref.id;
+      throw error;
     }
   }
   return ref.id;

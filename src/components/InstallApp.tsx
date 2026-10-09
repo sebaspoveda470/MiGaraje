@@ -100,7 +100,7 @@ export const InstallAppProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             <LogoMark className="w-11 h-11 shrink-0" glow={false} />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-slate-950">Instala MiGaraje</div>
-              <div className="text-[11px] text-slate-500 leading-snug">Ábrela como una app desde tu pantalla de inicio.</div>
+              <div className="text-[0.6875rem] text-slate-500 leading-snug">Ábrela como una app desde tu pantalla de inicio.</div>
             </div>
             <button onClick={install} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-full cursor-pointer shrink-0">
               Instalar

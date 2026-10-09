@@ -52,7 +52,7 @@ export const PhotoPicker: React.FC<PhotoPickerProps> = ({ label, images, onChang
     <div className="space-y-3 border border-slate-200 rounded-2xl p-3.5 bg-slate-50/60 text-xs">
       <div className="flex items-center justify-between">
         <span className="block font-bold text-slate-800">{label}</span>
-        <span className="text-[11px] text-slate-500">{images.length} de {max}</span>
+        <span className="text-[0.6875rem] text-slate-500">{images.length} de {max}</span>
       </div>
 
       {images.length > 0 && (
@@ -61,12 +61,12 @@ export const PhotoPicker: React.FC<PhotoPickerProps> = ({ label, images, onChang
             <div key={idx} className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-white ${idx === 0 ? 'border-blue-600' : 'border-slate-200'}`}>
               <img src={src} alt={`Foto ${idx + 1}`} className="w-full h-full object-contain" />
               {idx === 0 ? (
-                <span className="absolute bottom-0 inset-x-0 bg-blue-600 text-white text-[9px] font-black text-center py-0.5">Principal</span>
+                <span className="absolute bottom-0 inset-x-0 bg-blue-600 text-white text-[0.5625rem] font-black text-center py-0.5">Principal</span>
               ) : (
                 <button
                   type="button"
                   onClick={() => makeMain(idx)}
-                  className="absolute bottom-0 inset-x-0 bg-black/60 hover:bg-black/80 text-white text-[9px] font-bold text-center py-0.5 cursor-pointer"
+                  className="absolute bottom-0 inset-x-0 bg-black/60 hover:bg-black/80 text-white text-[0.5625rem] font-bold text-center py-0.5 cursor-pointer"
                 >
                   Hacer principal
                 </button>
@@ -118,7 +118,7 @@ export const PhotoPicker: React.FC<PhotoPickerProps> = ({ label, images, onChang
         </div>
       )}
 
-      <p className="text-[11px] text-slate-500">
+      <p className="text-[0.6875rem] text-slate-500">
         Puedes elegir varias fotos a la vez. La marcada como "Principal" es la que se ve primero.
       </p>
     </div>
@@ -190,7 +190,7 @@ export const PhotoGallery: React.FC<{
             >
               <ChevronRight className="w-5 h-5" />
             </button>
-            <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[0.625rem] font-bold px-2 py-0.5 rounded-full">
               {index + 1} / {count}
             </div>
           </>

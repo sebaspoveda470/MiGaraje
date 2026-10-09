@@ -201,7 +201,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-900">Almacén / Tienda</div>
-                  <div className="text-[11px] text-slate-500">Distribuidor o local</div>
+                  <div className="text-[0.6875rem] text-slate-500">Distribuidor o local</div>
                 </div>
               </button>
 
@@ -219,7 +219,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-900">Particular / Detailer</div>
-                  <div className="text-[11px] text-slate-500">Vendedor independiente</div>
+                  <div className="text-[0.6875rem] text-slate-500">Vendedor independiente</div>
                 </div>
               </button>
             </div>
@@ -244,7 +244,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                   onChange={(e) => setSellerName(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 focus:border-slate-900 focus:bg-white rounded-lg px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all"
                 />
-                {errors.sellerName && <p className="text-[11px] text-red-600 font-medium mt-1">{errors.sellerName}</p>}
+                {errors.sellerName && <p className="text-[0.6875rem] text-red-600 font-medium mt-1">{errors.sellerName}</p>}
               </div>
 
               <div>
@@ -258,7 +258,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                   onChange={(e) => setSellerPhone(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 focus:border-slate-900 focus:bg-white rounded-lg px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all"
                 />
-                {errors.sellerPhone && <p className="text-[11px] text-red-600 font-medium mt-1">{errors.sellerPhone}</p>}
+                {errors.sellerPhone && <p className="text-[0.6875rem] text-red-600 font-medium mt-1">{errors.sellerPhone}</p>}
               </div>
 
               <div className="sm:col-span-2">
@@ -295,7 +295,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 focus:border-slate-900 focus:bg-white rounded-lg px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all"
                 />
-                {errors.name && <p className="text-[11px] text-red-600 font-medium mt-1">{errors.name}</p>}
+                {errors.name && <p className="text-[0.6875rem] text-red-600 font-medium mt-1">{errors.name}</p>}
               </div>
 
               <div>
@@ -309,7 +309,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                   onChange={(e) => setBrand(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 focus:border-slate-900 focus:bg-white rounded-lg px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all"
                 />
-                {errors.brand && <p className="text-[11px] text-red-600 font-medium mt-1">{errors.brand}</p>}
+                {errors.brand && <p className="text-[0.6875rem] text-red-600 font-medium mt-1">{errors.brand}</p>}
               </div>
 
               <div>
@@ -328,7 +328,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                     className="w-full bg-slate-50 border border-slate-300 focus:border-slate-900 focus:bg-white rounded-lg pl-7 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all"
                   />
                 </div>
-                {errors.price && <p className="text-[11px] text-red-600 font-medium mt-1">{errors.price}</p>}
+                {errors.price && <p className="text-[0.6875rem] text-red-600 font-medium mt-1">{errors.price}</p>}
               </div>
 
               <div>
@@ -393,7 +393,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                   />
                 </label>
                 {customImage && (
-                  <span className="text-[11px] text-blue-600 font-semibold flex items-center gap-1">
+                  <span className="text-[0.6875rem] text-blue-600 font-semibold flex items-center gap-1">
                     <Check className="w-3.5 h-3.5" /> Foto personalizada cargada
                   </span>
                 )}
@@ -402,7 +402,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
               {/* Presets selector if no custom photo */}
               {!customImage && (
                 <div>
-                  <div className="text-[11px] text-slate-500 mb-1.5">O elige una foto sugerida del catálogo:</div>
+                  <div className="text-[0.6875rem] text-slate-500 mb-1.5">O elige una foto sugerida del catálogo:</div>
                   <div className="grid grid-cols-3 gap-2">
                     {PRESET_IMAGES_BY_CATEGORY[category].map((imgUrl, idx) => (
                       <button

@@ -190,7 +190,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ doc, onClose, onSwitch }
               <h2 className="text-base sm:text-lg font-black text-slate-950 truncate">
                 {isPrivacy ? 'Política de Tratamiento de Datos Personales' : 'Términos y Condiciones de Uso'}
               </h2>
-              <p className="text-[11px] text-slate-500">Última actualización: {SITE.legalLastUpdated}</p>
+              <p className="text-[0.6875rem] text-slate-500">Última actualización: {SITE.legalLastUpdated}</p>
             </div>
           </div>
           <button

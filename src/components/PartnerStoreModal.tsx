@@ -192,7 +192,7 @@ export const PartnerStoreModal: React.FC<PartnerStoreModalProps> = ({
               {/* Beneficios de intermediación */}
               <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
                 <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                <div className="text-[11px] leading-relaxed">
+                <div className="text-[0.6875rem] leading-relaxed">
                   <strong className="text-slate-900 block text-xs mb-0.5">¿Cómo funciona la intermediación MiGaraje?</strong>
                   Los clientes compran y pagan dentro de la plataforma con dinero en custodia. Tú preparas el repuesto y despachas. Una vez entregado conforme, recibes el valor de la venta deduciendo únicamente la tarifa acordada.
                 </div>

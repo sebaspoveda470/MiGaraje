@@ -243,7 +243,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
               {step === 1 ? 'Crea tu cuenta en un paso' : 'Registra tu vehículo (opcional)'}
             </h2>
-            <p className="text-[11px] sm:text-sm text-slate-300 mt-0.5 max-w-md mx-auto leading-relaxed">
+            <p className="text-[0.6875rem] sm:text-sm text-slate-300 mt-0.5 max-w-md mx-auto leading-relaxed">
               {step === 1 
                 ? 'Solo necesitamos tu nombre. Tu vehículo lo puedes registrar después, cuando quieras.'
                 : 'Ingresa los datos de tu vehículo. Puedes subir tu propia foto o usar nuestra imagen de referencia automática.'}
@@ -279,7 +279,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
                 />
                 {userErrors.fullName && (
-                  <p className="text-[11px] text-red-600 font-semibold mt-1">{userErrors.fullName}</p>
+                  <p className="text-[0.6875rem] text-red-600 font-semibold mt-1">{userErrors.fullName}</p>
                 )}
               </div>
 
@@ -335,7 +335,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     .
                   </span>
                 </label>
-                {userErrors.consent && <p className="text-[11px] text-red-600 font-semibold mt-1">{userErrors.consent}</p>}
+                {userErrors.consent && <p className="text-[0.6875rem] text-red-600 font-semibold mt-1">{userErrors.consent}</p>}
               </div>
 
               {saveError && (
@@ -380,12 +380,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </div>
 
                   {customUserPhoto ? (
-                    <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[0.625rem] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3 text-blue-600" />
                       Foto Personal Subida
                     </span>
                   ) : (
-                    <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[0.625rem] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <Sparkles className="w-3 h-3 text-blue-600" />
                       Referencia Automática ({brand} {model})
                     </span>
@@ -440,7 +440,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 {/* Alternate Color Variants (only when using reference photo) */}
                 {!customUserPhoto && referenceOptions.length > 1 && (
                   <div className="flex items-center gap-2 pt-1 overflow-x-auto pb-1">
-                    <span className="text-[11px] font-bold text-slate-600 shrink-0 flex items-center gap-1">
+                    <span className="text-[0.6875rem] font-bold text-slate-600 shrink-0 flex items-center gap-1">
                       <SlidersHorizontal className="w-3 h-3 text-blue-600" />
                       Variantes:
                     </span>
@@ -449,7 +449,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         key={idx}
                         type="button"
                         onClick={() => setSelectedVariantUrl(opt.url)}
-                        className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
+                        className={`text-[0.6875rem] px-2.5 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
                           activePreviewImage === opt.url
                             ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-xs'
                             : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
@@ -469,7 +469,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     <Car className="w-4 h-4 text-blue-600" />
                     <span>Marca del Vehículo *</span>
                   </span>
-                  <span className="text-[11px] text-blue-600 font-semibold">Selecciona o escribe abajo</span>
+                  <span className="text-[0.6875rem] text-blue-600 font-semibold">Selecciona o escribe abajo</span>
                 </label>
                 
                 {/* Brand Visual Chips */}
@@ -522,7 +522,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                           key={m}
                           type="button"
                           onClick={() => handleModelChange(m)}
-                          className="text-[10px] px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-blue-500 hover:text-blue-600 cursor-pointer font-medium"
+                          className="text-[0.625rem] px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-blue-500 hover:text-blue-600 cursor-pointer font-medium"
                         >
                           {m}
                         </button>
