@@ -1,9 +1,9 @@
 import React from 'react';
 import { 
-  Car, 
-  ShoppingBag, 
-  Sparkles, 
-  Users, 
+  Warehouse, 
+  CarFront, 
+  SprayCan, 
+  MessagesSquare, 
   ShoppingCart, 
   ChevronRight,
   ShieldCheck 
@@ -31,23 +31,23 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     {
       id: 'garaje',
       label: 'Mi Garaje',
-      icon: Car,
+      icon: Warehouse,
       hasDot: !!activeVehicle,
     },
     {
       id: 'vehiculos',
       label: 'Vehículos',
-      icon: ShoppingBag,
+      icon: CarFront,
     },
     {
       id: 'productos',
       label: 'Productos',
-      icon: Sparkles,
+      icon: SprayCan,
     },
     {
       id: 'comunidades',
       label: 'Comunidad',
-      icon: Users,
+      icon: MessagesSquare,
     },
   ];
 

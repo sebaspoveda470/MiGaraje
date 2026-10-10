@@ -17,7 +17,11 @@ import {
   Edit,
   Crown,
   Flag,
-  Tag
+  Tag,
+  Warehouse,
+  CarFront,
+  SprayCan,
+  MessagesSquare
 } from 'lucide-react';
 import { Vehicle, UserProfile, CartItem } from '../types';
 import { Logo } from './Logo';
@@ -454,7 +458,7 @@ cart,
                   : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
-              <Car className={`w-3.5 h-3.5 ${activeTab === 'garaje' ? 'text-blue-600' : 'text-slate-500'}`} />
+              <Warehouse className={`w-3.5 h-3.5 ${activeTab === 'garaje' ? 'text-blue-600' : 'text-slate-500'}`} />
               <span>Mi Garaje</span>
               {activeVehicle && (
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -470,7 +474,7 @@ cart,
                   : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
-              <ShoppingBag className={`w-3.5 h-3.5 ${activeTab === 'vehiculos' ? 'text-blue-600' : 'text-slate-500'}`} />
+              <CarFront className={`w-3.5 h-3.5 ${activeTab === 'vehiculos' ? 'text-blue-600' : 'text-slate-500'}`} />
               <span>Compra & Venta</span>
             </button>
 
@@ -483,7 +487,7 @@ cart,
                   : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
-              <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'productos' ? 'text-blue-600' : 'text-slate-500'}`} />
+              <SprayCan className={`w-3.5 h-3.5 ${activeTab === 'productos' ? 'text-blue-600' : 'text-slate-500'}`} />
               <span>Nuestros Productos</span>
             </button>
 
@@ -496,7 +500,7 @@ cart,
                   : 'text-slate-600 font-medium hover:text-slate-950'
               }`}
             >
-              <Users className={`w-3.5 h-3.5 ${activeTab === 'comunidades' ? 'text-blue-600' : 'text-slate-500'}`} />
+              <MessagesSquare className={`w-3.5 h-3.5 ${activeTab === 'comunidades' ? 'text-blue-600' : 'text-slate-500'}`} />
               <span>Mi Comunidad</span>
             </button>
           </div>
