@@ -7,7 +7,7 @@ import { ShareButtons } from './ShareButtons';
 import { getListingPhotos } from '../services/listingService';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { useReport } from './ReportDialog';
-import { buildListingSocialImage, downloadBlob } from '../utils/socialImage';
+import { buildWatermarkedPhoto, downloadBlob } from '../utils/socialImage';
 
 interface VehicleDetailModalProps {
   car: VehicleListing;
@@ -62,18 +62,27 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const [isBuildingImage, setIsBuildingImage] = useState(false);
   const isFeatured = !!featuredUntil && !isSold;
 
+  // Downloads every photo of the listing, each with the MiGaraje logo in a corner and nothing else
   const handleSocialImage = async () => {
     setIsBuildingImage(true);
-    try {
-      const blob = await buildListingSocialImage(car, photos[0] || car.images[0]);
-      downloadBlob(blob, `MiGaraje - ${car.title.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/g, '').trim()}.jpg`);
-      onNotify?.('Imagen descargada. Búscala en tu carpeta de Descargas.');
-    } catch (err) {
-      console.error(err);
-      onNotify?.('No se pudo crear la imagen con esta foto. Intenta de nuevo.', true);
-    } finally {
-      setIsBuildingImage(false);
+    const name = car.title.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/g, '').trim();
+    const sources = photos.length > 0 ? photos : car.images;
+    let done = 0;
+    for (let i = 0; i < sources.length; i++) {
+      try {
+        const blob = await buildWatermarkedPhoto(sources[i]);
+        downloadBlob(blob, `MiGaraje - ${name}${sources.length > 1 ? ` - foto ${i + 1}` : ''}.jpg`);
+        done++;
+        // A short pause between files: browsers drop downloads that start all at once
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (err) {
+        console.error(`No se pudo preparar la foto ${i + 1}`, err);
+      }
     }
+    setIsBuildingImage(false);
+    if (done === 0) onNotify?.('No se pudieron preparar las fotos de este anuncio. Intenta de nuevo.', true);
+    else if (done < sources.length) onNotify?.(`Se descargaron ${done} de ${sources.length} fotos. Búscalas en tu carpeta de Descargas.`, true);
+    else onNotify?.(done === 1 ? 'Foto descargada. Búscala en tu carpeta de Descargas.' : `Se descargaron las ${done} fotos. Búscalas en tu carpeta de Descargas.`);
   };
   const report = useReport();
 
@@ -343,7 +352,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     className="font-bold text-xs px-4 py-2.5 rounded-full flex items-center justify-center gap-1.5 cursor-pointer bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-60"
                   >
                     {isBuildingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageDown className="w-4 h-4" />}
-                    Imagen para redes
+                    {(photos.length || car.images.length) > 1 ? `Fotos para redes (${photos.length || car.images.length})` : 'Foto para redes'}
                   </button>
                 </div>
               </section>
