@@ -4,6 +4,7 @@ import { FeaturedMap } from '../services/listingService';
 import { CareProduct, CommunityClub, CommunityPost, VehicleListing } from '../types';
 import { subscribeToCommunities, subscribeToRecentPosts } from '../services/communityService';
 import { timeAgo } from '../utils/media';
+import { SwipeRow } from './SwipeRow';
 
 interface HomeShowcaseProps {
   listings: VehicleListing[];
@@ -33,11 +34,10 @@ const SectionTitle: React.FC<{ title: string; subtitle: string; action: string; 
   </div>
 );
 
-// Phones swipe sideways; larger screens show a grid
-const rowClass =
-  'flex sm:grid gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-none -mx-4 px-4 pb-1 sm:mx-0 sm:px-0 sm:pb-0';
+// Phones swipe sideways (SwipeRow); larger screens show a grid
+const rowClass = 'gap-3 sm:gap-4 sm:grid';
 const cardClass =
-  'w-[78%] shrink-0 snap-start sm:w-auto text-left bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-xs hover:shadow-md transition-shadow cursor-pointer group';
+  'w-[80%] sm:w-auto text-left bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-xs hover:shadow-md transition-shadow cursor-pointer group';
 
 /**
  * Home page preview of what the site has right now: latest vehicles for sale,
@@ -78,7 +78,7 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
             action="Ver todos"
             onAction={() => onNavigate('vehiculos')}
           />
-          <div className={`${rowClass} sm:grid-cols-2 lg:grid-cols-3`}>
+          <SwipeRow className={`${rowClass} sm:grid-cols-2 lg:grid-cols-3`}>
             {latestListings.map((car) => (
               <button key={car.id} data-reveal onClick={() => onOpenListing(car.id)} className={cardClass}>
                 <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
@@ -104,13 +104,13 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
             {latestListings.length < 3 && (
               <button
                 onClick={() => onNavigate('vehiculos')}
-                className="w-[70%] shrink-0 snap-start sm:w-auto rounded-3xl border-2 border-dashed border-slate-300 bg-white/50 hover:bg-white hover:border-blue-400 text-slate-500 hover:text-blue-700 flex flex-col items-center justify-center gap-1.5 p-6 text-center cursor-pointer transition-all min-h-[220px]"
+                className="w-[60%] sm:w-auto rounded-3xl border-2 border-dashed border-slate-300 bg-white/50 hover:bg-white hover:border-blue-400 text-slate-500 hover:text-blue-700 flex flex-col items-center justify-center gap-1.5 p-6 text-center cursor-pointer transition-all min-h-[220px]"
               >
                 <span className="text-sm font-semibold">¿Vendes tu vehículo?</span>
                 <span className="text-xs">Publícalo gratis y aparece aquí</span>
               </button>
             )}
-          </div>
+          </SwipeRow>
         </section>
       )}
 
@@ -122,7 +122,7 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
             action="Ver catálogo"
             onAction={() => onNavigate('productos')}
           />
-          <div className={`${rowClass} sm:grid-cols-2 lg:grid-cols-4`}>
+          <SwipeRow className={`${rowClass} sm:grid-cols-2 lg:grid-cols-4`}>
             {featuredProducts.map((p) => (
               <button key={p.id} data-reveal onClick={() => onOpenProduct(p.id)} className={`${cardClass} !w-[62%] sm:!w-auto`}>
                 <div className="aspect-square overflow-hidden bg-slate-100">
@@ -141,7 +141,7 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
                 </div>
               </button>
             ))}
-          </div>
+          </SwipeRow>
         </section>
       )}
 
@@ -154,7 +154,7 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
             onAction={() => onNavigate('comunidades')}
           />
           {posts.length > 0 ? (
-            <div className={`${rowClass} sm:grid-cols-2 lg:grid-cols-3`}>
+            <SwipeRow className={`${rowClass} sm:grid-cols-2 lg:grid-cols-3`}>
               {posts.map((post) => {
                 const club = clubById.get(post.clubId);
                 return (
@@ -180,10 +180,10 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
                   </button>
                 );
               })}
-            </div>
+            </SwipeRow>
           ) : (
             // No posts yet: invite people into the communities instead of showing an empty block
-            <div className={`${rowClass} sm:grid-cols-2 lg:grid-cols-4`}>
+            <SwipeRow className={`${rowClass} sm:grid-cols-2 lg:grid-cols-4`}>
               {topCommunities.map((c) => (
                 <button key={c.id} data-reveal onClick={() => onOpenCommunity(c.id)} className={`${cardClass} !w-[62%] sm:!w-auto`}>
                   <div className="aspect-[16/9] overflow-hidden bg-gradient-to-br from-blue-600 to-blue-900">
@@ -197,7 +197,7 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
                   </div>
                 </button>
               ))}
-            </div>
+            </SwipeRow>
           )}
         </section>
       )}

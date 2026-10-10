@@ -48,6 +48,7 @@ import { useConfirm } from './ConfirmDialog';
 import { useReport } from './ReportDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
+import { SwipeRow } from './SwipeRow';
 
 interface CommunityHubProps {
   activeVehicle: Vehicle | null;
@@ -728,13 +729,13 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
         <>
           {/* How it works (for newcomers) */}
           {myCommunitiesCount === 0 && (
-            <div className="flex sm:grid sm:grid-cols-3 gap-3 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+            <SwipeRow className="gap-3 sm:grid sm:grid-cols-3">
               {[
                 { icon: Search, title: 'Explora sin registrarte', text: 'Lee lo que otros propietarios preguntan y responden en todas las comunidades.' },
                 { icon: UserPlus, title: 'Únete a tu marca', text: 'Aparece en la lista de miembros y conoce a quienes tienen tu mismo vehículo.' },
                 { icon: HandHelping, title: 'Pregunta y ayuda', text: 'Publica tus dudas, comparte experiencias y recomienda talleres de confianza.' },
               ].map(({ icon: Icon, title, text }) => (
-                <div key={title} data-reveal className="w-[78%] shrink-0 snap-start sm:w-auto bg-white/80 rounded-3xl p-4 sm:p-5 border border-slate-200/70 flex items-start gap-3">
+                <div key={title} data-reveal className="w-[80%] sm:w-auto bg-white/80 rounded-3xl p-4 sm:p-5 border border-slate-200/70 flex items-start gap-3">
                   <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <Icon className="w-4 h-4" />
                   </div>
@@ -744,7 +745,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                   </div>
                 </div>
               ))}
-            </div>
+            </SwipeRow>
           )}
 
           {/* Communities */}
@@ -774,7 +775,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
               </div>
             </div>
 
-            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-none -mx-4 px-4 pb-1 sm:mx-0 sm:px-0 sm:pb-0">
+            <SwipeRow className="gap-3 sm:gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-3">
               {visibleClubs.map((comm) => {
                 const isMatch = !!activeVehicle && comm.brand.toLowerCase() === activeVehicle.brand.toLowerCase();
                 const isSelected = view === 'comunidad' && comm.id === selectedClubId;
@@ -783,12 +784,12 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                   <div
                     key={comm.id}
                     data-reveal
-                    className={`w-[82%] shrink-0 snap-start sm:w-auto bg-white rounded-3xl overflow-hidden border transition-all flex flex-col ${
+                    className={`w-[80%] sm:w-auto bg-white rounded-3xl overflow-hidden border transition-all flex flex-col ${
                       isSelected ? 'border-blue-500 ring-2 ring-blue-500/30 shadow-md' : 'border-slate-200/70 shadow-xs hover:shadow-md'
                     }`}
                   >
-                    <button onClick={() => openCommunity(comm.id)} className="text-left cursor-pointer flex-1 flex flex-col">
-                      <div className="relative h-32 sm:h-36 bg-gradient-to-br from-blue-600 to-blue-900 overflow-hidden">
+                    <button onClick={() => openCommunity(comm.id)} className="w-full text-left cursor-pointer flex-1 flex flex-col">
+                      <div className="relative w-full h-32 sm:h-36 bg-gradient-to-br from-blue-600 to-blue-900 overflow-hidden">
                         {comm.coverImage && <img src={comm.coverImage} alt="" loading="lazy" className="w-full h-full object-cover" />}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                         {isMatch && (
@@ -802,7 +803,7 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
                           </span>
                         )}
                       </div>
-                      <div className="px-4 sm:px-5 pb-4 -mt-7 relative flex-1 flex flex-col">
+                      <div className="w-full px-4 sm:px-5 pb-4 -mt-7 relative flex-1 flex flex-col">
                         <CommunityLogo club={comm} className="w-14 h-14 rounded-2xl border-4 border-white shadow-sm text-lg" />
                         <h3 className="mt-2 text-base font-semibold text-slate-950 leading-snug">{comm.name}</h3>
                         {comm.description && <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{comm.description}</p>}
@@ -832,13 +833,13 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
 
               <button
                 onClick={handleOpenCreate}
-                className="w-[60%] shrink-0 snap-start sm:w-auto rounded-3xl border-2 border-dashed border-slate-300 bg-white/50 hover:bg-white hover:border-blue-400 text-slate-500 hover:text-blue-700 flex flex-col items-center justify-center gap-2 text-sm font-semibold cursor-pointer transition-all min-h-[200px] p-6 text-center"
+                className="w-[60%] sm:w-auto rounded-3xl border-2 border-dashed border-slate-300 bg-white/50 hover:bg-white hover:border-blue-400 text-slate-500 hover:text-blue-700 flex flex-col items-center justify-center gap-2 text-sm font-semibold cursor-pointer transition-all min-h-[200px] p-6 text-center"
               >
                 <PlusCircle className="w-7 h-7" />
                 Crear una comunidad
                 <span className="text-xs font-normal text-slate-500">Para tu marca, modelo o ciudad</span>
               </button>
-            </div>
+            </SwipeRow>
 
             {clubFilter === 'mias' && visibleClubs.length === 0 && (
               <p className="text-xs text-slate-500">Todavía no te has unido a ninguna comunidad. Elige una en "Todas" y toca "Unirme".</p>

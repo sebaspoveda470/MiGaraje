@@ -134,6 +134,36 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Rows of cards that swipe sideways on phones (SwipeRow); from tablets up the row's own classes lay it out */
+@media (max-width: 639.98px) {
+  .swipe-row {
+    display: flex;
+    overflow-x: auto;
+    /* Reaches both screen edges, but a card always rests aligned with the rest of the page */
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
+    padding-bottom: 0.25rem;
+    scroll-snap-type: x mandatory;
+    /* A sideways swipe stays in the row: no "go back" gesture or page wobble */
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .swipe-row::-webkit-scrollbar {
+    display: none;
+  }
+  .swipe-row > * {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  /* Cards waiting off to the side appear with the first one, instead of fading in mid-swipe */
+  .reveal-ready .swipe-row:has(> [data-revealed]) > [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .scrollbar-none {
   scrollbar-width: none;
   -ms-overflow-style: none;

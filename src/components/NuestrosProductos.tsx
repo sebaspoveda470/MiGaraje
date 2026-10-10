@@ -35,6 +35,7 @@ import { PhotoPicker } from './PhotoPicker';
 import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
+import { SwipeRow } from './SwipeRow';
 
 // Photos live inside the product document (1 MB max), so keep a few small ones.
 const MAX_PRODUCT_PHOTOS = 4;
@@ -417,13 +418,13 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
 
       {/* How to buy: three steps, so a first order feels safe */}
       <section aria-label="Cómo comprar" className="space-y-3">
-        <div className="flex sm:grid sm:grid-cols-3 gap-3 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+        <SwipeRow className="gap-3 sm:grid sm:grid-cols-3">
           {[
             { n: '1', title: 'Elige tus productos', text: 'Agrégalos al carrito o toca “Comprar por WhatsApp” en el que te guste.' },
             { n: '2', title: 'Confirma por WhatsApp', text: 'Te atendemos directamente: confirmamos disponibilidad, valor del envío y forma de pago.' },
             { n: '3', title: 'Recíbelo en tu ciudad', text: 'Despachamos a toda Colombia. Pagas solo cuando todo esté acordado contigo.' },
           ].map((step) => (
-            <div key={step.n} data-reveal className="w-[78%] shrink-0 snap-start sm:w-auto bg-white/80 rounded-3xl p-4 sm:p-5 border border-slate-200/70 flex items-start gap-3">
+            <div key={step.n} data-reveal className="w-[80%] sm:w-auto bg-white/80 rounded-3xl p-4 sm:p-5 border border-slate-200/70 flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center shrink-0">{step.n}</div>
               <div>
                 <div className="text-sm font-semibold text-slate-900">{step.title}</div>
@@ -431,7 +432,7 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
               </div>
             </div>
           ))}
-        </div>
+        </SwipeRow>
         {salesWhatsApp && (
           <p className="text-xs text-slate-500 px-1">
             ¿Tienes dudas antes de pedir?{' '}
