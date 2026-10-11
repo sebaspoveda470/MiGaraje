@@ -76,7 +76,18 @@ export interface SellRequest {
   listingId: string | null;
 }
 
-const BRAND_OPTIONS = ['Mazda', 'Toyota', 'Renault', 'Chevrolet', 'Kia', 'Ford', 'Volkswagen', 'Nissan', 'Hyundai', 'BMW', 'Mercedes-Benz', 'Suzuki'];
+// Suggestions only: the brand is typed freely, so any make can be published
+const BRAND_OPTIONS = ['Mazda', 'Toyota', 'Renault', 'Chevrolet', 'Kia', 'Ford', 'Volkswagen', 'Nissan', 'Hyundai', 'BMW', 'Mercedes-Benz', 'Suzuki', 'Honda', 'Mitsubishi', 'Audi', 'Jeep', 'Peugeot', 'Subaru', 'Volvo', 'BYD', 'Yamaha', 'AKT', 'Bajaj'];
+
+/** "  mazda " → "Mazda", "great wall" → "Great Wall"; known brands keep their own spelling ("BMW"), so filters don't split one brand in two. */
+const tidyBrand = (text: string) => {
+  const clean = text.trim().replace(/\s+/g, ' ');
+  const known = BRAND_OPTIONS.find((b) => b.toLowerCase() === clean.toLowerCase());
+  if (known) return known;
+  // All-caps short names typed that way stay ("JAC", "MG"); the rest get a capital on each word
+  if (clean.length <= 4 && clean === clean.toUpperCase()) return clean;
+  return clean.toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+};
 
 // The cover lives in the listing and each extra photo in its own document
 const MAX_LISTING_PHOTOS = 10;
@@ -157,7 +168,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   }, [selectedCar?.id]);
 
   // Form State for "Vender mi Vehículo" Publishing Modal
-  const [pubBrand, setPubBrand] = useState('Mazda');
+  const [pubBrand, setPubBrand] = useState('');
   const [pubModel, setPubModel] = useState('');
   const [pubYear, setPubYear] = useState<number>(2022);
   const [pubPrice, setPubPrice] = useState<number>(75000000);
@@ -415,12 +426,17 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     }
     const plateCity = resolveTyped(pubPlateCity)?.city || pubPlateCity.trim();
 
-    const title = `${pubBrand} ${pubModel.trim()} ${pubYear}`;
+    const brand = tidyBrand(pubBrand);
+    if (!brand) {
+      setPublishError('Escribe la marca del vehículo.');
+      return;
+    }
+    const title = `${brand} ${pubModel.trim()} ${pubYear}`;
     const tags = [pubIsUniqueOwner ? 'Único Dueño' : null, plateEnding ? `Placa ${plateEnding} ${plateCity}`.trim() : null]
       .filter(Boolean) as string[];
     const newListing: Omit<VehicleListing, 'id'> = {
       title,
-      brand: pubBrand,
+      brand,
       model: pubModel.trim(),
       year: Number(pubYear),
       price: Number(pubPrice),
@@ -439,7 +455,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       sellerPhone: pubSellerPhone.trim(),
       whatsappNumber: toWhatsAppNumber(pubSellerPhone),
       sellerVerified: false,
-      images: pubImages.length > 0 ? pubImages : [getVehicleReferenceImage(pubBrand, pubModel.trim(), Number(pubYear), 'diario')],
+      images: pubImages.length > 0 ? pubImages : [getVehicleReferenceImage(brand, pubModel.trim(), Number(pubYear), 'diario')],
       status: 'disponible',
       specs: {
         engine: pubEngine.trim(),
@@ -956,15 +972,22 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Marca *</label>
-                  <select
+                  <input
+                    type="text"
+                    required
+                    maxLength={30}
+                    list="pub-brand-suggestions"
+                    autoComplete="off"
+                    placeholder="Ej: Mazda"
                     value={pubBrand}
                     onChange={(e) => setPubBrand(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
-                  >
-                    {(BRAND_OPTIONS.includes(pubBrand) ? BRAND_OPTIONS : [pubBrand, ...BRAND_OPTIONS]).map((b) => (
-                      <option key={b} value={b}>{b}</option>
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
+                  />
+                  <datalist id="pub-brand-suggestions">
+                    {BRAND_OPTIONS.map((b) => (
+                      <option key={b} value={b} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div>
