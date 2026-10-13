@@ -1,7 +1,7 @@
 import { VehicleListing } from '../types';
 
 /** Shown instead of the kilometers when the seller doesn't know them (classics, odometers that rolled over). */
-export const MILEAGE_UNKNOWN_LABEL = 'Km no disponible';
+export const MILEAGE_UNKNOWN_LABEL = 'Kilometraje no registrado';
 
 /**
  * True when a listing has no trustworthy mileage: the seller said so, or an old vehicle
@@ -10,6 +10,6 @@ export const MILEAGE_UNKNOWN_LABEL = 'Km no disponible';
 export const isMileageUnknown = (car: Pick<VehicleListing, 'mileage' | 'year' | 'mileageUnknown'>) =>
   !!car.mileageUnknown || (car.mileage === 0 && car.year <= new Date().getFullYear() - 20);
 
-/** "35.420 km", or the "not available" label. */
+/** "35.420 km", or the "not recorded" label. */
 export const mileageLabel = (car: Pick<VehicleListing, 'mileage' | 'year' | 'mileageUnknown'>) =>
   isMileageUnknown(car) ? MILEAGE_UNKNOWN_LABEL : `${car.mileage.toLocaleString('es-CO')} km`;
