@@ -5,6 +5,7 @@ import { CareProduct, CommunityClub, CommunityPost, VehicleListing } from '../ty
 import { subscribeToCommunities, subscribeToRecentPosts } from '../services/communityService';
 import { timeAgo } from '../utils/media';
 import { SwipeRow } from './SwipeRow';
+import { mileageLabel } from '../utils/mileage';
 
 interface HomeShowcaseProps {
   listings: VehicleListing[];
@@ -93,7 +94,7 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
                   <div className="text-base font-semibold text-slate-950 line-clamp-1">{car.title}</div>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-slate-500">
                     <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {car.city || car.location}</span>
-                    <span className="inline-flex items-center gap-1"><Gauge className="w-3.5 h-3.5" /> {car.mileage.toLocaleString('es-CO')} km</span>
+                    <span className="inline-flex items-center gap-1"><Gauge className="w-3.5 h-3.5" /> {mileageLabel(car)}</span>
                   </div>
                   <div className="text-lg font-semibold text-slate-950 tracking-tight">
                     {money(car.price)} <span className="text-[0.6875rem] font-medium text-slate-400">COP</span>

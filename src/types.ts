@@ -67,6 +67,8 @@ export interface VehicleListing {
   price: number;
   currency: string;
   mileage: number;
+  /** The seller doesn't know the kilometers (classics); `mileage` is then 0 */
+  mileageUnknown?: boolean;
   condition: 'usado' | 'seminuevo' | 'clasico_antiguo' | 'para_restaurar';
   location: string;
   city?: string;

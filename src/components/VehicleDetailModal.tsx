@@ -8,6 +8,7 @@ import { getListingPhotos } from '../services/listingService';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { useReport } from './ReportDialog';
 import { buildWatermarkedPhoto, downloadBlob } from '../utils/socialImage';
+import { mileageLabel } from '../utils/mileage';
 
 interface VehicleDetailModalProps {
   car: VehicleListing;
@@ -200,7 +201,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <span>•</span>
                 <span>{car.year}</span>
                 <span>•</span>
-                <span>{car.mileage.toLocaleString('es-CO')} km</span>
+                <span>{mileageLabel(car)}</span>
               </div>
 
               <div className="flex items-end justify-between gap-3 pt-1">
@@ -277,7 +278,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <h3 className="text-sm font-black text-slate-950">Ficha técnica</h3>
                 <dl className="text-xs">
                   <Row label="Año" value={car.year} />
-                  <Row label="Kilometraje" value={`${car.mileage.toLocaleString('es-CO')} km`} />
+                  <Row label="Kilometraje" value={mileageLabel(car)} />
                   <Row label="Transmisión" value={car.specs?.transmission || 'No indicada'} />
                   <Row label="Combustible" value={car.specs?.fuel || 'No indicado'} />
                   {car.specs?.engine && <Row label="Motor" value={car.specs.engine} />}

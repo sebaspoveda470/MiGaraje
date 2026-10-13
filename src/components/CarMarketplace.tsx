@@ -46,6 +46,7 @@ import { CityPicker } from './CityPicker';
 import { findPlace, resolveTyped, normalizeText } from '../utils/places';
 import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
 import { NumberInput } from './NumberInput';
+import { isMileageUnknown, mileageLabel } from '../utils/mileage';
 
 interface CarMarketplaceProps {
   carListings: VehicleListing[];
@@ -107,7 +108,8 @@ const COMPARATORS: Record<SortKey, (a: VehicleListing, b: VehicleListing) => num
   recientes: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
   precio_asc: (a, b) => a.price - b.price,
   precio_desc: (a, b) => b.price - a.price,
-  km_asc: (a, b) => a.mileage - b.mileage,
+  // Listings without a known mileage go last
+  km_asc: (a, b) => Number(isMileageUnknown(a)) - Number(isMileageUnknown(b)) || a.mileage - b.mileage,
   anio_desc: (a, b) => b.year - a.year,
 };
 
@@ -192,6 +194,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
   // Phones show only the search box until "Filtros" is tapped
   const [showFilters, setShowFilters] = useState(false);
   const [pubIsUniqueOwner, setPubIsUniqueOwner] = useState(true);
+  const [pubMileageUnknown, setPubMileageUnknown] = useState(false);
   const [pubSoatValid, setPubSoatValid] = useState(true);
   const [pubTecnoValid, setPubTecnoValid] = useState(true);
   const [pubColor, setPubColor] = useState('');
@@ -208,6 +211,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
 
   const resetPublishForm = () => {
     setPubModel('');
+    setPubMileageUnknown(false);
     setPubDescription('');
     setPubImages([]);
     setPubColor('');
@@ -278,6 +282,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
     setPubYear(car.year);
     setPubPrice(car.price);
     setPubMileage(car.mileage);
+    setPubMileageUnknown(isMileageUnknown(car));
     // "Armenia, Quindío" keeps its department; older listings only stored the city
     setPubCity((/, Colombia$/.test(car.location || '') ? null : findPlace(car.location))?.label || findPlace(car.city)?.label || car.city || 'Bogotá D.C.');
     setPubPlateEnding(car.plateEnding || '');
@@ -442,8 +447,9 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
       year: Number(pubYear),
       price: Number(pubPrice),
       currency: 'COP',
-      mileage: Number(pubMileage),
-      condition: pubMileage < 30000 ? 'seminuevo' : 'usado',
+      mileage: pubMileageUnknown ? 0 : Number(pubMileage),
+      mileageUnknown: pubMileageUnknown,
+      condition: pubMileageUnknown ? 'usado' : pubMileage < 30000 ? 'seminuevo' : 'usado',
       location: place.label === place.city ? `${place.city}, Colombia` : place.label,
       city: place.city,
       plateEnding,
@@ -783,7 +789,7 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                     </span>
                     <div className="flex items-center gap-1 text-slate-600 font-medium">
                       <Gauge className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{car.mileage.toLocaleString('es-CO')} km</span>
+                      <span>{mileageLabel(car)}</span>
                     </div>
                   </div>
 
@@ -1034,13 +1040,23 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Kilometraje (km) *</label>
                   <NumberInput
-                    required
+                    required={!pubMileageUnknown}
+                    disabled={pubMileageUnknown}
                     min={0}
-                    placeholder="35000"
-                    value={pubMileage}
+                    placeholder={pubMileageUnknown ? 'No disponible' : '35000'}
+                    value={pubMileageUnknown ? 0 : pubMileage}
                     onChange={setPubMileage}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400"
                   />
+                  <label className="mt-1.5 flex items-start gap-1.5 text-[0.6875rem] text-slate-600 leading-snug cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={pubMileageUnknown}
+                      onChange={(e) => setPubMileageUnknown(e.target.checked)}
+                      className="mt-0.5 shrink-0 cursor-pointer"
+                    />
+                    <span>No conozco el kilometraje (vehículo clásico)</span>
+                  </label>
                 </div>
 
                 <div>

@@ -29,7 +29,9 @@ const cop = (value: number) => `$${Number(value || 0).toLocaleString('es-CO')}`;
 function describe(type: ShareType, data: Record<string, any>): { title: string; description: string } {
   if (type === 'vehiculo') {
     const sold = data.status === 'vendido' ? ' (VENDIDO)' : '';
-    const details = [data.city, data.year, data.mileage != null ? `${Number(data.mileage).toLocaleString('es-CO')} km` : null]
+    // No kilometers when the seller doesn't know them (same rule as src/utils/mileage.ts)
+    const mileageUnknown = data.mileageUnknown || (Number(data.mileage) === 0 && Number(data.year) <= new Date().getFullYear() - 20);
+    const details = [data.city, data.year, data.mileage != null && !mileageUnknown ? `${Number(data.mileage).toLocaleString('es-CO')} km` : null]
       .filter(Boolean)
       .join(' • ');
     return {
