@@ -3,6 +3,7 @@ import { BookOpen, Plus, Trash2, Loader2, Wrench, X } from 'lucide-react';
 import { ServiceCategory, ServiceRecord, Vehicle } from '../types';
 import { subscribeToServices, saveService, deleteService } from '../services/userService';
 import { useConfirm } from './ConfirmDialog';
+import { NumberInput } from './NumberInput';
 
 interface MaintenanceLogProps {
   uid: string;
@@ -167,11 +168,11 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
             </div>
             <div>
               <label className="block font-bold text-slate-700 mb-1">Kilometraje *</label>
-              <input type="number" required min={0} value={mileage} onChange={(e) => setMileage(Number(e.target.value))} className={inputClass} />
+              <NumberInput required min={0} value={mileage} onChange={setMileage} className={inputClass} />
             </div>
             <div>
               <label className="block font-bold text-slate-700 mb-1">Costo (COP)</label>
-              <input type="number" min={0} step={1000} value={cost} onChange={(e) => setCost(Number(e.target.value))} className={inputClass} />
+              <NumberInput min={0} value={cost} onChange={setCost} className={inputClass} />
             </div>
             <div className="sm:col-span-2">
               <label className="block font-bold text-slate-700 mb-1">Taller (opcional)</label>

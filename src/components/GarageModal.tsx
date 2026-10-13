@@ -18,6 +18,7 @@ import {
 import { Vehicle, VehicleCategory } from '../types';
 import { getVehicleReferenceImage, getVehicleImageOptions } from '../utils/vehicleImages';
 import { compressImageFile } from '../utils/media';
+import { NumberInput } from './NumberInput';
 
 interface GarageModalProps {
   isOpen: boolean;
@@ -426,13 +427,12 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                   <Calendar className="w-4 h-4 text-blue-600" />
                   <span>Año de Fabricación *</span>
                 </label>
-                <input
-                  type="number"
+                <NumberInput
                   required
                   min={1940}
                   max={2026}
                   value={year}
-                  onChange={(e) => setYear(Number(e.target.value))}
+                  onChange={setYear}
                   className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2 text-sm text-slate-900 focus:outline-none shadow-xs font-bold"
                 />
               </div>
@@ -474,13 +474,11 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                   <Gauge className="w-4 h-4 text-blue-600" />
                   <span>Kilometraje Actual (km) *</span>
                 </label>
-                <input
-                  type="number"
+                <NumberInput
                   required
                   min={0}
-                  step={500}
                   value={mileage}
-                  onChange={(e) => setMileage(Number(e.target.value))}
+                  onChange={setMileage}
                   className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2 text-sm text-slate-900 focus:outline-none shadow-xs font-bold"
                 />
               </div>

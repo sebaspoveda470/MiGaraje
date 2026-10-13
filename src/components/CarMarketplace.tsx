@@ -45,6 +45,7 @@ import { normalizePlate, isValidPlate, plateLastDigit } from '../utils/plates';
 import { CityPicker } from './CityPicker';
 import { findPlace, resolveTyped, normalizeText } from '../utils/places';
 import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
+import { NumberInput } from './NumberInput';
 
 interface CarMarketplaceProps {
   carListings: VehicleListing[];
@@ -1006,27 +1007,24 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Año *</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     required
                     min={1940}
                     max={new Date().getFullYear() + 1}
                     value={pubYear}
-                    onChange={(e) => setPubYear(Number(e.target.value))}
+                    onChange={setPubYear}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                   />
                 </div>
 
                 <div className="col-span-2">
                   <label className="block font-bold text-slate-800 mb-1">Precio en Pesos (COP) *</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     required
-                    step={500000}
                     min={5000000}
                     placeholder="75000000"
-                    value={pubPrice || ''}
-                    onChange={(e) => setPubPrice(Number(e.target.value))}
+                    value={pubPrice}
+                    onChange={setPubPrice}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white font-mono font-bold"
                   />
                 </div>
@@ -1035,14 +1033,12 @@ export const CarMarketplace: React.FC<CarMarketplaceProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Kilometraje (km) *</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     required
-                    step={1000}
                     min={0}
                     placeholder="35000"
                     value={pubMileage}
-                    onChange={(e) => setPubMileage(Number(e.target.value))}
+                    onChange={setPubMileage}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white"
                   />
                 </div>

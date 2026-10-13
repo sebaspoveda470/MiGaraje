@@ -36,6 +36,7 @@ import { useConfirm } from './ConfirmDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
 import { SwipeRow } from './SwipeRow';
+import { NumberInput } from './NumberInput';
 
 // Photos live inside the product document (1 MB max), so keep a few small ones.
 const MAX_PRODUCT_PHOTOS = 4;
@@ -870,14 +871,12 @@ export const NuestrosProductos: React.FC<NuestrosProductosProps> = ({
 
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Precio en COP *</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     required
                     min={1000}
-                    step={1000}
                     placeholder="35000"
                     value={price}
-                    onChange={(e) => setPrice(Number(e.target.value))}
+                    onChange={setPrice}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400 focus:bg-white font-mono"
                   />
                 </div>
