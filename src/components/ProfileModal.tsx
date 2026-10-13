@@ -326,7 +326,7 @@ onLogout,
                             )}
                           </div>
                           <div className="text-[0.6875rem] text-slate-500 font-medium truncate">
-                            Año {v.year} • {v.mileage.toLocaleString()} km
+                            Año {v.year} • {v.mileage.toLocaleString('es-CO')} km
                           </div>
                         </div>
                       </div>

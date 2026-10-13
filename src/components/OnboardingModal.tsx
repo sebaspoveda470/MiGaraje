@@ -557,8 +557,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </label>
                   <NumberInput
                     required
+                    grouped
                     min={0}
-                    placeholder="Ej. 45000"
+                    placeholder="Ej. 45.000"
                     value={mileage}
                     onChange={setMileage}
                     className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2 text-sm text-slate-900 focus:outline-none shadow-xs font-bold"

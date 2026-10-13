@@ -92,7 +92,7 @@ export const IntermediationModal: React.FC<IntermediationModalProps> = ({
                 <span className="text-[0.625rem] text-slate-500 font-bold uppercase">{listing.brand} {listing.year}</span>
                 <h4 className="text-sm font-bold text-slate-950 truncate">{listing.title}</h4>
                 <div className="text-base font-black text-slate-950 mt-0.5">
-                  ${listing.price.toLocaleString()} {listing.currency}
+                  ${listing.price.toLocaleString('es-CO')} {listing.currency}
                 </div>
               </div>
             </div>
@@ -121,7 +121,7 @@ export const IntermediationModal: React.FC<IntermediationModalProps> = ({
               <span className="font-bold text-slate-900 block">Estimación de Costos de Cierre</span>
               <div className="flex justify-between text-slate-600">
                 <span>Vehículo:</span>
-                <span className="font-bold text-slate-900">${listing.price.toLocaleString()} {listing.currency}</span>
+                <span className="font-bold text-slate-900">${listing.price.toLocaleString('es-CO')} {listing.currency}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Peritaje integral (180 puntos):</span>
@@ -133,7 +133,7 @@ export const IntermediationModal: React.FC<IntermediationModalProps> = ({
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Derechos de traspaso est. (1.5%):</span>
-                <span className="font-bold text-slate-900">${estimatedTraspaso.toLocaleString()} USD</span>
+                <span className="font-bold text-slate-900">${estimatedTraspaso.toLocaleString('es-CO')} USD</span>
               </div>
             </div>
 

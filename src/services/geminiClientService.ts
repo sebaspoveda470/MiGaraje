@@ -90,7 +90,7 @@ export function getClientVehicleInsights(vehicle: {
   }
 
   return {
-    summary: `Diagnóstico y pauta de servicio preventiva recomendada para ${brand} ${model} modelo ${year} con ${mileage.toLocaleString()} km.`,
+    summary: `Diagnóstico y pauta de servicio preventiva recomendada para ${brand} ${model} modelo ${year} con ${mileage.toLocaleString('es-CO')} km.`,
     maintenanceChecklist,
     commonKnownIssues: [
       {

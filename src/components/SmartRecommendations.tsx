@@ -183,7 +183,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
               <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 font-medium pt-1">
                 <div className="flex items-center gap-1.5">
                   <Gauge className="w-4 h-4 text-slate-500" />
-                  <span>{activeVehicle.mileage.toLocaleString()} km registrados</span>
+                  <span>{activeVehicle.mileage.toLocaleString('es-CO')} km registrados</span>
                 </div>
                 <span>•</span>
                 <div className="flex items-center gap-1.5">
@@ -234,7 +234,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
           <div className="p-4 sm:p-5">
             <div className="text-[0.6875rem] text-slate-500 font-bold uppercase tracking-wider">Próximo Cambio de Aceite</div>
             <div className="text-base sm:text-lg font-black text-slate-950 mt-0.5">
-              {nextOilChangeKm.toLocaleString()} km
+              {nextOilChangeKm.toLocaleString('es-CO')} km
             </div>
             <div className="text-[0.6875rem] text-slate-500">Faltan aprox. {kmToOilChange.toLocaleString('es-CO')} km</div>
             {isEditingKm ? (
@@ -317,7 +317,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
               <span>Plan de Mantenimiento</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-              Plan Preventivo Sugerido para los {activeVehicle.mileage.toLocaleString()} km
+              Plan Preventivo Sugerido para los {activeVehicle.mileage.toLocaleString('es-CO')} km
             </h2>
             <p className="text-xs text-slate-600 mt-0.5">
               Rutina de inspección técnica según especificaciones de fábrica y topografía de Colombia.
@@ -401,7 +401,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                     {prod.name}
                   </h3>
                   <div className="text-sm font-black text-slate-950 mt-1">
-                    ${prod.price.toLocaleString()} COP
+                    ${prod.price.toLocaleString('es-CO')} COP
                   </div>
                 </div>
               </div>

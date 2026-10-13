@@ -126,7 +126,7 @@ export const MobileGarageDrawer: React.FC<MobileGarageDrawerProps> = ({
                         <span>•</span>
                         <div className="flex items-center gap-1">
                           <Gauge className="w-3 h-3 text-slate-400" />
-                          <span>{veh.mileage.toLocaleString()} km</span>
+                          <span>{veh.mileage.toLocaleString('es-CO')} km</span>
                         </div>
                       </div>
 

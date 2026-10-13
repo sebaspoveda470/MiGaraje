@@ -316,7 +316,7 @@ cart,
                                 )}
                               </div>
                               <div className="text-[0.6875rem] text-slate-500">
-                                Año {veh.year} • {veh.mileage.toLocaleString()} km
+                                Año {veh.year} • {veh.mileage.toLocaleString('es-CO')} km
                               </div>
                             </div>
                           </div>

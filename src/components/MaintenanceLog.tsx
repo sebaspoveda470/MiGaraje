@@ -168,11 +168,11 @@ export const MaintenanceLog: React.FC<MaintenanceLogProps> = ({ uid, vehicle, on
             </div>
             <div>
               <label className="block font-bold text-slate-700 mb-1">Kilometraje *</label>
-              <NumberInput required min={0} value={mileage} onChange={setMileage} className={inputClass} />
+              <NumberInput grouped required min={0} value={mileage} onChange={setMileage} className={inputClass} />
             </div>
             <div>
               <label className="block font-bold text-slate-700 mb-1">Costo (COP)</label>
-              <NumberInput min={0} value={cost} onChange={setCost} className={inputClass} />
+              <NumberInput grouped min={0} value={cost} onChange={setCost} className={inputClass} />
             </div>
             <div className="sm:col-span-2">
               <label className="block font-bold text-slate-700 mb-1">Taller (opcional)</label>

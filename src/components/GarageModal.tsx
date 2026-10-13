@@ -476,6 +476,7 @@ export const GarageModal: React.FC<GarageModalProps> = ({
                 </label>
                 <NumberInput
                   required
+                  grouped
                   min={0}
                   value={mileage}
                   onChange={setMileage}
