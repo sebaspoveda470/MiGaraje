@@ -290,7 +290,7 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
               className="text-[0.6875rem] text-blue-600 font-bold hover:underline cursor-pointer"
               onClick={() => onNavigateToTab('comunidades')}
             >
-              Ir a Mi Comunidad →
+              Ir a Social →
             </div>
           </div>
         </div>

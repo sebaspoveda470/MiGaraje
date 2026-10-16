@@ -46,7 +46,7 @@ const PrivacyPolicy: React.FC = () => (
         <li>Crear y administrar tu cuenta y tu garaje digital.</li>
         <li>
           Mostrar recordatorios de mantenimiento y de vencimiento de documentos de tus vehículos, y enviarlos a tu correo.
-          También avisarte por correo cuando alguien responde tus publicaciones en Mi Comunidad (puedes desactivar los
+          También avisarte por correo cuando alguien responde tus publicaciones en Social (puedes desactivar los
           correos en tu perfil).
         </li>
         <li>Publicar tus anuncios, publicaciones, comentarios y reseñas.</li>
@@ -57,7 +57,7 @@ const PrivacyPolicy: React.FC = () => (
 
     <Section title="4. Información pública">
       <p>
-        Lo que publicas en Compra & Venta (incluido el teléfono de contacto), en Mi Comunidad y en las reseñas es visible para
+        Lo que publicas en Compra & Venta (incluido el teléfono de contacto), en Social y en las reseñas es visible para
         cualquier visitante. Cuando te unes a una comunidad, tu nombre y la marca, modelo y año de tu vehículo activo aparecen
         en su lista de miembros, visible para cualquier visitante, hasta que salgas de ella. Tu correo, tu teléfono de perfil,
         las placas y demás datos de tus vehículos y tus pedidos no son públicos.

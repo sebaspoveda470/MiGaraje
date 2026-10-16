@@ -7,8 +7,8 @@ import nodemailer from 'nodemailer';
 
 const TYPE_LABELS: Record<string, string> = {
   listing: 'Anuncio de vehículo',
-  post: 'Publicación en Mi Comunidad',
-  comment: 'Comentario en Mi Comunidad',
+  post: 'Publicación en Social',
+  comment: 'Comentario en Social',
   review: 'Reseña de producto',
 };
 

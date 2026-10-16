@@ -15,7 +15,7 @@ const glass = 'bg-white/80 backdrop-blur-2xl backdrop-saturate-150 border border
 const HIGHLIGHTS = [
   { value: 'MiGaraje', title: 'Productos propios', detail: 'Venta directa por WhatsApp' },
   { value: 'Directo', title: 'Trato con el vendedor', detail: 'Sin comisiones ni intermediarios', accent: true },
-  { value: 'Clubes', title: 'Mi Comunidad', detail: 'Clubes por marca y consultas técnicas' },
+  { value: 'Social', title: 'Novedades y clubes', detail: 'Noticias del mundo automotriz y clubes por marca' },
 ];
 
 export const WebHero: React.FC<WebHeroProps> = ({ listingsCount, onExploreVehicles, onExploreProducts, onRegisterCar }) => {

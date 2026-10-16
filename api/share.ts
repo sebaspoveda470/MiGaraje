@@ -46,7 +46,7 @@ function describe(type: ShareType, data: Record<string, any>): { title: string; 
     };
   }
   return {
-    title: `${data.name} | Mi Comunidad MiGaraje`,
+    title: `${data.name} | Comunidad en MiGaraje`,
     description: (data.description || 'Únete a esta comunidad de propietarios en MiGaraje.').slice(0, 200),
   };
 }

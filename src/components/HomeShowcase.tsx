@@ -151,7 +151,7 @@ export const HomeShowcase: React.FC<HomeShowcaseProps> = ({ listings, featured =
           <SectionTitle
             title="Lo último en la comunidad"
             subtitle="Preguntas y experiencias de otros propietarios."
-            action="Ir a Mi Comunidad"
+            action="Ir a Social"
             onAction={() => onNavigate('comunidades')}
           />
           {posts.length > 0 ? (

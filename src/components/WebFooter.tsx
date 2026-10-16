@@ -16,7 +16,7 @@ const SECTIONS = [
   { tab: 'garaje', label: 'Mi Garaje' },
   { tab: 'vehiculos', label: 'Compra & Venta' },
   { tab: 'productos', label: 'Nuestros Productos' },
-  { tab: 'comunidades', label: 'Mi Comunidad' },
+  { tab: 'comunidades', label: 'Social' },
 ];
 
 export const WebFooter: React.FC<WebFooterProps> = ({ salesWhatsApp, onOpenLegal, onNavigateTab, onOpenStoreModal }) => {

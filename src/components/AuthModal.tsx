@@ -85,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenLeg
   const subtitle =
     mode === 'reset'
       ? 'Ingresa el correo de tu cuenta y te enviaremos un enlace.'
-      : 'Guarda tus vehículos, publica en Compra & Venta y participa en Mi Comunidad.';
+      : 'Guarda tus vehículos, publica en Compra & Venta y participa en Social.';
 
   return (
     <div className="fixed inset-0 z-[65] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-2xl overflow-hidden animate-fade-in">

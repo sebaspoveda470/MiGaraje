@@ -46,7 +46,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     },
     {
       id: 'comunidades',
-      label: 'Comunidad',
+      label: 'Social',
       icon: MessagesSquare,
     },
   ];

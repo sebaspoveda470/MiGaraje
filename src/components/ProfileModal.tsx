@@ -209,7 +209,7 @@ onLogout,
                   className="mt-0.5 w-4 h-4 accent-blue-600 shrink-0"
                 />
                 <span className="text-slate-700">
-                  <strong>Recibir recordatorios y avisos por correo</strong>: cuando se acerque el vencimiento del SOAT o la revisión técnico-mecánica de mis vehículos, y cuando alguien responda mis publicaciones en Mi Comunidad.
+                  <strong>Recibir recordatorios y avisos por correo</strong>: cuando se acerque el vencimiento del SOAT o la revisión técnico-mecánica de mis vehículos, y cuando alguien responda mis publicaciones en Social.
                 </span>
               </label>
               <div className="flex justify-end gap-2 pt-1">

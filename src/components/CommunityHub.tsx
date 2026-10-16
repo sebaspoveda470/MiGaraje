@@ -667,10 +667,10 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
       <SectionHero image="/section-comunidad.jpg" alt="Encuentro de vehículos con personas reunidas" focus="50% 55%">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
           <h1 className="text-[1.75rem] leading-[1.1] sm:text-4xl lg:text-5xl font-semibold text-white tracking-[-0.025em] drop-shadow-sm">
-            Comunidades de propietarios y apasionados.
+            Novedades, comunidades y gente que ama los vehículos.
           </h1>
           <p className="hidden sm:block text-sm text-white/80 leading-relaxed font-normal">
-            Mira lo que otros propietarios están preguntando y compartiendo, únete a la comunidad de tu marca y resuelve dudas con gente que tiene tu mismo vehículo.
+            Entérate de lo nuevo del mundo automotriz, mira lo que otros propietarios preguntan y comparten, y únete a la comunidad de tu marca.
           </p>
         </div>
 

@@ -181,7 +181,7 @@ cart,
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Buscar vehículos en venta, productos MiGaraje o temas en Mi Comunidad..."
+                placeholder="Buscar vehículos en venta, productos MiGaraje o temas en Social..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
@@ -501,7 +501,7 @@ cart,
               }`}
             >
               <MessagesSquare className={`w-3.5 h-3.5 ${activeTab === 'comunidades' ? 'text-blue-600' : 'text-slate-500'}`} />
-              <span>Mi Comunidad</span>
+              <span>Social</span>
             </button>
           </div>
 
