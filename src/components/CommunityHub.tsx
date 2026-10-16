@@ -49,6 +49,7 @@ import { useReport } from './ReportDialog';
 import { syncDeepLink } from '../utils/shareLinks';
 import { SectionGlow, SectionHero, heroGlassClass } from './SectionArt';
 import { SwipeRow } from './SwipeRow';
+import { NewsSection } from './NewsSection';
 
 interface CommunityHubProps {
   activeVehicle: Vehicle | null;
@@ -691,6 +692,9 @@ export const CommunityHub: React.FC<CommunityHubProps> = ({
           </button>
         </div>
       </SectionHero>
+
+      {/* Automotive news (published by the admin) */}
+      <NewsSection isAdmin={isAdmin} onError={onError} onNotify={onNotify} />
 
       {communitiesLoading && (
         <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 font-semibold">

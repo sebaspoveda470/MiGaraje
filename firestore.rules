@@ -140,6 +140,20 @@ service cloud.firestore {
       allow delete: if isUser(resource.data.userId) || isAdmin();
     }
 
+    // ---------- Novedades (automotive news, written by the admin) ----------
+
+    match /news/{newsId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && isShortString(incoming().title, 140)
+        && isShortString(incoming().summary, 300)
+        && isShortString(incoming().sourceName, 80)
+        && isShortString(incoming().sourceUrl, 500)
+        && incoming().scope in ['colombia', 'internacional']
+        && (!('body' in incoming()) || (incoming().body is string && incoming().body.size() <= 4000));
+      allow delete: if isAdmin();
+    }
+
     // ---------- Mi Comunidad ----------
 
     match /communities/{clubId} {

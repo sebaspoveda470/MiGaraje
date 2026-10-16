@@ -357,3 +357,21 @@ export interface ContentReport {
   notified: boolean;
   createdAt: number;
 }
+
+/** Automotive news published by the admin in Comunidad ("Novedades") */
+export interface NewsItem {
+  id: string;
+  title: string;
+  /** One or two sentences shown on the card */
+  summary: string;
+  /** Optional longer text, in MiGaraje's own words */
+  body?: string;
+  /** Compressed photo (data URL) or a link to a free-to-use image */
+  image?: string;
+  /** Free-to-use images still credit their author: "Foto: Jane Doe / Unsplash" */
+  imageCredit?: string;
+  sourceName: string;
+  sourceUrl: string;
+  scope: 'colombia' | 'internacional';
+  createdAt?: number;
+}
