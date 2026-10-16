@@ -63,7 +63,13 @@ export const InstallAppProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // storage unavailable: just show it
     }
     if (dismissed) return;
-    const timer = setTimeout(() => setShowBanner(true), 15000);
+    // Same spot as the terms notice (TermsGate): wait until that one is answered
+    let timer = 0;
+    const tryShow = () => {
+      if (document.querySelector('[data-terms-notice]')) timer = window.setTimeout(tryShow, 5000);
+      else setShowBanner(true);
+    };
+    timer = window.setTimeout(tryShow, 15000);
     return () => clearTimeout(timer);
   }, [installed]);
 

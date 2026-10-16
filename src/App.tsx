@@ -15,6 +15,8 @@ import { useScrollReveal } from './utils/scrollReveal';
 import type { SellRequest } from './components/CarMarketplace';
 import { AuthModal } from './components/AuthModal';
 import { LegalModal, LegalDoc } from './components/LegalModal';
+import { TermsGate } from './components/TermsGate';
+import { SITE } from './config/site';
 import { OrdersPanel } from './components/OrdersPanel';
 import { ReportsPanel } from './components/ReportsPanel';
 import { ReportProvider } from './components/ReportDialog';
@@ -376,6 +378,18 @@ export function App() {
       setUser((prev) => (prev ? { ...prev, [kind]: current } : prev));
       showError('No se pudo guardar el favorito.')(err);
     });
+  };
+
+  // Accepting the terms from the TermsGate pop-up (older accounts, or after the terms change)
+  const handleAcceptTerms = async () => {
+    if (!user) return;
+    const updated: UserProfile = { ...user, acceptedTermsAt: new Date().toISOString(), acceptedTermsVersion: SITE.legalVersion };
+    try {
+      await saveUserProfile(updated);
+      setUser(updated);
+    } catch (err) {
+      showError('No se pudo guardar. Revisa tu conexión e intenta de nuevo.')(err);
+    }
   };
 
   const handleLogout = async () => {
@@ -860,7 +874,9 @@ onToggleSold={handleToggleSold}
         onError={(message, err) => showError(message)(err)}
       />
 
-      <LegalModal doc={legalDoc}onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
+      <TermsGate isSignedIn={!!authUser} user={user} onAccept={handleAcceptTerms} onLogout={handleLogout} onOpenLegal={setLegalDoc} />
+
+      <LegalModal doc={legalDoc} onClose={() => setLegalDoc(null)} onSwitch={setLegalDoc} />
 
     </div>
     </ReportProvider>

@@ -28,6 +28,7 @@ import { Logo } from './Logo';
 import { getVehicleReferenceImage, getVehicleImageOptions } from '../utils/vehicleImages';
 import { compressImageFile } from '../utils/media';
 import { NumberInput } from './NumberInput';
+import { SITE } from '../config/site';
 
 export interface OnboardingAccount {
   uid: string;
@@ -175,6 +176,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     role,
     joinedDate: new Date().toISOString(),
     acceptedTermsAt: new Date().toISOString(),
+    acceptedTermsVersion: SITE.legalVersion,
   });
 
   const save = async (vehicle: Vehicle | null) => {

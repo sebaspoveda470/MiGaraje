@@ -6,4 +6,6 @@ export const SITE = {
   city: 'Bogotá D.C., Colombia',
   contactEmail: 'migaraje.co@gmail.com',
   legalLastUpdated: '25 de septiembre de 2026',
+  // Same day as above, as YYYY-MM-DD. Change both when the terms change: everyone signed in is asked to accept them again.
+  legalVersion: '2026-09-25',
 };
