@@ -8,6 +8,7 @@ import { getListingPhotos } from '../services/listingService';
 import { timeAgo, toWhatsAppNumber } from '../utils/media';
 import { useReport } from './ReportDialog';
 import { buildWatermarkedPhoto, downloadBlob } from '../utils/socialImage';
+import { buildZip } from '../utils/zip';
 import { mileageLabel } from '../utils/mileage';
 
 interface VehicleDetailModalProps {
@@ -63,27 +64,38 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const [isBuildingImage, setIsBuildingImage] = useState(false);
   const isFeatured = !!featuredUntil && !isSold;
 
-  // Downloads every photo of the listing, each with the MiGaraje logo in a corner and nothing else
+  // Downloads every photo of the listing, each with the MiGaraje logo in a corner and nothing else.
+  // Several photos go in a single .zip (a folder), so the browser doesn't block the extra downloads.
   const handleSocialImage = async () => {
     setIsBuildingImage(true);
     const name = car.title.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/g, '').trim();
     const sources = photos.length > 0 ? photos : car.images;
-    let done = 0;
+    const ready: { name: string; data: Blob }[] = [];
     for (let i = 0; i < sources.length; i++) {
       try {
         const blob = await buildWatermarkedPhoto(sources[i]);
-        downloadBlob(blob, `MiGaraje - ${name}${sources.length > 1 ? ` - foto ${i + 1}` : ''}.jpg`);
-        done++;
-        // A short pause between files: browsers drop downloads that start all at once
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        ready.push({ name: `MiGaraje - ${name}${sources.length > 1 ? ` - foto ${i + 1}` : ''}.jpg`, data: blob });
       } catch (err) {
         console.error(`No se pudo preparar la foto ${i + 1}`, err);
       }
     }
+    try {
+      if (ready.length === 1) downloadBlob(ready[0].data, ready[0].name);
+      else if (ready.length > 1) {
+        const folder = `MiGaraje - ${name}`;
+        const zip = await buildZip(ready.map((f) => ({ name: `${folder}/${f.name}`, data: f.data })));
+        downloadBlob(zip, `${folder}.zip`);
+      }
+    } catch (err) {
+      console.error('No se pudo armar la carpeta de fotos', err);
+      ready.length = 0;
+    }
     setIsBuildingImage(false);
+    const done = ready.length;
     if (done === 0) onNotify?.('No se pudieron preparar las fotos de este anuncio. Intenta de nuevo.', true);
-    else if (done < sources.length) onNotify?.(`Se descargaron ${done} de ${sources.length} fotos. Búscalas en tu carpeta de Descargas.`, true);
-    else onNotify?.(done === 1 ? 'Foto descargada. Búscala en tu carpeta de Descargas.' : `Se descargaron las ${done} fotos. Búscalas en tu carpeta de Descargas.`);
+    else if (done === 1 && sources.length === 1) onNotify?.('Foto descargada. Búscala en tu carpeta de Descargas.');
+    else if (done < sources.length) onNotify?.(`Se descargó una carpeta con ${done} de ${sources.length} fotos. Búscala en tu carpeta de Descargas.`, true);
+    else onNotify?.(`Se descargó una carpeta con las ${done} fotos. Búscala en tu carpeta de Descargas y ábrela (o "Extraer todo").`);
   };
   const report = useReport();
 
