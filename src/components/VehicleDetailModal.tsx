@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Star, ImageDown, Loader2 } from 'lucide-react';
+import { Star, ImageDown, Loader2, Share2 } from 'lucide-react';
 import { X, MapPin, MessageCircle, CircleCheck, CircleX, RotateCcw, User, Heart, Pencil, Flag, Phone, Clock, ShieldCheck, FileCheck, UserCheck } from 'lucide-react';
 import { VehicleListing } from '../types';
 import { PhotoGallery } from './PhotoPicker';
@@ -64,38 +64,83 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const [isBuildingImage, setIsBuildingImage] = useState(false);
   const isFeatured = !!featuredUntil && !isSold;
 
-  // Downloads every photo of the listing, each with the MiGaraje logo in a corner and nothing else.
-  // Several photos go in a single .zip (a folder), so the browser doesn't block the extra downloads.
+  // Phones: hand the photos to the phone's share menu ("Guardar N imágenes" on iPhone, Instagram,
+  // WhatsApp, Drive...). Computers: one .zip (a folder), so the browser doesn't block extra downloads.
+  const [sharePhotos, setSharePhotos] = useState<File[] | null>(null);
+  useEffect(() => setSharePhotos(null), [car.id]);
+
+  const canSharePhotos = () => {
+    if (typeof navigator === 'undefined' || !navigator.canShare) return false;
+    if (!window.matchMedia('(pointer: coarse)').matches) return false;
+    try {
+      return navigator.canShare({ files: [new File([''], 'prueba.jpg', { type: 'image/jpeg' })] });
+    } catch {
+      return false;
+    }
+  };
+
+  const downloadPhotos = async (ready: { name: string; data: Blob }[], folder: string) => {
+    if (ready.length === 1) downloadBlob(ready[0].data, ready[0].name);
+    else downloadBlob(await buildZip(ready.map((f) => ({ name: `${folder}/${f.name}`, data: f.data }))), `${folder}.zip`);
+  };
+
   const handleSocialImage = async () => {
     setIsBuildingImage(true);
     const name = car.title.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/g, '').trim();
+    const folder = `MiGaraje - ${name}`;
     const sources = photos.length > 0 ? photos : car.images;
     const ready: { name: string; data: Blob }[] = [];
     for (let i = 0; i < sources.length; i++) {
       try {
         const blob = await buildWatermarkedPhoto(sources[i]);
-        ready.push({ name: `MiGaraje - ${name}${sources.length > 1 ? ` - foto ${i + 1}` : ''}.jpg`, data: blob });
+        ready.push({ name: `${folder}${sources.length > 1 ? ` - foto ${i + 1}` : ''}.jpg`, data: blob });
       } catch (err) {
         console.error(`No se pudo preparar la foto ${i + 1}`, err);
       }
     }
+    const done = ready.length;
+    if (done === 0) {
+      setIsBuildingImage(false);
+      onNotify?.('No se pudieron preparar las fotos de este anuncio. Intenta de nuevo.', true);
+      return;
+    }
+    const missing = done < sources.length ? ` (no se pudieron preparar ${sources.length - done})` : '';
+    if (canSharePhotos()) {
+      // The share menu only opens right after a tap, so the phone gets a second button for it
+      setSharePhotos(ready.map((f) => new File([f.data], f.name, { type: 'image/jpeg' })));
+      setIsBuildingImage(false);
+      onNotify?.(`${done === 1 ? 'La foto está lista' : `Las ${done} fotos están listas`}${missing}. Toca "Guardar o compartir".`, done < sources.length);
+      return;
+    }
     try {
-      if (ready.length === 1) downloadBlob(ready[0].data, ready[0].name);
-      else if (ready.length > 1) {
-        const folder = `MiGaraje - ${name}`;
-        const zip = await buildZip(ready.map((f) => ({ name: `${folder}/${f.name}`, data: f.data })));
-        downloadBlob(zip, `${folder}.zip`);
-      }
+      await downloadPhotos(ready, folder);
+      if (done === 1 && sources.length === 1) onNotify?.('Foto descargada. Búscala en tu carpeta de Descargas.');
+      else onNotify?.(`Se descargó una carpeta con ${done === sources.length ? `las ${done}` : `${done} de ${sources.length}`} fotos. Búscala en tu carpeta de Descargas y ábrela (o "Extraer todo").`, done < sources.length);
     } catch (err) {
       console.error('No se pudo armar la carpeta de fotos', err);
-      ready.length = 0;
+      onNotify?.('No se pudieron descargar las fotos. Intenta de nuevo.', true);
     }
     setIsBuildingImage(false);
-    const done = ready.length;
-    if (done === 0) onNotify?.('No se pudieron preparar las fotos de este anuncio. Intenta de nuevo.', true);
-    else if (done === 1 && sources.length === 1) onNotify?.('Foto descargada. Búscala en tu carpeta de Descargas.');
-    else if (done < sources.length) onNotify?.(`Se descargó una carpeta con ${done} de ${sources.length} fotos. Búscala en tu carpeta de Descargas.`, true);
-    else onNotify?.(`Se descargó una carpeta con las ${done} fotos. Búscala en tu carpeta de Descargas y ábrela (o "Extraer todo").`);
+  };
+
+  const handleSharePhotos = async () => {
+    if (!sharePhotos) return;
+    try {
+      await navigator.share({ files: sharePhotos });
+      setSharePhotos(null);
+    } catch (err) {
+      // Closing the menu without choosing anything is not an error
+      if ((err as Error)?.name === 'AbortError') return;
+      console.error('No se pudo abrir el menú de compartir', err);
+      try {
+        const folder = sharePhotos[0].name.replace(/( - foto \d+)?\.jpg$/, '');
+        await downloadPhotos(sharePhotos.map((f) => ({ name: f.name, data: f })), folder);
+        setSharePhotos(null);
+        onNotify?.('No se pudo abrir el menú de compartir; las fotos se descargaron en una carpeta (.zip).', true);
+      } catch {
+        onNotify?.('No se pudieron guardar las fotos. Intenta de nuevo.', true);
+      }
+    }
   };
   const report = useReport();
 
@@ -359,14 +404,24 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       {isFeatured ? 'Quitar destacado' : 'Destacar 30 días'}
                     </button>
                   )}
-                  <button
-                    onClick={handleSocialImage}
-                    disabled={isBuildingImage}
-                    className="font-bold text-xs px-4 py-2.5 rounded-full flex items-center justify-center gap-1.5 cursor-pointer bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-60"
-                  >
-                    {isBuildingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageDown className="w-4 h-4" />}
-                    {(photos.length || car.images.length) > 1 ? `Fotos para redes (${photos.length || car.images.length})` : 'Foto para redes'}
-                  </button>
+                  {sharePhotos ? (
+                    <button
+                      onClick={handleSharePhotos}
+                      className="font-bold text-xs px-4 py-2.5 rounded-full flex items-center justify-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      {sharePhotos.length > 1 ? `Guardar o compartir (${sharePhotos.length} fotos)` : 'Guardar o compartir foto'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSocialImage}
+                      disabled={isBuildingImage}
+                      className="font-bold text-xs px-4 py-2.5 rounded-full flex items-center justify-center gap-1.5 cursor-pointer bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                    >
+                      {isBuildingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageDown className="w-4 h-4" />}
+                      {(photos.length || car.images.length) > 1 ? `Fotos para redes (${photos.length || car.images.length})` : 'Foto para redes'}
+                    </button>
+                  )}
                 </div>
               </section>
             )}
