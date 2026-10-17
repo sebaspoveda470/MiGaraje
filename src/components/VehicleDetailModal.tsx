@@ -67,11 +67,30 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   // Phones: hand the photos to the phone's share menu ("Guardar N imágenes" on iPhone, Instagram,
   // WhatsApp, Drive...). Computers: one .zip (a folder), so the browser doesn't block extra downloads.
   const [sharePhotos, setSharePhotos] = useState<File[] | null>(null);
-  useEffect(() => setSharePhotos(null), [car.id]);
+  // Phones whose browser has no share menu (e.g. Huawei Browser): one "Guardar" button per photo,
+  // since every tap is allowed to start a download
+  const [photoList, setPhotoList] = useState<{ name: string; url: string; data: Blob }[] | null>(null);
+  const clearPhotoList = () =>
+    setPhotoList((list) => {
+      list?.forEach((p) => URL.revokeObjectURL(p.url));
+      return null;
+    });
+  useEffect(() => {
+    setSharePhotos(null);
+    clearPhotoList();
+  }, [car.id]);
+  useEffect(() => () => clearPhotoList(), []);
+
+  const isPhone = () =>
+    window.matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const showPhotoList = (ready: { name: string; data: Blob }[]) => {
+    clearPhotoList();
+    setPhotoList(ready.map((f) => ({ ...f, url: URL.createObjectURL(f.data) })));
+  };
 
   const canSharePhotos = () => {
     if (typeof navigator === 'undefined' || !navigator.canShare) return false;
-    if (!window.matchMedia('(pointer: coarse)').matches) return false;
+    if (!isPhone()) return false;
     try {
       return navigator.canShare({ files: [new File([''], 'prueba.jpg', { type: 'image/jpeg' })] });
     } catch {
@@ -112,6 +131,12 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       onNotify?.(`${done === 1 ? 'La foto está lista' : `Las ${done} fotos están listas`}${missing}. Toca "Guardar o compartir".`, done < sources.length);
       return;
     }
+    if (isPhone()) {
+      showPhotoList(ready);
+      setIsBuildingImage(false);
+      onNotify?.(`${done === 1 ? 'La foto está lista' : `Las ${done} fotos están listas`}${missing}. Toca "Guardar" en cada una.`, done < sources.length);
+      return;
+    }
     try {
       await downloadPhotos(ready, folder);
       if (done === 1 && sources.length === 1) onNotify?.('Foto descargada. Búscala en tu carpeta de Descargas.');
@@ -132,14 +157,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       // Closing the menu without choosing anything is not an error
       if ((err as Error)?.name === 'AbortError') return;
       console.error('No se pudo abrir el menú de compartir', err);
-      try {
-        const folder = sharePhotos[0].name.replace(/( - foto \d+)?\.jpg$/, '');
-        await downloadPhotos(sharePhotos.map((f) => ({ name: f.name, data: f })), folder);
-        setSharePhotos(null);
-        onNotify?.('No se pudo abrir el menú de compartir; las fotos se descargaron en una carpeta (.zip).', true);
-      } catch {
-        onNotify?.('No se pudieron guardar las fotos. Intenta de nuevo.', true);
-      }
+      showPhotoList(sharePhotos.map((f) => ({ name: f.name, data: f })));
+      setSharePhotos(null);
+      onNotify?.('No se pudo abrir el menú de compartir. Toca "Guardar" en cada foto.', true);
     }
   };
   const report = useReport();
@@ -423,6 +443,30 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     </button>
                   )}
                 </div>
+                {photoList && (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs text-slate-600">Toca "Guardar" en cada foto. También puedes mantenerla presionada y elegir "Descargar imagen".</p>
+                      <button onClick={clearPhotoList} className="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer shrink-0">
+                        Cerrar
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {photoList.map((p, i) => (
+                        <div key={p.url} className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                          <img src={p.url} alt={`Foto ${i + 1} para redes`} className="w-full aspect-square object-cover" />
+                          <button
+                            onClick={() => downloadBlob(p.data, p.name)}
+                            className="w-full py-2 text-xs font-bold text-blue-700 hover:bg-blue-50 flex items-center justify-center gap-1 cursor-pointer"
+                          >
+                            <ImageDown className="w-4 h-4" />
+                            Guardar foto {i + 1}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </section>
             )}
 
