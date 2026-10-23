@@ -109,8 +109,8 @@ export const Logo: React.FC<LogoProps> = ({
             )}
           </div>
           {showTagline && (
-            <p className={`${dims.sub} font-logo font-medium tracking-[0.14em] mt-1 leading-none ${dark ? 'text-slate-200' : 'text-slate-500'}`}>
-              Ecosistema Automotriz
+            <p className={`${dims.sub} font-logo font-medium mt-1 leading-none whitespace-nowrap ${dark ? 'text-slate-200' : 'text-slate-500'}`}>
+              Todo para tu vehículo, en un solo lugar
             </p>
           )}
         </div>
